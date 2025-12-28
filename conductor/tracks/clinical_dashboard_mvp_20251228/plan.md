@@ -13,7 +13,7 @@
 - [x] Task: Set up React Router with public (Login) and protected (Dashboard) routes.
 - [x] Task: Conductor - User Manual Verification 'Authentication and Routing' (Protocol in workflow.md)
 
-## Phase 3: Diagnosis Features (Manual & Unified)
+## Phase 3: Diagnosis Features (Manual & Unified) [checkpoint: cf67bed]
 - [x] Task: Implement API Client service.
     - [x] Create a typed `api.ts` service to communicate with the FastAPI backend endpoints (`/api/ingest`, `/api/diagnose`).
 - [x] Task: Implement Manual Diagnosis Form.
@@ -24,13 +24,13 @@
     - [x] Update API service to handle multipart/form-data.
 - [x] Task: Build Diagnosis Results Display.
     - [x] Create UI components for Differential Diagnosis cards, Confidence bars, and Rationale sections.
-- [ ] Task: Conductor - User Manual Verification 'Diagnosis Features' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Diagnosis Features' (Protocol in workflow.md)
 
 ## Phase 4: History View and Final Polish
-- [ ] Task: Backend - Implement simple GET /api/history endpoint to read `audit.log` (Required for frontend view).
-- [ ] Task: Implement History/Audit Log View in Frontend.
-    - [ ] Fetch data from the new endpoint.
-    - [ ] Display audit logs in a data table.
-- [ ] Task: Final UI Polish.
-    - [ ] Ensure consistent styling, error handling, and loading states across all views.
+- [x] Task: Backend - Implement simple GET /api/history endpoint to read `audit.log` (Required for frontend view).
+- [x] Task: Implement History/Audit Log View in Frontend.
+    - [x] Fetch data from the new endpoint.
+    - [x] Display audit logs in a data table.
+- [x] Task: Final UI Polish.
+    - [x] Ensure consistent styling, error handling, and loading states across all views.
 - [ ] Task: Conductor - User Manual Verification 'History View and Final Polish' (Protocol in workflow.md)

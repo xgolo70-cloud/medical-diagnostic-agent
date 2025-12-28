@@ -2,21 +2,10 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import { Box, Typography } from '@mui/material';
 import { Layout } from './components/layout';
 import { LoginForm } from './components/auth';
-import { DashboardPage, DiagnosisPage } from './pages';
+import { DashboardPage, DiagnosisPage, HistoryPage } from './pages';
 import { useAppSelector } from './store/hooks';
 
-// Placeholder pages for Phase 4
-const HistoryPage = () => (
-  <Box>
-    <Typography variant="h4" fontWeight={700} gutterBottom>
-      Diagnosis History
-    </Typography>
-    <Typography color="text.secondary">
-      Audit history and diagnosis logs coming in Phase 4.
-    </Typography>
-  </Box>
-);
-
+// Settings placeholder
 const SettingsPage = () => (
   <Box>
     <Typography variant="h4" fontWeight={700} gutterBottom>
