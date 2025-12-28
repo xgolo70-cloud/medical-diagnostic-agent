@@ -25,8 +25,8 @@
 - [x] Task: Implement /api/diagnose endpoint with Audit Logging. [fab5ecb]
 - [x] Task: Conductor - User Manual Verification 'Core Diagnosis Engine Integration' (Protocol in workflow.md) [e06d340]
 
-## Phase 4: MVP Integration and Verification
+## Phase 4: MVP Integration and Verification [checkpoint: f13d99e]
 - [x] Task: Perform end-to-end testing of the full pipeline. [aefbad3]
 - [x] Task: Implement a unified API endpoint that synthesizes manual data and PDF content for analysis. [bc7bfe8]
 - [x] Task: Verify the diagnostic accuracy against a small set of medical benchmark cases. [f7075ea]
-- [ ] Task: Conductor - User Manual Verification 'MVP Integration and Verification' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'MVP Integration and Verification' (Protocol in workflow.md) [f13d99e]
