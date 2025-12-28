@@ -19,9 +19,9 @@
 - [x] Task: Implement TDD for Gemini 2.0 Flash prompt engineering and integration. [9763bab]
     - [x] Write tests for AI response structure (differential diagnosis, confidence, rationale).
     - [x] Implement the LLM service to process synthesized patient data and return structured results.
-- [ ] Task: Implement TDD for Clinical Rationale and Citation logic.
-    - [ ] Write tests ensuring rationale links back to input symptoms or history.
-    - [ ] Refine the AI prompt to enforce traceable citations.
+- [x] Task: Implement TDD for Clinical Rationale and Citation logic. [b43b904]
+    - [x] Write tests ensuring rationale links back to input symptoms or history.
+    - [x] Refine the AI prompt to enforce traceable citations.
 - [ ] Task: Conductor - User Manual Verification 'Core Diagnosis Engine Integration' (Protocol in workflow.md)
 
 ## Phase 4: MVP Integration and Verification
