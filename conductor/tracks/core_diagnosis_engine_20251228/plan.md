@@ -7,9 +7,9 @@
 - [x] Task: Conductor - User Manual Verification 'Environment and Project Scaffolding' (Protocol in workflow.md) [148c439]
 
 ## Phase 2: Data Ingestion Pipeline
-- [ ] Task: Implement TDD for Manual Data Entry endpoint.
-    - [ ] Write tests for patient data schema validation.
-    - [ ] Implement FastAPI endpoint for manual data entry.
+- [x] Task: Implement TDD for Manual Data Entry endpoint. [4e5752f]
+    - [x] Write tests for patient data schema validation.
+    - [x] Implement FastAPI endpoint for manual data entry.
 - [x] Task: Implement TDD for PDF Document Parsing. [ca551ca]
     - [x] Write tests for clinical text extraction from sample PDF lab reports.
     - [x] Implement PDF parsing logic using PyMuPDF or pdfplumber.
