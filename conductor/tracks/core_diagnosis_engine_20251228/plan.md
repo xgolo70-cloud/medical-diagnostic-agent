@@ -10,9 +10,9 @@
 - [ ] Task: Implement TDD for Manual Data Entry endpoint.
     - [ ] Write tests for patient data schema validation.
     - [ ] Implement FastAPI endpoint for manual data entry.
-- [~] Task: Implement TDD for PDF Document Parsing.
-    - [ ] Write tests for clinical text extraction from sample PDF lab reports.
-    - [ ] Implement PDF parsing logic using PyMuPDF or pdfplumber.
+- [x] Task: Implement TDD for PDF Document Parsing. [ca551ca]
+    - [x] Write tests for clinical text extraction from sample PDF lab reports.
+    - [x] Implement PDF parsing logic using PyMuPDF or pdfplumber.
 - [ ] Task: Conductor - User Manual Verification 'Data Ingestion Pipeline' (Protocol in workflow.md)
 
 ## Phase 3: Core Diagnosis Engine Integration
