@@ -6,17 +6,17 @@
 - [x] Task: Set up the skeleton for the Audit Logging system. [2debb04]
 - [x] Task: Conductor - User Manual Verification 'Environment and Project Scaffolding' (Protocol in workflow.md) [148c439]
 
-## Phase 2: Data Ingestion Pipeline
+## Phase 2: Data Ingestion Pipeline [checkpoint: de4c054]
 - [x] Task: Implement TDD for Manual Data Entry endpoint. [4e5752f]
     - [x] Write tests for patient data schema validation.
     - [x] Implement FastAPI endpoint for manual data entry.
 - [x] Task: Implement TDD for PDF Document Parsing. [ca551ca]
     - [x] Write tests for clinical text extraction from sample PDF lab reports.
     - [x] Implement PDF parsing logic using PyMuPDF or pdfplumber.
-- [ ] Task: Conductor - User Manual Verification 'Data Ingestion Pipeline' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Data Ingestion Pipeline' (Protocol in workflow.md) [de4c054]
 
 ## Phase 3: Core Diagnosis Engine Integration
-- [ ] Task: Implement TDD for Gemini 2.0 Flash prompt engineering and integration.
+- [~] Task: Implement TDD for Gemini 2.0 Flash prompt engineering and integration.
     - [ ] Write tests for AI response structure (differential diagnosis, confidence, rationale).
     - [ ] Implement the LLM service to process synthesized patient data and return structured results.
 - [ ] Task: Implement TDD for Clinical Rationale and Citation logic.
