@@ -3,11 +3,6 @@ from unittest.mock import MagicMock, patch
 from app.core.engine.diagnosis import DiagnosisEngine
 from app.schemas.patient import PatientData
 
-@pytest.fixture
-def mock_gemini():
-    with patch('google.generativeai.GenerativeModel') as mock:
-        yield mock
-
 def test_diagnosis_generation_structure(mock_gemini):
     # Setup mock response
     mock_model = mock_gemini.return_value
