@@ -16,9 +16,9 @@
 - [x] Task: Conductor - User Manual Verification 'Data Ingestion Pipeline' (Protocol in workflow.md) [de4c054]
 
 ## Phase 3: Core Diagnosis Engine Integration
-- [~] Task: Implement TDD for Gemini 2.0 Flash prompt engineering and integration.
-    - [ ] Write tests for AI response structure (differential diagnosis, confidence, rationale).
-    - [ ] Implement the LLM service to process synthesized patient data and return structured results.
+- [x] Task: Implement TDD for Gemini 2.0 Flash prompt engineering and integration. [9763bab]
+    - [x] Write tests for AI response structure (differential diagnosis, confidence, rationale).
+    - [x] Implement the LLM service to process synthesized patient data and return structured results.
 - [ ] Task: Implement TDD for Clinical Rationale and Citation logic.
     - [ ] Write tests ensuring rationale links back to input symptoms or history.
     - [ ] Refine the AI prompt to enforce traceable citations.
