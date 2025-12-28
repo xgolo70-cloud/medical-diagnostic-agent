@@ -26,7 +26,7 @@
 - [x] Task: Conductor - User Manual Verification 'Core Diagnosis Engine Integration' (Protocol in workflow.md) [e06d340]
 
 ## Phase 4: MVP Integration and Verification
-- [~] Task: Perform end-to-end testing of the full pipeline.
+- [x] Task: Perform end-to-end testing of the full pipeline. [aefbad3]
 - [ ] Task: Implement a unified API endpoint that synthesizes manual data and PDF content for analysis.
 - [ ] Task: Verify the diagnostic accuracy against a small set of medical benchmark cases.
 - [ ] Task: Conductor - User Manual Verification 'MVP Integration and Verification' (Protocol in workflow.md)
