@@ -4,3 +4,6 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
+## [~] Track: Clinical Dashboard Web Application (MVP)
+*Link: [./conductor/tracks/clinical_dashboard_mvp_20251228/](./conductor/tracks/clinical_dashboard_mvp_20251228/)*
+

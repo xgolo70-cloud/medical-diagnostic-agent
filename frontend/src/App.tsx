@@ -1,43 +1,42 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
+import { Box, Typography } from '@mui/material';
 import { Layout } from './components/layout';
+import { LoginForm } from './components/auth';
+import { DashboardPage } from './pages';
 import { useAppSelector } from './store/hooks';
 
-// Placeholder page components (to be implemented in Phase 2/3)
-const DashboardPage = () => (
-  <div>
-    <h1 className="text-2xl font-bold mb-4">Dashboard</h1>
-    <p className="text-gray-600">Welcome to the Clinical Dashboard</p>
-  </div>
-);
-
+// Placeholder pages for Phase 3/4
 const DiagnosisPage = () => (
-  <div>
-    <h1 className="text-2xl font-bold mb-4">New Diagnosis</h1>
-    <p className="text-gray-600">Diagnosis features coming in Phase 3</p>
-  </div>
+  <Box>
+    <Typography variant="h4" fontWeight={700} gutterBottom>
+      New Diagnosis
+    </Typography>
+    <Typography color="text.secondary">
+      Diagnosis form with manual entry and PDF upload coming in Phase 3.
+    </Typography>
+  </Box>
 );
 
 const HistoryPage = () => (
-  <div>
-    <h1 className="text-2xl font-bold mb-4">History</h1>
-    <p className="text-gray-600">Audit history coming in Phase 4</p>
-  </div>
+  <Box>
+    <Typography variant="h4" fontWeight={700} gutterBottom>
+      Diagnosis History
+    </Typography>
+    <Typography color="text.secondary">
+      Audit history and diagnosis logs coming in Phase 4.
+    </Typography>
+  </Box>
 );
 
 const SettingsPage = () => (
-  <div>
-    <h1 className="text-2xl font-bold mb-4">Settings</h1>
-    <p className="text-gray-600">Settings coming soon</p>
-  </div>
-);
-
-const LoginPage = () => (
-  <div className="min-h-screen flex items-center justify-center bg-gray-100">
-    <div className="bg-white p-8 rounded-lg shadow-md w-96">
-      <h1 className="text-2xl font-bold mb-4 text-center">Login</h1>
-      <p className="text-gray-600 text-center">Login form coming in Phase 2</p>
-    </div>
-  </div>
+  <Box>
+    <Typography variant="h4" fontWeight={700} gutterBottom>
+      Settings
+    </Typography>
+    <Typography color="text.secondary">
+      User preferences and configuration options.
+    </Typography>
+  </Box>
 );
 
 // Protected route wrapper
@@ -59,7 +58,7 @@ function App() {
       {/* Public routes */}
       <Route
         path="/login"
-        element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <LoginPage />}
+        element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <LoginForm />}
       />
 
       {/* Protected routes */}

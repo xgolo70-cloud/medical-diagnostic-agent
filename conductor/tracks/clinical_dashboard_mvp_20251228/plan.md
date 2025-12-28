@@ -1,16 +1,16 @@
 # Track Plan: Clinical Dashboard Web Application (MVP)
 
-## Phase 1: Frontend Scaffolding and Infrastructure
+## Phase 1: Frontend Scaffolding and Infrastructure [checkpoint: e3c8322]
 - [x] Task: Initialize React project with TypeScript, Vite, Tailwind CSS, and Material UI.
 - [x] Task: Configure Redux Toolkit (store, auth slice) and React Query (query client).
 - [x] Task: Create basic layout components (Sidebar, Layout shell, Theme provider).
-- [ ] Task: Conductor - User Manual Verification 'Frontend Scaffolding and Infrastructure' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Frontend Scaffolding and Infrastructure' (Protocol in workflow.md)
 
 ## Phase 2: Authentication and Routing
-- [ ] Task: Implement TDD for Mock Authentication Logic.
-    - [ ] Write unit tests for the auth slice (login/logout actions).
-    - [ ] Implement the login form component and auth guard (Protected Route wrapper).
-- [ ] Task: Set up React Router with public (Login) and protected (Dashboard) routes.
+- [x] Task: Implement TDD for Mock Authentication Logic.
+    - [x] Write unit tests for the auth slice (login/logout actions).
+    - [x] Implement the login form component and auth guard (Protected Route wrapper).
+- [x] Task: Set up React Router with public (Login) and protected (Dashboard) routes.
 - [ ] Task: Conductor - User Manual Verification 'Authentication and Routing' (Protocol in workflow.md)
 
 ## Phase 3: Diagnosis Features (Manual & Unified)

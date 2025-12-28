@@ -4,7 +4,9 @@
 - **Primary Language:** Python 3.11+
 - **API Framework:** FastAPI
 - **AI Models:** Gemini 2.0 Flash (Reasoning & NLP), Med-PaLM (Clinical Specialization)
+- **AI SDK:** google-generativeai
 - **Medical NLP:** Spark NLP for Healthcare, MedSPACY (Entity Extraction & Relation Mapping)
+- **Document Parsing:** pypdf (PDF Text Extraction)
 - **Ontology Mapping:** Neo4j (Graph database for SNOMED CT and ICD-10 knowledge representation)
 
 ## Data & Infrastructure
