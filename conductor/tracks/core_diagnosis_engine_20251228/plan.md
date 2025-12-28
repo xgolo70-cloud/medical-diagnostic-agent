@@ -27,6 +27,6 @@
 
 ## Phase 4: MVP Integration and Verification
 - [x] Task: Perform end-to-end testing of the full pipeline. [aefbad3]
-- [ ] Task: Implement a unified API endpoint that synthesizes manual data and PDF content for analysis.
+- [x] Task: Implement a unified API endpoint that synthesizes manual data and PDF content for analysis. [bc7bfe8]
 - [ ] Task: Verify the diagnostic accuracy against a small set of medical benchmark cases.
 - [ ] Task: Conductor - User Manual Verification 'MVP Integration and Verification' (Protocol in workflow.md)
