@@ -4,3 +4,4 @@ pytest
 cryptography
 httpx
 pypdf
+google-generativeai
