@@ -22,6 +22,7 @@
 - [x] Task: Implement TDD for Clinical Rationale and Citation logic. [b43b904]
     - [x] Write tests ensuring rationale links back to input symptoms or history.
     - [x] Refine the AI prompt to enforce traceable citations.
+- [x] Task: Implement /api/diagnose endpoint with Audit Logging. [fab5ecb]
 - [ ] Task: Conductor - User Manual Verification 'Core Diagnosis Engine Integration' (Protocol in workflow.md)
 
 ## Phase 4: MVP Integration and Verification
