@@ -15,7 +15,7 @@
     - [x] Implement PDF parsing logic using PyMuPDF or pdfplumber.
 - [x] Task: Conductor - User Manual Verification 'Data Ingestion Pipeline' (Protocol in workflow.md) [de4c054]
 
-## Phase 3: Core Diagnosis Engine Integration
+## Phase 3: Core Diagnosis Engine Integration [checkpoint: e06d340]
 - [x] Task: Implement TDD for Gemini 2.0 Flash prompt engineering and integration. [9763bab]
     - [x] Write tests for AI response structure (differential diagnosis, confidence, rationale).
     - [x] Implement the LLM service to process synthesized patient data and return structured results.
@@ -23,9 +23,10 @@
     - [x] Write tests ensuring rationale links back to input symptoms or history.
     - [x] Refine the AI prompt to enforce traceable citations.
 - [x] Task: Implement /api/diagnose endpoint with Audit Logging. [fab5ecb]
-- [ ] Task: Conductor - User Manual Verification 'Core Diagnosis Engine Integration' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Core Diagnosis Engine Integration' (Protocol in workflow.md) [e06d340]
 
 ## Phase 4: MVP Integration and Verification
+- [~] Task: Perform end-to-end testing of the full pipeline.
 - [ ] Task: Implement a unified API endpoint that synthesizes manual data and PDF content for analysis.
 - [ ] Task: Verify the diagnostic accuracy against a small set of medical benchmark cases.
 - [ ] Task: Conductor - User Manual Verification 'MVP Integration and Verification' (Protocol in workflow.md)
