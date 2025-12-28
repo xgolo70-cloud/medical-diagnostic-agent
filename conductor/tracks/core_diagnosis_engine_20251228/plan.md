@@ -1,16 +1,16 @@
 # Track Plan: Core Diagnosis Engine and Basic Data Ingestion Pipeline
 
-## Phase 1: Environment and Project Scaffolding
+## Phase 1: Environment and Project Scaffolding [checkpoint: 148c439]
 - [x] Task: Initialize Python project with Poetry/pip, FastAPI, and required dependencies. [dc05785]
 - [x] Task: Implement basic HIPAA-compliant security utilities (Encryption/Decryption helpers). [f119afb]
 - [x] Task: Set up the skeleton for the Audit Logging system. [2debb04]
-- [ ] Task: Conductor - User Manual Verification 'Environment and Project Scaffolding' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Environment and Project Scaffolding' (Protocol in workflow.md) [148c439]
 
 ## Phase 2: Data Ingestion Pipeline
 - [ ] Task: Implement TDD for Manual Data Entry endpoint.
     - [ ] Write tests for patient data schema validation.
     - [ ] Implement FastAPI endpoint for manual data entry.
-- [ ] Task: Implement TDD for PDF Document Parsing.
+- [~] Task: Implement TDD for PDF Document Parsing.
     - [ ] Write tests for clinical text extraction from sample PDF lab reports.
     - [ ] Implement PDF parsing logic using PyMuPDF or pdfplumber.
 - [ ] Task: Conductor - User Manual Verification 'Data Ingestion Pipeline' (Protocol in workflow.md)
