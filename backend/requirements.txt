@@ -5,3 +5,4 @@ cryptography
 httpx
 pypdf
 google-generativeai
+python-multipart
