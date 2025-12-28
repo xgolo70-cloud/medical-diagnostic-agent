@@ -6,24 +6,24 @@
 - [x] Task: Create basic layout components (Sidebar, Layout shell, Theme provider).
 - [x] Task: Conductor - User Manual Verification 'Frontend Scaffolding and Infrastructure' (Protocol in workflow.md)
 
-## Phase 2: Authentication and Routing
+## Phase 2: Authentication and Routing [checkpoint: 6d02af5]
 - [x] Task: Implement TDD for Mock Authentication Logic.
     - [x] Write unit tests for the auth slice (login/logout actions).
     - [x] Implement the login form component and auth guard (Protected Route wrapper).
 - [x] Task: Set up React Router with public (Login) and protected (Dashboard) routes.
-- [ ] Task: Conductor - User Manual Verification 'Authentication and Routing' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Authentication and Routing' (Protocol in workflow.md)
 
 ## Phase 3: Diagnosis Features (Manual & Unified)
-- [ ] Task: Implement API Client service.
-    - [ ] Create a typed `api.ts` service to communicate with the FastAPI backend endpoints (`/api/ingest`, `/api/diagnose`).
-- [ ] Task: Implement Manual Diagnosis Form.
-    - [ ] Create form with validation (using React Hook Form + Zod) matching `PatientData` schema.
-    - [ ] Connect form submission to the API and display raw results.
-- [ ] Task: Implement Unified Diagnosis View (File Upload).
-    - [ ] Add file upload component for PDFs.
-    - [ ] Update API service to handle multipart/form-data.
-- [ ] Task: Build Diagnosis Results Display.
-    - [ ] Create UI components for Differential Diagnosis cards, Confidence bars, and Rationale sections.
+- [x] Task: Implement API Client service.
+    - [x] Create a typed `api.ts` service to communicate with the FastAPI backend endpoints (`/api/ingest`, `/api/diagnose`).
+- [x] Task: Implement Manual Diagnosis Form.
+    - [x] Create form with validation (using React Hook Form + Zod) matching `PatientData` schema.
+    - [x] Connect form submission to the API and display raw results.
+- [x] Task: Implement Unified Diagnosis View (File Upload).
+    - [x] Add file upload component for PDFs.
+    - [x] Update API service to handle multipart/form-data.
+- [x] Task: Build Diagnosis Results Display.
+    - [x] Create UI components for Differential Diagnosis cards, Confidence bars, and Rationale sections.
 - [ ] Task: Conductor - User Manual Verification 'Diagnosis Features' (Protocol in workflow.md)
 
 ## Phase 4: History View and Final Polish
