@@ -41,4 +41,8 @@ class DiagnosisEngine:
             "recommended_tests": ["string"],
             "citations": ["string"]
         }}
+
+        IMPORTANT:
+        1. The 'rationale' field MUST explicitly reference the specific symptoms or history points from the input that support the diagnosis.
+        2. Provide 'citations' to standard medical literature or guidelines where applicable.
         """
