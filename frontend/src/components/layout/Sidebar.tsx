@@ -89,10 +89,24 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileOpen = false, onMobileCl
                     md:translate-x-0 
                     ${mobileOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
                     flex flex-col
-                    overflow-hidden
                 `}
                 style={{ width: currentWidth }}
             >
+                {/* Floating Collapse Toggle (Desktop) */}
+                <button 
+                    onClick={toggleCollapse}
+                    className={`
+                        absolute -right-3 top-9
+                        hidden md:flex w-6 h-6 bg-white border border-zinc-200 shadow-md rounded-full items-center justify-center 
+                        text-zinc-500 hover:text-black hover:scale-110 active:scale-95 transition-all duration-200 z-50
+                        ${isCollapsed ? '' : 'rotate-180'}
+                    `}
+                >
+                    <ChevronRight size={14} strokeWidth={2} />
+                </button>
+
+                {/* Inner Content Wrapper (Handles Overflow) */}
+                <div className="flex flex-col w-full h-full overflow-hidden">
                 {/* Header */}
                 <div className={`h-24 flex items-center shrink-0 ${isCollapsed ? 'justify-center' : 'justify-between px-6'}`}>
                     <Link 
@@ -218,18 +232,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileOpen = false, onMobileCl
                     {/* Gradient Divider */}
                     <div className="absolute top-0 left-6 right-6 h-px bg-gradient-to-r from-transparent via-black/10 to-transparent" />
 
-                    {/* Collapse Toggle (Desktop) */}
-                    <button 
-                         onClick={toggleCollapse}
-                         className={`
-                             absolute -right-3 top-[-26px]
-                             hidden md:flex w-7 h-7 bg-white/100 backdrop-blur border border-zinc-200 shadow-sm rounded-full items-center justify-center 
-                             text-zinc-500 hover:text-black hover:scale-110 active:scale-95 transition-all duration-300 z-50
-                             ${isCollapsed ? 'rotate-180' : ''}
-                         `}
-                     >
-                         <ChevronRight size={14} strokeWidth={2} />
-                     </button>
+
 
                     {/* Website Link */}
                     <Link 
@@ -302,6 +305,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileOpen = false, onMobileCl
                             )}
                         </AnimatePresence>
                     </div>
+                </div>
                 </div>
             </motion.aside>
         </>
