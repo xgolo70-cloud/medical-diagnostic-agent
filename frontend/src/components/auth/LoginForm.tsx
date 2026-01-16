@@ -221,24 +221,7 @@ export const LoginForm: React.FC = () => {
                                             </motion.span>
                                         </AnimatePresence>
                                     </span>
-                                    <svg className="absolute -bottom-2 left-0 w-full h-6" viewBox="0 0 200 20" preserveAspectRatio="none">
-                                        <defs>
-                                            <linearGradient id="loginLineGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                                                <stop offset="0%" stopColor="#60a5fa" stopOpacity="0.3" />
-                                                <stop offset="30%" stopColor="#818cf8" stopOpacity="1" />
-                                                <stop offset="70%" stopColor="#a78bfa" stopOpacity="1" />
-                                                <stop offset="100%" stopColor="#60a5fa" stopOpacity="0.3" />
-                                            </linearGradient>
-                                            <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
-                                                <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
-                                                <feMerge>
-                                                    <feMergeNode in="coloredBlur"/>
-                                                    <feMergeNode in="SourceGraphic"/>
-                                                </feMerge>
-                                            </filter>
-                                        </defs>
-                                        <path d="M5 10 Q 100 18 195 10" stroke="url(#loginLineGradient)" strokeWidth="4" fill="none" strokeLinecap="round" filter="url(#glow)" />
-                                    </svg>
+                                    <div className="absolute -bottom-1 left-0 right-0 h-[3px] bg-gradient-to-r from-blue-400/60 via-purple-400/80 to-blue-400/60 rounded-full" />
                                 </div>
                             </h2>
                          </div>
