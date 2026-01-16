@@ -1,6 +1,6 @@
 import { motion, useInView } from 'framer-motion';
 import { useRef } from 'react';
-import { Github, Twitter, Linkedin, Brain, ArrowUpRight } from 'lucide-react';
+import { Github, Twitter, Linkedin, Brain, ArrowUpRight, Mail } from 'lucide-react';
 import { Button } from '../ui/Button';
 
 interface FooterLink {
@@ -53,6 +53,7 @@ const socialLinks = [
     { icon: Github, href: "#", label: "GitHub" },
     { icon: Twitter, href: "#", label: "Twitter" },
     { icon: Linkedin, href: "#", label: "LinkedIn" },
+    { icon: Mail, href: "#", label: "Email" },
 ];
 
 export const SiteFooter = () => {
@@ -60,73 +61,71 @@ export const SiteFooter = () => {
     const isInView = useInView(ref, { once: true, margin: "-50px" });
 
     return (
-        <footer ref={ref} className="relative bg-white border-t border-gray-200 overflow-hidden">
-             {/* Background Pattern */}
-             <div className="absolute inset-0 z-0 pointer-events-none opacity-[0.4]" 
+        <footer ref={ref} className="relative bg-white border-t border-gray-100 overflow-hidden font-sans">
+            {/* Background Pattern - Consistent with Hero */}
+            <div className="absolute inset-0 z-0 opacity-[0.4]" 
                 style={{
                     backgroundImage: 'radial-gradient(#e5e7eb 1px, transparent 1px)',
                     backgroundSize: '24px 24px'
                 }}
             />
             
-            {/* CTA Section */}
-            <div className="py-24 relative z-10">
-                <div className="max-w-7xl mx-auto px-6 text-center">
+            {/* CTA Section - Integrated Flow */}
+            <div className="py-32 relative z-10 px-6">
+                <div className="max-w-4xl mx-auto text-center">
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         animate={isInView ? { opacity: 1, y: 0 } : {}}
                         transition={{ duration: 0.6 }}
-                        className="bg-white/50 backdrop-blur-sm border border-gray-100 rounded-3xl p-12 shadow-sm"
                     >
-                        <h2 className="text-4xl md:text-5xl font-bold tracking-tight text-gray-900 mb-6 font-display">
-                            Ready to deploy?
+                        <h2 className="text-5xl md:text-6xl font-bold tracking-tight text-gray-900 mb-8 font-display">
+                            Ready to transform?
                         </h2>
-                        <div className="flex justify-center w-full">
-                            <p className="text-xl text-gray-500 max-w-xl w-full mb-10 text-center">
-                                Start building with a free account. Speak to an expert for your Enterprise needs.
-                            </p>
-                        </div>
+                        <p className="text-xl text-gray-500 max-w-2xl mx-auto mb-12 leading-relaxed">
+                            Join the leading healthcare providers building the future of patient care with AI & Things.
+                        </p>
                         <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-                            <Button className="h-12 px-8 bg-black text-white hover:bg-gray-800 font-medium rounded-lg shadow-lg shadow-gray-200/50 hover:shadow-xl hover:-translate-y-0.5 transition-all">
-                                Start Deploying
-                                <ArrowUpRight className="w-4 h-4 ml-2" />
+                            <Button className="h-14 px-8 bg-black text-white hover:bg-gray-800 text-lg font-semibold rounded-xl shadow-lg shadow-black/10 hover:shadow-black/20 hover:-translate-y-0.5 transition-all w-full sm:w-auto">
+                                Start Free Trial
+                                <ArrowUpRight className="w-5 h-5 ml-2" />
                             </Button>
                             <Button 
                                 variant="outline"
-                                className="h-12 px-8 border-gray-300 text-gray-900 hover:bg-gray-50 font-medium rounded-lg bg-white"
+                                className="h-14 px-8 border-gray-200 text-gray-700 hover:bg-gray-50 text-lg font-semibold rounded-xl bg-white/50 backdrop-blur-sm w-full sm:w-auto hover:border-gray-300 transition-all"
                             >
-                                Talk to an Expert
+                                Schedule Demo
                             </Button>
                         </div>
                     </motion.div>
                 </div>
             </div>
 
-            <div className="h-px bg-gradient-to-r from-transparent via-gray-200 to-transparent w-full" />
+            <div className="h-px bg-gradient-to-r from-transparent via-gray-200 to-transparent w-full relative z-20" />
 
-            {/* Footer Links */}
-            <div className="py-16 relative z-10 bg-white/80 backdrop-blur-sm">
-                <div className="max-w-7xl mx-auto px-6">
-                    <div className="grid grid-cols-2 md:grid-cols-6 gap-12">
-                        {/* Brand */}
-                        <div className="col-span-2">
+            {/* Footer Links Container */}
+            <div className="relative z-10 bg-white/80 backdrop-blur-md supports-[backdrop-filter]:bg-white/60">
+                <div className="max-w-7xl mx-auto pb-16 pt-20 px-6">
+                    <div className="grid grid-cols-2 md:grid-cols-12 gap-10 md:gap-8 lg:gap-12">
+                        
+                        {/* Brand Column */}
+                        <div className="col-span-2 md:col-span-4 flex flex-col">
                             <div className="flex items-center gap-2 mb-6">
-                                <div className="w-8 h-8 rounded-lg bg-black flex items-center justify-center">
-                                    <Brain className="w-4 h-4 text-white" />
+                                <div className="w-10 h-10 rounded-xl bg-black flex items-center justify-center shadow-md shadow-black/5">
+                                    <Brain className="w-5 h-5 text-white" />
                                 </div>
-                                <span className="font-bold text-lg text-gray-900 tracking-tight">AI & Things</span>
+                                <span className="font-bold text-xl text-gray-900 tracking-tight">AI & Things</span>
                             </div>
-                            <p className="text-sm text-gray-500 mb-8 max-w-xs leading-relaxed">
-                                The intelligent edge platform for mission-critical healthcare IoT. Built for developers, trusted by clinicians.
+                            <p className="text-base text-gray-500 mb-8 max-w-sm leading-relaxed">
+                                Empowering healthcare providers with intelligent edge solutions. Secure, compliant, and lightning fast.
                             </p>
                             
-                            {/* Social */}
-                            <div className="flex gap-2">
+                            {/* Social Icons */}
+                            <div className="flex gap-3 mt-auto">
                                 {socialLinks.map((social, i) => (
                                     <a 
                                         key={i}
                                         href={social.href}
-                                        className="w-9 h-9 rounded-lg bg-gray-50 border border-gray-200 flex items-center justify-center text-gray-500 hover:text-black hover:border-black hover:bg-white transition-all duraion-200"
+                                        className="w-10 h-10 rounded-full bg-gray-50 border border-gray-200 flex items-center justify-center text-gray-500 hover:text-black hover:bg-gray-100 hover:border-gray-300 transition-all duration-300"
                                         aria-label={social.label}
                                     >
                                         <social.icon className="w-4 h-4" />
@@ -135,48 +134,43 @@ export const SiteFooter = () => {
                             </div>
                         </div>
 
-                        {/* Links */}
-                        {Object.values(footerLinks).map((section) => (
-                            <div key={section.title}>
-                                <h4 className="font-bold text-gray-900 mb-6 text-xs tracking-wide uppercase font-mono bg-gray-100 inline-block px-2 py-1 rounded">{section.title}</h4>
-                                <ul className="space-y-3">
-                                    {section.links.map((link, j) => (
-                                        <li key={j}>
-                                            <a 
-                                                href={link.href} 
-                                                className="text-sm text-gray-500 hover:text-black transition-colors inline-flex items-center gap-2 font-medium"
-                                            >
-                                                {link.label}
-                                                {link.badge && (
-                                                    <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-black text-white">
-                                                        {link.badge}
-                                                    </span>
-                                                )}
-                                            </a>
-                                        </li>
-                                    ))}
-                                </ul>
+                        {/* Navigation Columns */}
+                        <div className="col-span-2 md:col-span-8 flex flex-row flex-wrap justify-between gap-10 md:gap-6">
+                            {Object.values(footerLinks).map((section) => (
+                                <div key={section.title} className="flex-1 min-w-[140px]">
+                                    <h4 className="font-bold text-gray-900 mb-6 text-sm tracking-wider uppercase">{section.title}</h4>
+                                    <ul className="space-y-4">
+                                        {section.links.map((link, j) => (
+                                            <li key={j}>
+                                                <a 
+                                                    href={link.href} 
+                                                    className="text-[15px] text-gray-500 hover:text-black transition-colors flex items-center gap-2 font-medium"
+                                                >
+                                                    {link.label}
+                                                    {link.badge && (
+                                                        <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-50 text-blue-600 border border-blue-100">
+                                                            {link.badge}
+                                                        </span>
+                                                    )}
+                                                </a>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+
+                     {/* Bottom Bar */}
+                    <div className="mt-20 pt-8 border-t border-gray-100 flex flex-col md:flex-row justify-between items-center gap-4">
+                        <div className="text-sm text-gray-400 font-medium">
+                            © 2025 AI & Things, Inc.
+                        </div>
+                        <div className="flex items-center gap-6 text-sm text-gray-500 font-medium">
+                            <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-green-50 border border-green-100/50">
+                                <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+                                <span className="text-green-700 text-xs font-bold">Systems Operational</span>
                             </div>
-                        ))}
-                    </div>
-                </div>
-            </div>
-
-            <div className="h-px bg-gray-100 w-full" />
-
-            {/* Bottom Bar */}
-            <div className="py-8 bg-white/80 backdrop-blur-sm relative z-10">
-                <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-4">
-                    <div className="text-xs text-gray-400 font-mono">
-                        © 2025 AI & Things, Inc. All rights reserved.
-                    </div>
-                    <div className="flex items-center gap-8 text-xs text-gray-500 font-medium">
-                        <a href="#" className="hover:text-black transition-colors">Privacy</a>
-                        <a href="#" className="hover:text-black transition-colors">Terms</a>
-                        <a href="#" className="hover:text-black transition-colors">Sitemap</a>
-                        <div className="flex items-center gap-2">
-                            <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
-                            <span className="text-gray-400">All Systems Normal</span>
                         </div>
                     </div>
                 </div>
@@ -184,3 +178,4 @@ export const SiteFooter = () => {
         </footer>
     );
 };
+

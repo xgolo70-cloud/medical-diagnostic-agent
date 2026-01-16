@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import authReducer, {
     loginStart,
     loginSuccess,
@@ -6,78 +6,186 @@ import authReducer, {
     logout,
 } from './authSlice';
 
+// Mock tokenManager
+vi.mock('../services/api', () => ({
+    tokenManager: {
+        hasTokens: vi.fn(() => false),
+        clearTokens: vi.fn(),
+        setTokens: vi.fn(),
+        getAccessToken: vi.fn(),
+        getRefreshToken: vi.fn(),
+    },
+}));
+
 describe('authSlice', () => {
-    const initialState = {
-        user: null,
-        isAuthenticated: false,
-        isLoading: false,
-        error: null,
+    const mockUser = {
+        username: 'testuser',
+        role: 'gp' as const,
     };
 
-    describe('initial state', () => {
-        it('should return the initial state when passed undefined', () => {
-            const result = authReducer(undefined, { type: 'unknown' });
-            expect(result).toEqual(initialState);
+    beforeEach(() => {
+        // Clear localStorage before each test
+        localStorage.clear();
+        vi.clearAllMocks();
+    });
+
+    describe('Initial State', () => {
+        it('should have correct initial state when no stored session', () => {
+            const state = authReducer(undefined, { type: '@@INIT' });
+            
+            expect(state.user).toBeNull();
+            expect(state.isAuthenticated).toBe(false);
+            expect(state.isLoading).toBe(false);
+            expect(state.error).toBeNull();
         });
     });
 
     describe('loginStart', () => {
         it('should set isLoading to true and clear error', () => {
-            const stateWithError = { ...initialState, error: 'Previous error' };
-            const result = authReducer(stateWithError, loginStart());
-
-            expect(result.isLoading).toBe(true);
-            expect(result.error).toBeNull();
+            const previousState = {
+                user: null,
+                isAuthenticated: false,
+                isLoading: false,
+                error: 'Previous error',
+            };
+            
+            const state = authReducer(previousState, loginStart());
+            
+            expect(state.isLoading).toBe(true);
+            expect(state.error).toBeNull();
         });
     });
 
     describe('loginSuccess', () => {
-        it('should set user, authenticate, and clear loading state', () => {
-            const loadingState = { ...initialState, isLoading: true };
-            const user = { username: 'admin', role: 'gp' as const };
-
-            const result = authReducer(loadingState, loginSuccess(user));
-
-            expect(result.user).toEqual(user);
-            expect(result.isAuthenticated).toBe(true);
-            expect(result.isLoading).toBe(false);
-            expect(result.error).toBeNull();
+        it('should set user and isAuthenticated', () => {
+            const previousState = {
+                user: null,
+                isAuthenticated: false,
+                isLoading: true,
+                error: null,
+            };
+            
+            const state = authReducer(previousState, loginSuccess(mockUser));
+            
+            expect(state.user).toEqual(mockUser);
+            expect(state.isAuthenticated).toBe(true);
+            expect(state.isLoading).toBe(false);
+            expect(state.error).toBeNull();
         });
 
-        it('should accept different user roles', () => {
-            const specialistUser = { username: 'dr.smith', role: 'specialist' as const };
-            const result = authReducer(initialState, loginSuccess(specialistUser));
-
-            expect(result.user?.role).toBe('specialist');
+        it('should persist user to localStorage', () => {
+            const previousState = {
+                user: null,
+                isAuthenticated: false,
+                isLoading: true,
+                error: null,
+            };
+            
+            authReducer(previousState, loginSuccess(mockUser));
+            
+            const stored = localStorage.getItem('auth_session');
+            expect(stored).not.toBeNull();
+            expect(JSON.parse(stored!)).toEqual(mockUser);
         });
     });
 
     describe('loginFailure', () => {
-        it('should set error message and clear loading state', () => {
-            const loadingState = { ...initialState, isLoading: true };
+        it('should set error and clear user', () => {
+            const previousState = {
+                user: mockUser,
+                isAuthenticated: true,
+                isLoading: true,
+                error: null,
+            };
+            
             const errorMessage = 'Invalid credentials';
+            const state = authReducer(previousState, loginFailure(errorMessage));
+            
+            expect(state.user).toBeNull();
+            expect(state.isAuthenticated).toBe(false);
+            expect(state.isLoading).toBe(false);
+            expect(state.error).toBe(errorMessage);
+        });
 
-            const result = authReducer(loadingState, loginFailure(errorMessage));
-
-            expect(result.error).toBe(errorMessage);
-            expect(result.isLoading).toBe(false);
-            expect(result.isAuthenticated).toBe(false);
-            expect(result.user).toBeNull();
+        it('should clear localStorage on failure', () => {
+            localStorage.setItem('auth_session', JSON.stringify(mockUser));
+            
+            const previousState = {
+                user: mockUser,
+                isAuthenticated: true,
+                isLoading: true,
+                error: null,
+            };
+            
+            authReducer(previousState, loginFailure('Error'));
+            
+            expect(localStorage.getItem('auth_session')).toBeNull();
         });
     });
 
     describe('logout', () => {
-        it('should reset to initial state', () => {
-            const authenticatedState = {
-                user: { username: 'admin', role: 'gp' as const },
+        it('should clear user and authentication state', () => {
+            const previousState = {
+                user: mockUser,
                 isAuthenticated: true,
                 isLoading: false,
                 error: null,
             };
+            
+            const state = authReducer(previousState, logout());
+            
+            expect(state.user).toBeNull();
+            expect(state.isAuthenticated).toBe(false);
+            expect(state.isLoading).toBe(false);
+            expect(state.error).toBeNull();
+        });
 
-            const result = authReducer(authenticatedState, logout());
+        it('should clear localStorage on logout', () => {
+            localStorage.setItem('auth_session', JSON.stringify(mockUser));
+            
+            const previousState = {
+                user: mockUser,
+                isAuthenticated: true,
+                isLoading: false,
+                error: null,
+            };
+            
+            authReducer(previousState, logout());
+            
+            expect(localStorage.getItem('auth_session')).toBeNull();
+        });
+    });
 
-            expect(result).toEqual(initialState);
+    describe('State Transitions', () => {
+        it('should handle full login flow', () => {
+            let state = authReducer(undefined, { type: '@@INIT' });
+            
+            // Start login
+            state = authReducer(state, loginStart());
+            expect(state.isLoading).toBe(true);
+            
+            // Login success
+            state = authReducer(state, loginSuccess(mockUser));
+            expect(state.isAuthenticated).toBe(true);
+            expect(state.user).toEqual(mockUser);
+            
+            // Logout
+            state = authReducer(state, logout());
+            expect(state.isAuthenticated).toBe(false);
+            expect(state.user).toBeNull();
+        });
+
+        it('should handle failed login flow', () => {
+            let state = authReducer(undefined, { type: '@@INIT' });
+            
+            // Start login
+            state = authReducer(state, loginStart());
+            expect(state.isLoading).toBe(true);
+            
+            // Login failure
+            state = authReducer(state, loginFailure('Invalid password'));
+            expect(state.isAuthenticated).toBe(false);
+            expect(state.error).toBe('Invalid password');
         });
     });
 });

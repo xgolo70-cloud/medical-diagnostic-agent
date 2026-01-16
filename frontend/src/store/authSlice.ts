@@ -1,8 +1,9 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
+import { tokenManager } from '../services/api';
 
 interface User {
     username: string;
-    role: 'gp' | 'specialist' | 'auditor';
+    role: 'gp' | 'specialist' | 'auditor' | 'admin';
 }
 
 interface AuthState {
@@ -17,6 +18,12 @@ const AUTH_STORAGE_KEY = 'auth_session';
 
 const loadAuthFromStorage = (): { user: User | null; isAuthenticated: boolean } => {
     try {
+        // Check if we have valid tokens
+        if (!tokenManager.hasTokens()) {
+            localStorage.removeItem(AUTH_STORAGE_KEY);
+            return { user: null, isAuthenticated: false };
+        }
+        
         const stored = localStorage.getItem(AUTH_STORAGE_KEY);
         if (stored) {
             const user = JSON.parse(stored) as User;
@@ -28,6 +35,7 @@ const loadAuthFromStorage = (): { user: User | null; isAuthenticated: boolean } 
     } catch {
         // Clear corrupted data
         localStorage.removeItem(AUTH_STORAGE_KEY);
+        tokenManager.clearTokens();
     }
     return { user: null, isAuthenticated: false };
 };
@@ -63,19 +71,22 @@ const authSlice = createSlice({
             state.isAuthenticated = false;
             state.user = null;
             state.error = action.payload;
-            // Clear any stale session data
+            // Clear any stale session data and tokens
             localStorage.removeItem(AUTH_STORAGE_KEY);
+            tokenManager.clearTokens();
         },
         logout: (state) => {
             state.isLoading = false;
             state.isAuthenticated = false;
             state.user = null;
             state.error = null;
-            // Clear session from localStorage
+            // Clear session from localStorage and all tokens
             localStorage.removeItem(AUTH_STORAGE_KEY);
+            tokenManager.clearTokens();
         },
     },
 });
 
 export const { loginStart, loginSuccess, loginFailure, logout } = authSlice.actions;
 export default authSlice.reducer;
+

@@ -13,11 +13,28 @@ export default defineConfig({
     rollupOptions: {
       output: {
         manualChunks: {
-          vendor: ['react', 'react-dom', 'react-router-dom', 'framer-motion'],
-          ui: ['@mui/material', '@mui/icons-material', 'lucide-react'],
+          // Core React - essential, loads first
+          'react-vendor': ['react', 'react-dom'],
+          'router': ['react-router-dom'],
+          
+          // Animations - large, can be lazy loaded
+          'animations': ['framer-motion', 'gsap'],
+          
+          // MUI - very large, split into core and icons
+          'mui-core': ['@mui/material', '@emotion/react', '@emotion/styled'],
+          'mui-icons': ['@mui/icons-material'],
+          
+          // Utilities
+          'icons': ['lucide-react'],
+          'forms': ['react-hook-form', '@hookform/resolvers', 'zod'],
+          'data': ['@tanstack/react-query', 'axios'],
+          'state': ['@reduxjs/toolkit', 'react-redux'],
+          'pdf': ['jspdf', 'html2canvas'],
         },
       },
     },
+    // Adjust warning limit for better visibility
+    chunkSizeWarningLimit: 500,
   },
   test: {
     globals: true,

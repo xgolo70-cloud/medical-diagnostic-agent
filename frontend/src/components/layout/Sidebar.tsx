@@ -10,14 +10,13 @@ import {
     X,
     Brain,
     Home,
-    PanelLeftClose,
-    PanelLeft
+    ChevronRight
 } from 'lucide-react';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { logout } from '../../store/authSlice';
 
-export const SIDEBAR_WIDTH = 240;
-export const SIDEBAR_COLLAPSED_WIDTH = 64;
+export const SIDEBAR_WIDTH = 270;
+export const SIDEBAR_COLLAPSED_WIDTH = 80;
 
 interface NavItem {
     path: string;
@@ -26,11 +25,11 @@ interface NavItem {
 }
 
 const navItems: NavItem[] = [
-    { path: '/dashboard', label: 'Dashboard', icon: <LayoutDashboard size={18} strokeWidth={1.75} /> },
-    { path: '/diagnosis', label: 'Analysis', icon: <Stethoscope size={18} strokeWidth={1.75} /> },
-    { path: '/medai', label: 'MedGemma AI', icon: <Brain size={18} strokeWidth={1.75} /> },
-    { path: '/history', label: 'History', icon: <History size={18} strokeWidth={1.75} /> },
-    { path: '/settings', label: 'Settings', icon: <Settings size={18} strokeWidth={1.75} /> },
+    { path: '/dashboard', label: 'Dashboard', icon: <LayoutDashboard size={20} strokeWidth={1.5} /> },
+    { path: '/diagnosis', label: 'Analysis', icon: <Stethoscope size={20} strokeWidth={1.5} /> },
+    { path: '/medai', label: 'MedGemma AI', icon: <Brain size={20} strokeWidth={1.5} /> },
+    { path: '/history', label: 'History', icon: <History size={20} strokeWidth={1.5} /> },
+    { path: '/settings', label: 'Settings', icon: <Settings size={20} strokeWidth={1.5} /> },
 ];
 
 interface SidebarProps {
@@ -72,21 +71,22 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileOpen = false, onMobileCl
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        transition={{ duration: 0.15 }}
-                        className="fixed inset-0 z-40 bg-black/30 md:hidden"
+                        transition={{ duration: 0.2 }}
+                        className="fixed inset-0 z-40 bg-black/20 backdrop-blur-sm md:hidden"
                         onClick={onMobileClose}
                     />
                 )}
             </AnimatePresence>
 
-            {/* Sidebar */}
+            {/* Sidebar Container */}
             <motion.aside
                 initial={false}
                 animate={{ width: currentWidth }}
-                transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
+                transition={{ duration: 0.4, type: "spring", stiffness: 100, damping: 20 }}
                 className={`
                     fixed top-0 left-0 z-50 h-full 
-                    bg-[#fafafa] border-r border-gray-200/80
+                    bg-white/85 backdrop-blur-2xl border-r border-white/50
+                    shadow-[4px_0_24px_-12px_rgba(0,0,0,0.1)]
                     md:translate-x-0 
                     ${mobileOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
                     flex flex-col
@@ -94,155 +94,186 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileOpen = false, onMobileCl
                 style={{ width: currentWidth }}
             >
                 {/* Header */}
-                <div className={`h-14 flex items-center border-b border-gray-200/60 ${isCollapsed ? 'justify-center px-2' : 'justify-between px-4'}`}>
+                <div className={`h-24 flex items-center ${isCollapsed ? 'justify-center' : 'justify-between px-6'}`}>
                     <Link 
                         to="/"
-                        className="flex items-center gap-2.5 group"
+                        className="flex items-center gap-3.5 group relative"
                     >
-                        <div className="w-8 h-8 rounded-lg bg-black flex items-center justify-center flex-shrink-0">
-                            <Brain className="text-white w-4 h-4" />
+                        {/* Logo Container */}
+                        <div className="relative">
+                            <div className="absolute inset-0 bg-gradient-to-tr from-black/20 to-transparent blur-xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500 scale-150" />
+                            <div className="w-11 h-11 rounded-xl bg-black text-white flex items-center justify-center shadow-lg shadow-black/10 relative z-10 transition-transform duration-300 group-hover:scale-105 active:scale-95">
+                                <Brain className="w-5 h-5" />
+                            </div>
                         </div>
-                        {!isCollapsed && (
-                            <span className="font-semibold text-gray-900 text-[13px] tracking-tight">
-                                AI & Things
-                            </span>
-                        )}
+                        
+                        <AnimatePresence mode='wait'>
+                            {!isCollapsed && (
+                                <motion.div
+                                    initial={{ opacity: 0, x: -10, filter: 'blur(5px)' }}
+                                    animate={{ opacity: 1, x: 0, filter: 'blur(0px)' }}
+                                    exit={{ opacity: 0, x: -10, filter: 'blur(5px)' }}
+                                    transition={{ duration: 0.3 }}
+                                    className="flex flex-col justify-center"
+                                >
+                                    <span className="font-bold text-black text-[16px] tracking-tight leading-none bg-clip-text text-transparent bg-gradient-to-r from-black via-black to-zinc-600">
+                                        AI & Things
+                                    </span>
+                                    <span className="text-[11px] text-zinc-500 font-medium tracking-wider uppercase mt-1">
+                                        Workspace
+                                    </span>
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
                     </Link>
                     
                     {/* Mobile Close */}
                     <button 
                         onClick={onMobileClose}
-                        aria-label="Close mobile menu"
-                        className="md:hidden p-1.5 text-gray-400 hover:text-gray-600 rounded-md hover:bg-gray-100 transition-colors"
+                        className="md:hidden p-2 text-black hover:bg-black/5 rounded-full transition-colors"
                     >
-                        <X size={16} aria-hidden="true" />
+                        <X size={20} />
                     </button>
-
-                    {/* Desktop Toggle */}
-                    {!isCollapsed && (
-                        <button 
-                            onClick={toggleCollapse}
-                            aria-label="Collapse sidebar"
-                            className="hidden md:flex p-1.5 text-gray-400 hover:text-gray-600 rounded-md hover:bg-gray-100 transition-colors"
-                        >
-                            <PanelLeftClose size={16} aria-hidden="true" />
-                        </button>
-                    )}
                 </div>
 
-                {/* Expand button when collapsed */}
-                {isCollapsed && (
-                    <button 
-                        onClick={toggleCollapse}
-                        aria-label="Expand sidebar"
-                        className="hidden md:flex mx-auto mt-3 p-2 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-100 transition-colors"
-                    >
-                        <PanelLeft size={16} aria-hidden="true" />
-                    </button>
-                )}
-
                 {/* Navigation */}
-                <nav 
-                    className={`flex-1 py-4 overflow-y-auto overflow-x-hidden ${isCollapsed ? 'px-2' : 'px-3'}`}
-                    role="navigation"
-                    aria-label="Main navigation"
-                >
-                    {!isCollapsed && (
-                        <div className="mb-2 px-2 text-[10px] font-medium text-gray-400 uppercase tracking-wider" aria-hidden="true">
-                            Menu
-                        </div>
-                    )}
+                <nav className="flex-1 py-4 px-4 space-y-2 overflow-y-auto overflow-x-hidden relative scrollbar-thin scrollbar-thumb-zinc-200">
+                    {navItems.map((item) => {
+                        const isActive = location.pathname === item.path;
+                        return (
+                            <Link
+                                key={item.path}
+                                to={item.path}
+                                onClick={onMobileClose}
+                                className={`
+                                    relative flex items-center gap-4 px-4 py-3.5 rounded-2xl transition-all duration-300 group outline-none
+                                    ${isCollapsed ? 'justify-center' : ''}
+                                `}
+                            >
+                                {/* Active Indicator Background - Magic Motion */}
+                                {isActive && (
+                                    <motion.div
+                                        layoutId="activeTabBackground"
+                                        className="absolute inset-0 bg-black/[0.04] rounded-2xl border border-black/[0.02]"
+                                        initial={false}
+                                        transition={{ type: "spring", stiffness: 400, damping: 35 }}
+                                    />
+                                )}
 
-                    <div className="space-y-0.5">
-                        {navItems.map((item) => {
-                            const isActive = location.pathname === item.path;
-                            return (
-                                <Link
-                                    key={item.path}
-                                    to={item.path}
-                                    onClick={onMobileClose}
-                                    title={isCollapsed ? item.label : undefined}
-                                    aria-label={item.label}
-                                    aria-current={isActive ? 'page' : undefined}
-                                    className={`
-                                        group relative flex items-center gap-2.5 h-9 rounded-lg text-[13px] transition-colors duration-150
-                                        ${isCollapsed ? 'justify-center px-0' : 'px-2.5'}
-                                        ${isActive 
-                                            ? 'bg-white text-gray-900 font-medium shadow-sm border border-gray-200/80' 
-                                            : 'text-gray-600 hover:text-gray-900 hover:bg-white/60'
-                                        }
-                                    `}
-                                >
-                                    <span className={`flex-shrink-0 ${isActive ? 'text-gray-900' : 'text-gray-500 group-hover:text-gray-700'}`} aria-hidden="true">
-                                        {item.icon}
-                                    </span>
-                                    {!isCollapsed && (
-                                        <span className="truncate">{item.label}</span>
-                                    )}
+                                {/* Hover Background (for non-active) */}
+                                {!isActive && (
+                                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/[0.02] rounded-2xl transition-colors duration-300" />
+                                )}
 
-                                    {/* Tooltip */}
-                                    {isCollapsed && (
-                                        <div className="absolute left-full ml-2 px-2 py-1 bg-gray-900 text-white text-xs rounded-md opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-opacity whitespace-nowrap z-50">
-                                            {item.label}
-                                        </div>
-                                    )}
-                                </Link>
-                            );
-                        })}
-                    </div>
+                                <span className={`
+                                    relative z-10 transition-all duration-300 
+                                    ${isActive ? 'text-black scale-105' : 'text-zinc-500 group-hover:text-black group-hover:scale-105'}
+                                `}>
+                                    {isActive 
+                                        ? React.cloneElement(item.icon as React.ReactElement, { strokeWidth: 2 } as any) 
+                                        : item.icon}
+                                </span>
+
+                                {!isCollapsed && (
+                                    <motion.span 
+                                        initial={{ opacity: 0 }}
+                                        animate={{ opacity: 1 }}
+                                        exit={{ opacity: 0 }}
+                                        className={`
+                                            relative z-10 font-medium text-[14px] transition-colors duration-300
+                                            ${isActive ? 'text-black font-semibold' : 'text-zinc-600 group-hover:text-black'}
+                                        `}
+                                    >
+                                        {item.label}
+                                    </motion.span>
+                                )}
+                                
+                                {/* Active Dot (Right side) */}
+                                {isActive && !isCollapsed && (
+                                    <motion.div
+                                        layoutId="activeIndicator"
+                                        className="absolute right-3 w-1.5 h-1.5 rounded-full bg-black shadow-[0_0_10px_rgba(0,0,0,0.3)]"
+                                        initial={{ scale: 0 }}
+                                        animate={{ scale: 1 }}
+                                        transition={{ duration: 0.2 }}
+                                    />
+                                )}
+
+                                {/* Collapsed Tooltip */}
+                                {isCollapsed && (
+                                    <div className="absolute left-full ml-5 px-3 py-2 bg-black/90 backdrop-blur text-white text-[13px] font-medium rounded-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 shadow-xl translate-x-[-8px] group-hover:translate-x-0 z-50 whitespace-nowrap">
+                                        {item.label}
+                                        <div className="absolute left-0 top-1/2 -translate-x-1 -translate-y-1/2 w-2 h-2 bg-black/90 transform rotate-45" />
+                                    </div>
+                                )}
+                            </Link>
+                        );
+                    })}
                 </nav>
 
-                {/* Footer */}
-                <div className={`border-t border-gray-200/60 ${isCollapsed ? 'p-2' : 'p-3'}`}>
-                    {/* Home Link */}
+                {/* Footer Section */}
+                <div className="p-5 relative">
+                    {/* Gradient Divider */}
+                    <div className="absolute top-0 left-6 right-6 h-px bg-gradient-to-r from-transparent via-black/10 to-transparent" />
+
+                    {/* Collapse Toggle (Desktop) */}
+                    <button 
+                         onClick={toggleCollapse}
+                         className={`
+                             absolute -right-3 top-[-26px]
+                             hidden md:flex w-7 h-7 bg-white/100 backdrop-blur border border-zinc-200 shadow-sm rounded-full items-center justify-center 
+                             text-zinc-500 hover:text-black hover:scale-110 active:scale-95 transition-all duration-300 z-50
+                             ${isCollapsed ? 'rotate-180' : ''}
+                         `}
+                     >
+                         <ChevronRight size={14} strokeWidth={2} />
+                     </button>
+
+                    {/* Website Link */}
                     <Link 
                         to="/"
-                        title={isCollapsed ? 'Website' : undefined}
                         className={`
-                            flex items-center gap-2.5 h-9 rounded-lg text-[13px] text-gray-500 hover:text-gray-900 hover:bg-white/60 transition-colors mb-2
-                            ${isCollapsed ? 'justify-center px-0' : 'px-2.5'}
+                            flex items-center gap-3.5 p-3 rounded-2xl text-black hover:bg-black/[0.03] transition-all duration-300 mb-2 group
+                            ${isCollapsed ? 'justify-center' : ''}
                         `}
                     >
-                        <Home size={18} strokeWidth={1.75} />
-                        {!isCollapsed && <span>Website</span>}
+                         <div className={`
+                             w-8 h-8 rounded-lg flex items-center justify-center transition-colors duration-300
+                             ${isCollapsed ? '' : 'bg-zinc-50 group-hover:bg-white border border-zinc-100 group-hover:border-zinc-200'}
+                         `}>
+                            <Home size={18} strokeWidth={1.5} className="text-zinc-500 group-hover:text-black transition-colors" />
+                         </div>
+                        {!isCollapsed && <span className="text-[13px] font-medium text-zinc-600 group-hover:text-black transition-colors">Website</span>}
                     </Link>
 
-                    {/* User */}
+                    {/* User Profile */}
                     <div className={`
-                        flex items-center gap-2.5 p-2 rounded-lg bg-white border border-gray-200/80 shadow-sm
-                        ${isCollapsed ? 'justify-center' : ''}
+                        flex items-center gap-3.5 p-2 rounded-2xl bg-gradient-to-b from-white to-zinc-50/50 border border-white shadow-sm transition-all duration-300 hover:shadow-md
+                        ${isCollapsed ? 'justify-center p-2 bg-none border-none shadow-none' : ''}
                     `}>
-                        <div className="w-7 h-7 rounded-full bg-gray-900 flex items-center justify-center text-white text-xs font-semibold flex-shrink-0">
+                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-black to-zinc-700 text-white flex items-center justify-center text-xs font-bold shadow-md ring-2 ring-white cursor-default select-none">
                             {user?.username?.charAt(0).toUpperCase() || 'U'}
                         </div>
+                        
                         {!isCollapsed && (
                             <div className="flex-1 min-w-0">
-                                <p className="text-[13px] font-medium text-gray-900 truncate leading-tight">
+                                <p className="text-[13px] font-bold text-black truncate tracking-tight">
                                     {user?.username || 'User'}
                                 </p>
-                                <p className="text-[11px] text-gray-500 truncate leading-tight">{user?.role || 'Admin'}</p>
+                                <p className="text-[11px] text-zinc-400 truncate font-medium">{user?.role || 'Administrator'}</p>
                             </div>
                         )}
-                        <button
-                            onClick={handleLogout}
-                            title="Sign Out"
-                            aria-label="Sign out of your account"
-                            className={`p-1 text-gray-400 hover:text-red-500 rounded transition-colors ${isCollapsed ? 'hidden' : ''}`}
-                        >
-                            <LogOut size={14} aria-hidden="true" />
-                        </button>
+                        
+                        {!isCollapsed && (
+                            <button
+                                onClick={handleLogout}
+                                className="p-2 text-zinc-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all duration-200"
+                                title="Sign out"
+                            >
+                                <LogOut size={16} strokeWidth={2} />
+                            </button>
+                        )}
                     </div>
-
-                    {/* Logout button when collapsed */}
-                    {isCollapsed && (
-                        <button
-                            onClick={handleLogout}
-                            title="Sign Out"
-                            className="w-full mt-2 flex justify-center p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
-                        >
-                            <LogOut size={16} />
-                        </button>
-                    )}
                 </div>
             </motion.aside>
         </>

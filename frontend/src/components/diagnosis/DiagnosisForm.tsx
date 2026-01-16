@@ -167,8 +167,10 @@ export const DiagnosisForm: React.FC<DiagnosisFormProps> = ({ unified = false })
                 elevation={0}
                 sx={{
                     borderRadius: 3,
-                    border: '1px solid #e5e7eb',
-                    overflow: 'visible', // Changed to visible for better shadow rendering if needed
+                    border: '1px solid #eaeaea',
+                    bgcolor: 'white',
+                    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)',
+                    overflow: 'visible',
                 }}
             >
                 <CardContent sx={{ p: { xs: 2, md: 4 } }}>
@@ -184,7 +186,7 @@ export const DiagnosisForm: React.FC<DiagnosisFormProps> = ({ unified = false })
                                         display: 'flex',
                                         alignItems: 'center',
                                         justifyContent: 'center',
-                                        bgcolor: '#111827',
+                                        bgcolor: '#171717',
                                         color: 'white',
                                         fontWeight: 600,
                                         fontSize: '0.85rem',
@@ -215,12 +217,12 @@ export const DiagnosisForm: React.FC<DiagnosisFormProps> = ({ unified = false })
                                                 sx={{
                                                     '& .MuiOutlinedInput-root': {
                                                         borderRadius: 2,
-                                                        bgcolor: '#f9fafb',
-                                                        '& fieldset': { borderColor: '#e5e7eb' },
-                                                        '&:hover fieldset': { borderColor: '#d1d5db' },
-                                                        '&.Mui-focused fieldset': { borderColor: '#111827', borderWidth: 1 },
+                                                        bgcolor: '#fafafa',
+                                                        '& fieldset': { borderColor: '#eaeaea' },
+                                                        '&:hover fieldset': { borderColor: '#d4d4d4' },
+                                                        '&.Mui-focused fieldset': { borderColor: '#171717', borderWidth: 1 },
                                                     },
-                                                    '& .MuiInputLabel-root.Mui-focused': { color: '#111827' }
+                                                    '& .MuiInputLabel-root.Mui-focused': { color: '#171717' }
                                                 }}
                                             />
                                         )}
@@ -244,12 +246,12 @@ export const DiagnosisForm: React.FC<DiagnosisFormProps> = ({ unified = false })
                                                 sx={{
                                                     '& .MuiOutlinedInput-root': {
                                                         borderRadius: 2,
-                                                        bgcolor: '#f9fafb',
-                                                        '& fieldset': { borderColor: '#e5e7eb' },
-                                                        '&:hover fieldset': { borderColor: '#d1d5db' },
-                                                        '&.Mui-focused fieldset': { borderColor: '#111827', borderWidth: 1 },
+                                                        bgcolor: '#fafafa',
+                                                        '& fieldset': { borderColor: '#eaeaea' },
+                                                        '&:hover fieldset': { borderColor: '#d4d4d4' },
+                                                        '&.Mui-focused fieldset': { borderColor: '#171717', borderWidth: 1 },
                                                     },
-                                                    '& .MuiInputLabel-root.Mui-focused': { color: '#111827' }
+                                                    '& .MuiInputLabel-root.Mui-focused': { color: '#171717' }
                                                 }}
                                             />
                                         )}
@@ -261,17 +263,17 @@ export const DiagnosisForm: React.FC<DiagnosisFormProps> = ({ unified = false })
                                         control={control}
                                         render={({ field }) => (
                                             <FormControl fullWidth error={!!errors.gender}>
-                                                <InputLabel sx={{ '&.Mui-focused': { color: '#111827' } }}>Gender</InputLabel>
+                                                <InputLabel sx={{ '&.Mui-focused': { color: '#171717' } }}>Gender</InputLabel>
                                                 <Select 
                                                     {...field} 
                                                     label="Gender" 
                                                     disabled={diagnoseMutation.isPending}
                                                     sx={{
                                                         borderRadius: 2,
-                                                        bgcolor: '#f9fafb',
-                                                        '& .MuiOutlinedInput-notchedOutline': { borderColor: '#e5e7eb' },
-                                                        '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: '#d1d5db' },
-                                                        '&.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: '#111827', borderWidth: 1 },
+                                                        bgcolor: '#fafafa',
+                                                        '& .MuiOutlinedInput-notchedOutline': { borderColor: '#eaeaea' },
+                                                        '&:hover .MuiOutlinedInput-notchedOutline': { borderColor: '#d4d4d4' },
+                                                        '&.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: '#171717', borderWidth: 1 },
                                                     }}
                                                 >
                                                     <MenuItem value="male">Male</MenuItem>
@@ -296,7 +298,7 @@ export const DiagnosisForm: React.FC<DiagnosisFormProps> = ({ unified = false })
                                         display: 'flex',
                                         alignItems: 'center',
                                         justifyContent: 'center',
-                                        bgcolor: '#111827',
+                                        bgcolor: '#171717',
                                         color: 'white',
                                         fontWeight: 600,
                                         fontSize: '0.85rem',
@@ -353,12 +355,12 @@ export const DiagnosisForm: React.FC<DiagnosisFormProps> = ({ unified = false })
                                                 sx={{
                                                     '& .MuiOutlinedInput-root': {
                                                         borderRadius: 2,
-                                                        bgcolor: '#f9fafb',
-                                                        '& fieldset': { borderColor: '#e5e7eb' },
-                                                        '&:hover fieldset': { borderColor: '#d1d5db' },
-                                                        '&.Mui-focused fieldset': { borderColor: '#111827', borderWidth: 1 },
+                                                        bgcolor: '#fafafa',
+                                                        '& fieldset': { borderColor: '#eaeaea' },
+                                                        '&:hover fieldset': { borderColor: '#d4d4d4' },
+                                                        '&.Mui-focused fieldset': { borderColor: '#171717', borderWidth: 1 },
                                                     },
-                                                    '& .MuiInputLabel-root.Mui-focused': { color: '#111827' }
+                                                    '& .MuiInputLabel-root.Mui-focused': { color: '#171717' }
                                                 }}
                                             />
                                         )}
@@ -378,7 +380,7 @@ export const DiagnosisForm: React.FC<DiagnosisFormProps> = ({ unified = false })
                                         display: 'flex',
                                         alignItems: 'center',
                                         justifyContent: 'center',
-                                        bgcolor: '#111827',
+                                        bgcolor: '#171717',
                                         color: 'white',
                                         fontWeight: 600,
                                         fontSize: '0.85rem',
@@ -433,12 +435,12 @@ export const DiagnosisForm: React.FC<DiagnosisFormProps> = ({ unified = false })
                                                 sx={{
                                                     '& .MuiOutlinedInput-root': {
                                                         borderRadius: 2,
-                                                        bgcolor: '#f9fafb',
-                                                        '& fieldset': { borderColor: '#e5e7eb' },
-                                                        '&:hover fieldset': { borderColor: '#d1d5db' },
-                                                        '&.Mui-focused fieldset': { borderColor: '#111827', borderWidth: 1 },
+                                                        bgcolor: '#fafafa',
+                                                        '& fieldset': { borderColor: '#eaeaea' },
+                                                        '&:hover fieldset': { borderColor: '#d4d4d4' },
+                                                        '&.Mui-focused fieldset': { borderColor: '#171717', borderWidth: 1 },
                                                     },
-                                                    '& .MuiInputLabel-root.Mui-focused': { color: '#111827' }
+                                                    '& .MuiInputLabel-root.Mui-focused': { color: '#171717' }
                                                 }}
                                             />
                                         )}
@@ -455,7 +457,7 @@ export const DiagnosisForm: React.FC<DiagnosisFormProps> = ({ unified = false })
                                 '&:before': { display: 'none' },
                                 boxShadow: 'none',
                                 border: '1px solid',
-                                borderColor: '#e5e7eb',
+                                borderColor: '#eaeaea',
                                 bgcolor: '#ffffff',
                             }}
                         >
@@ -587,7 +589,7 @@ export const DiagnosisForm: React.FC<DiagnosisFormProps> = ({ unified = false })
                                             display: 'flex',
                                             alignItems: 'center',
                                             justifyContent: 'center',
-                                            bgcolor: '#111827',
+                                            bgcolor: '#171717',
                                             color: 'white',
                                             fontWeight: 600,
                                             fontSize: '0.85rem',
@@ -606,20 +608,22 @@ export const DiagnosisForm: React.FC<DiagnosisFormProps> = ({ unified = false })
                                     onDrop={handleDrop}
                                     sx={{
                                         border: '1px dashed',
-                                        borderColor: pdfFile ? 'success.main' : isDragging ? '#111827' : '#d1d5db',
+                                        borderColor: pdfFile ? '#171717' : isDragging ? '#171717' : '#d4d4d4',
                                         borderRadius: 3,
                                         p: 4,
                                         textAlign: 'center',
                                         cursor: 'pointer',
                                         transition: 'all 0.2s ease',
+                                        display: 'block',
+                                        width: '100%',
                                         bgcolor: pdfFile
-                                            ? '#ecfdf5'
+                                            ? '#fafafa'
                                             : isDragging
-                                                ? '#f9fafb'
+                                                ? '#f3f4f6'
                                                 : '#ffffff',
                                         '&:hover': {
-                                            borderColor: '#111827',
-                                            bgcolor: '#f9fafb',
+                                            borderColor: '#171717',
+                                            bgcolor: '#fafafa',
                                         },
                                     }}
                                     component="label"
@@ -635,19 +639,19 @@ export const DiagnosisForm: React.FC<DiagnosisFormProps> = ({ unified = false })
                                         <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1 }}>
                                             <Box
                                                 sx={{
-                                                    width: 56,
-                                                    height: 56,
+                                                    width: 48,
+                                                    height: 48,
                                                     borderRadius: '50%',
                                                     display: 'flex',
                                                     alignItems: 'center',
                                                     justifyContent: 'center',
-                                                    bgcolor: '#10b981',
+                                                    bgcolor: '#171717',
                                                     mb: 1,
                                                 }}
                                             >
-                                                <CheckIcon sx={{ fontSize: 28, color: 'white' }} />
+                                                <CheckIcon sx={{ fontSize: 24, color: 'white' }} />
                                             </Box>
-                                            <Typography variant="subtitle2" fontWeight={600} color="#059669">
+                                            <Typography variant="subtitle2" fontWeight={600} color="text.primary">
                                                 {pdfFile.name}
                                             </Typography>
                                             <Typography variant="caption" color="text.secondary">
@@ -658,21 +662,21 @@ export const DiagnosisForm: React.FC<DiagnosisFormProps> = ({ unified = false })
                                         <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1 }}>
                                             <Box
                                                 sx={{
-                                                    width: 56,
-                                                    height: 56,
+                                                    width: 48,
+                                                    height: 48,
                                                     borderRadius: '50%',
                                                     display: 'flex',
                                                     alignItems: 'center',
                                                     justifyContent: 'center',
-                                                    bgcolor: isDragging ? '#e5e7eb' : '#f3f4f6',
+                                                    bgcolor: isDragging ? '#e5e5e5' : '#f3f4f6',
                                                     mb: 1,
                                                     transition: 'all 0.2s ease',
                                                 }}
                                             >
                                                 {isDragging ? (
-                                                    <FileIcon sx={{ fontSize: 24, color: '#374151' }} />
+                                                    <UploadIcon sx={{ fontSize: 24, color: '#171717' }} />
                                                 ) : (
-                                                    <UploadIcon sx={{ fontSize: 24, color: '#9ca3af' }} />
+                                                    <FileIcon sx={{ fontSize: 24, color: '#737373' }} />
                                                 )}
                                             </Box>
                                             <Typography variant="subtitle2" fontWeight={600} color="text.primary">
@@ -695,7 +699,7 @@ export const DiagnosisForm: React.FC<DiagnosisFormProps> = ({ unified = false })
                                 justifyContent: 'flex-end',
                                 pt: 3,
                                 borderTop: '1px solid',
-                                borderColor: '#e5e7eb',
+                                borderColor: '#eaeaea',
                             }}
                         >
                             <Button
@@ -707,14 +711,13 @@ export const DiagnosisForm: React.FC<DiagnosisFormProps> = ({ unified = false })
                                     px: 3,
                                     py: 1,
                                     borderRadius: 2,
-                                    color: '#374151',
+                                    color: '#171717',
                                     borderColor: '#e5e7eb',
                                     textTransform: 'none',
                                     fontWeight: 500,
                                     '&:hover': {
-                                        borderColor: '#d1d5db',
-                                        bgcolor: '#f9fafb',
-                                        color: '#111827'
+                                        borderColor: '#171717',
+                                        bgcolor: '#fafafa',
                                     }
                                 }}
                             >
@@ -729,7 +732,7 @@ export const DiagnosisForm: React.FC<DiagnosisFormProps> = ({ unified = false })
                                     px: 4,
                                     py: 1,
                                     borderRadius: 2,
-                                    bgcolor: '#111827',
+                                    bgcolor: '#171717',
                                     color: 'white',
                                     textTransform: 'none',
                                     fontWeight: 600,
@@ -739,8 +742,8 @@ export const DiagnosisForm: React.FC<DiagnosisFormProps> = ({ unified = false })
                                         boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)',
                                     },
                                     '&.Mui-disabled': {
-                                        bgcolor: '#e5e7eb',
-                                        color: '#9ca3af'
+                                        bgcolor: '#f5f5f5',
+                                        color: '#a3a3a3'
                                     }
                                 }}
                             >

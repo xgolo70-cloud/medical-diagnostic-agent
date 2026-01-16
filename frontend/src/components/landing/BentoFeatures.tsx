@@ -196,7 +196,7 @@ export const BentoFeatures = () => {
     const isInView = useInView(sectionRef, { once: true, margin: "-100px" });
 
     return (
-        <section ref={sectionRef} className="py-24 relative bg-white">
+        <section ref={sectionRef} className="py-16 relative bg-white">
             <div className="max-w-7xl mx-auto px-6 relative z-10">
                 {/* Section Header */}
                 <motion.div 
