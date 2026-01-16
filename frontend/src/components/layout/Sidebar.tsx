@@ -82,7 +82,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileOpen = false, onMobileCl
             <motion.aside
                 initial={false}
                 animate={{ width: currentWidth }}
-                transition={{ duration: 0.4, type: "spring", stiffness: 100, damping: 20 }}
+                transition={{ type: "spring", stiffness: 300, damping: 30, mass: 0.8 }}
                 className={`
                     fixed top-0 left-0 z-50 h-full 
                     bg-white/85 backdrop-blur-2xl border-r border-white/50
@@ -90,31 +90,32 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileOpen = false, onMobileCl
                     md:translate-x-0 
                     ${mobileOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
                     flex flex-col
+                    overflow-hidden
                 `}
                 style={{ width: currentWidth }}
             >
                 {/* Header */}
-                <div className={`h-24 flex items-center ${isCollapsed ? 'justify-center' : 'justify-between px-6'}`}>
+                <div className={`h-24 flex items-center shrink-0 ${isCollapsed ? 'justify-center' : 'justify-between px-6'}`}>
                     <Link 
                         to="/"
-                        className="flex items-center gap-3.5 group relative"
+                        className="flex items-center gap-3.5 group relative overflow-hidden"
                     >
                         {/* Logo Container */}
-                        <div className="relative">
+                        <div className="relative shrink-0">
                             <div className="absolute inset-0 bg-gradient-to-tr from-black/20 to-transparent blur-xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500 scale-150" />
                             <div className="w-11 h-11 rounded-xl bg-black text-white flex items-center justify-center shadow-lg shadow-black/10 relative z-10 transition-transform duration-300 group-hover:scale-105 active:scale-95">
                                 <Brain className="w-5 h-5" />
                             </div>
                         </div>
                         
-                        <AnimatePresence mode='wait'>
+                        <AnimatePresence>
                             {!isCollapsed && (
                                 <motion.div
-                                    initial={{ opacity: 0, x: -10, filter: 'blur(5px)' }}
-                                    animate={{ opacity: 1, x: 0, filter: 'blur(0px)' }}
-                                    exit={{ opacity: 0, x: -10, filter: 'blur(5px)' }}
-                                    transition={{ duration: 0.3 }}
-                                    className="flex flex-col justify-center"
+                                    initial={{ opacity: 0, x: -10 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    exit={{ opacity: 0, x: -10 }}
+                                    transition={{ duration: 0.2 }}
+                                    className="flex flex-col justify-center whitespace-nowrap"
                                 >
                                     <span className="font-bold text-black text-[16px] tracking-tight leading-none bg-clip-text text-transparent bg-gradient-to-r from-black via-black to-zinc-600">
                                         AI & Things
@@ -166,7 +167,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileOpen = false, onMobileCl
                                 )}
 
                                 <span className={`
-                                    relative z-10 transition-all duration-300 
+                                    relative z-10 transition-all duration-300 shrink-0
                                     ${isActive ? 'text-black scale-105' : 'text-zinc-500 group-hover:text-black group-hover:scale-105'}
                                 `}>
                                     {isActive 
@@ -174,34 +175,36 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileOpen = false, onMobileCl
                                         : item.icon}
                                 </span>
 
-                                {!isCollapsed && (
-                                    <motion.span 
-                                        initial={{ opacity: 0 }}
-                                        animate={{ opacity: 1 }}
-                                        exit={{ opacity: 0 }}
-                                        className={`
-                                            relative z-10 font-medium text-[14px] transition-colors duration-300
-                                            ${isActive ? 'text-black font-semibold' : 'text-zinc-600 group-hover:text-black'}
-                                        `}
-                                    >
-                                        {item.label}
-                                    </motion.span>
-                                )}
+                                <AnimatePresence>
+                                    {!isCollapsed && (
+                                        <motion.span 
+                                            initial={{ opacity: 0, x: -10 }}
+                                            animate={{ opacity: 1, x: 0 }}
+                                            exit={{ opacity: 0, x: -10 }}
+                                            transition={{ duration: 0.2 }}
+                                            className={`
+                                                relative z-10 font-medium text-[14px] transition-colors duration-300 whitespace-nowrap
+                                                ${isActive ? 'text-black font-semibold' : 'text-zinc-600 group-hover:text-black'}
+                                            `}
+                                        >
+                                            {item.label}
+                                        </motion.span>
+                                    )}
+                                </AnimatePresence>
                                 
                                 {/* Active Dot (Right side) */}
                                 {isActive && !isCollapsed && (
                                     <motion.div
-                                        layoutId="activeIndicator"
-                                        className="absolute right-3 w-1.5 h-1.5 rounded-full bg-black shadow-[0_0_10px_rgba(0,0,0,0.3)]"
                                         initial={{ scale: 0 }}
                                         animate={{ scale: 1 }}
-                                        transition={{ duration: 0.2 }}
+                                        exit={{ scale: 0 }}
+                                        className="absolute right-3 w-1.5 h-1.5 rounded-full bg-black shadow-[0_0_10px_rgba(0,0,0,0.3)]"
                                     />
                                 )}
 
                                 {/* Collapsed Tooltip */}
                                 {isCollapsed && (
-                                    <div className="absolute left-full ml-5 px-3 py-2 bg-black/90 backdrop-blur text-white text-[13px] font-medium rounded-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 shadow-xl translate-x-[-8px] group-hover:translate-x-0 z-50 whitespace-nowrap">
+                                    <div className="absolute left-full ml-5 px-3 py-2 bg-black/90 backdrop-blur text-white text-[13px] font-medium rounded-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 shadow-xl translate-x-[-8px] group-hover:translate-x-0 z-50 whitespace-nowrap pointer-events-none">
                                         {item.label}
                                         <div className="absolute left-0 top-1/2 -translate-x-1 -translate-y-1/2 w-2 h-2 bg-black/90 transform rotate-45" />
                                     </div>
@@ -212,7 +215,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileOpen = false, onMobileCl
                 </nav>
 
                 {/* Footer Section */}
-                <div className="p-5 relative">
+                <div className="p-5 relative shrink-0">
                     {/* Gradient Divider */}
                     <div className="absolute top-0 left-6 right-6 h-px bg-gradient-to-r from-transparent via-black/10 to-transparent" />
 
@@ -238,12 +241,24 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileOpen = false, onMobileCl
                         `}
                     >
                          <div className={`
-                             w-8 h-8 rounded-lg flex items-center justify-center transition-colors duration-300
+                             w-8 h-8 rounded-lg flex items-center justify-center transition-colors duration-300 shrink-0
                              ${isCollapsed ? '' : 'bg-zinc-50 group-hover:bg-white border border-zinc-100 group-hover:border-zinc-200'}
                          `}>
                             <Home size={18} strokeWidth={1.5} className="text-zinc-500 group-hover:text-black transition-colors" />
                          </div>
-                        {!isCollapsed && <span className="text-[13px] font-medium text-zinc-600 group-hover:text-black transition-colors">Website</span>}
+                         <AnimatePresence>
+                             {!isCollapsed && (
+                                <motion.span 
+                                    initial={{ opacity: 0, x: -10 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    exit={{ opacity: 0, x: -10 }}
+                                    transition={{ duration: 0.2 }}
+                                    className="text-[13px] font-medium text-zinc-600 group-hover:text-black transition-colors whitespace-nowrap"
+                                >
+                                    Website
+                                </motion.span>
+                             )}
+                         </AnimatePresence>
                     </Link>
 
                     {/* User Profile */}
@@ -251,28 +266,42 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileOpen = false, onMobileCl
                         flex items-center gap-3.5 p-2 rounded-2xl bg-gradient-to-b from-white to-zinc-50/50 border border-white shadow-sm transition-all duration-300 hover:shadow-md
                         ${isCollapsed ? 'justify-center p-2 bg-none border-none shadow-none' : ''}
                     `}>
-                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-black to-zinc-700 text-white flex items-center justify-center text-xs font-bold shadow-md ring-2 ring-white cursor-default select-none">
+                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-black to-zinc-700 text-white flex items-center justify-center text-xs font-bold shadow-md ring-2 ring-white cursor-default select-none shrink-0">
                             {user?.username?.charAt(0).toUpperCase() || 'U'}
                         </div>
                         
-                        {!isCollapsed && (
-                            <div className="flex-1 min-w-0">
-                                <p className="text-[13px] font-bold text-black truncate tracking-tight">
-                                    {user?.username || 'User'}
-                                </p>
-                                <p className="text-[11px] text-zinc-400 truncate font-medium">{user?.role || 'Administrator'}</p>
-                            </div>
-                        )}
+                        <AnimatePresence>
+                            {!isCollapsed && (
+                                <motion.div 
+                                    initial={{ opacity: 0, width: 0 }}
+                                    animate={{ opacity: 1, width: 'auto' }}
+                                    exit={{ opacity: 0, width: 0 }}
+                                    transition={{ duration: 0.2 }}
+                                    className="flex-1 min-w-0 overflow-hidden"
+                                >
+                                    <p className="text-[13px] font-bold text-black truncate tracking-tight">
+                                        {user?.username || 'User'}
+                                    </p>
+                                    <p className="text-[11px] text-zinc-400 truncate font-medium">{user?.role || 'Administrator'}</p>
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
                         
-                        {!isCollapsed && (
-                            <button
-                                onClick={handleLogout}
-                                className="p-2 text-zinc-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all duration-200"
-                                title="Sign out"
-                            >
-                                <LogOut size={16} strokeWidth={2} />
-                            </button>
-                        )}
+                        <AnimatePresence>
+                            {!isCollapsed && (
+                                <motion.button
+                                    initial={{ opacity: 0, scale: 0.8 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    exit={{ opacity: 0, scale: 0.5 }}
+                                    transition={{ duration: 0.2 }}
+                                    onClick={handleLogout}
+                                    className="p-2 text-zinc-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all duration-200 shrink-0"
+                                    title="Sign out"
+                                >
+                                    <LogOut size={16} strokeWidth={2} />
+                                </motion.button>
+                            )}
+                        </AnimatePresence>
                     </div>
                 </div>
             </motion.aside>
