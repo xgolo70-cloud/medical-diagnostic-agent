@@ -78,11 +78,10 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileOpen = false, onMobileCl
                 )}
             </AnimatePresence>
 
-            {/* Sidebar Container */}
             <motion.aside
                 initial={false}
                 animate={{ width: currentWidth }}
-                transition={{ type: "spring", stiffness: 300, damping: 30, mass: 0.8 }}
+                transition={{ type: "spring", stiffness: 200, damping: 25, mass: 1 }}
                 className={`
                     fixed top-0 left-0 z-50 h-full 
                     bg-white/85 backdrop-blur-2xl border-r border-white/50
