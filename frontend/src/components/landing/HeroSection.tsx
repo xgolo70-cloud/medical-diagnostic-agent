@@ -53,7 +53,7 @@ export const HeroSection = () => {
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.5, delay: 0.1 }}
-                        className="text-5xl md:text-7xl font-bold tracking-tight text-gray-900 mb-8 w-full"
+                        className="text-5xl md:text-7xl font-bold tracking-tight text-gray-900 mb-12 w-full"
                     >
                         Medical Intelligence <br className="hidden md:block" />
                         <div className="relative inline-flex flex-col items-center">
@@ -71,7 +71,7 @@ export const HeroSection = () => {
                                     </motion.span>
                                 </AnimatePresence>
                             </span>
-                             <svg className="absolute -bottom-6 left-1/2 -translate-x-1/2 w-[130%] h-8 -z-10" viewBox="0 0 200 20" preserveAspectRatio="none">
+                             <svg className="absolute -bottom-5 left-1/2 -translate-x-1/2 w-[130%] h-8 -z-10" viewBox="0 0 200 20" preserveAspectRatio="none">
                                 <defs>
                                     <linearGradient id="lineGradient" x1="0%" y1="0%" x2="100%" y2="0%">
                                         <stop offset="0%" stopColor="#3b82f6" stopOpacity="0.2" />
