@@ -56,23 +56,25 @@ export const HeroSection = () => {
                         className="text-5xl md:text-7xl font-bold tracking-tight text-gray-900 mb-8 w-full"
                     >
                         Medical Intelligence <br className="hidden md:block" />
-                        <span className="relative inline-flex h-[1.2em] w-full justify-center overflow-hidden">
-                            <AnimatePresence mode="popLayout">
-                                <motion.span
-                                    key={index}
-                                    initial={{ y: "100%", opacity: 0 }}
-                                    animate={{ y: "0%", opacity: 1 }}
-                                    exit={{ y: "-100%", opacity: 0 }}
-                                    transition={{ duration: 0.5, ease: "circOut" }}
-                                    className="block bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent px-2"
-                                >
-                                    {words[index]}
-                                </motion.span>
-                            </AnimatePresence>
-                             <svg className="absolute -bottom-4 left-1/2 -translate-x-1/2 w-[120%] h-4 text-blue-500/30 -z-10" viewBox="0 0 100 10" preserveAspectRatio="none">
+                        <div className="relative inline-flex flex-col items-center">
+                            <span className="relative inline-flex h-[1.2em] overflow-hidden">
+                                <AnimatePresence mode="popLayout">
+                                    <motion.span
+                                        key={index}
+                                        initial={{ y: "100%", opacity: 0 }}
+                                        animate={{ y: "0%", opacity: 1 }}
+                                        exit={{ y: "-100%", opacity: 0 }}
+                                        transition={{ duration: 0.5, ease: "circOut" }}
+                                        className="block bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent px-2 whitespace-nowrap"
+                                    >
+                                        {words[index]}
+                                    </motion.span>
+                                </AnimatePresence>
+                            </span>
+                             <svg className="absolute -bottom-3 left-1/2 -translate-x-1/2 w-[120%] h-4 text-blue-500/30 -z-10" viewBox="0 0 100 10" preserveAspectRatio="none">
                                 <path d="M0 5 Q 50 10 100 5" stroke="currentColor" strokeWidth="12" fill="none" />
                             </svg>
-                        </span>
+                        </div>
                     </motion.h1>
 
                     {/* Subheadline */}
