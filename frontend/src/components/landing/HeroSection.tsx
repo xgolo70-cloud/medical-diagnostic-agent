@@ -69,8 +69,8 @@ export const HeroSection = () => {
                                     {words[index]}
                                 </motion.span>
                             </AnimatePresence>
-                             <svg className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-[200px] h-3 text-blue-500/20 -z-10" viewBox="0 0 100 10" preserveAspectRatio="none">
-                                <path d="M0 5 Q 50 10 100 5" stroke="currentColor" strokeWidth="8" fill="none" />
+                            <svg className="absolute -bottom-2 left-0 w-full h-4 text-blue-500/30 -z-10" viewBox="0 0 200 10" preserveAspectRatio="none">
+                                <path d="M0 5 Q 100 15 200 5" stroke="currentColor" strokeWidth="6" fill="none" strokeLinecap="round" />
                             </svg>
                         </span>
                     </motion.h1>
