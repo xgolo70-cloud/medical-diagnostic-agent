@@ -140,8 +140,10 @@ export const LoginForm: React.FC = () => {
                                         'https://images.unsplash.com/photo-1579684385136-213fb0d02d25?q=80&w=2070&auto=format&fit=crop',
                                         'https://images.unsplash.com/photo-1585435557343-3b092031a831?q=80&w=2070&auto=format&fit=crop',
                                     ].map((img, i) => (
-                                        <div key={i} className="relative w-full aspect-[2/3] rounded-2xl overflow-hidden shadow-lg">
-                                            <img src={img} alt="" className="w-full h-full object-cover" />
+                                        <div key={i} className="relative w-full aspect-[2/3] rounded-2xl overflow-hidden shadow-2xl border border-white/10 group">
+                                            <div className="absolute inset-0 bg-indigo-500/20 mix-blend-overlay z-10" />
+                                            <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/60 z-10" />
+                                            <img src={img} alt="" className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-1000 ease-out" />
                                         </div>
                                     ))}
                                 </div>
@@ -159,8 +161,10 @@ export const LoginForm: React.FC = () => {
                                         'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2564&auto=format&fit=crop',
                                         'https://images.unsplash.com/photo-1551076805-e1869033e561?q=80&w=2070&auto=format&fit=crop',
                                     ].map((img, i) => (
-                                        <div key={i} className="relative w-full aspect-[2/3] rounded-2xl overflow-hidden shadow-lg">
-                                            <img src={img} alt="" className="w-full h-full object-cover" />
+                                        <div key={i} className="relative w-full aspect-[2/3] rounded-2xl overflow-hidden shadow-2xl border border-white/10 group">
+                                            <div className="absolute inset-0 bg-blue-500/20 mix-blend-overlay z-10" />
+                                            <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/60 z-10" />
+                                            <img src={img} alt="" className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-1000 ease-out" />
                                         </div>
                                     ))}
                                 </div>
@@ -178,8 +182,10 @@ export const LoginForm: React.FC = () => {
                                         'https://images.unsplash.com/photo-1532094349884-543bc11b234d?q=80&w=2070&auto=format&fit=crop',
                                         'https://images.unsplash.com/photo-1518770660439-4636190af475?q=80&w=2070&auto=format&fit=crop',
                                     ].map((img, i) => (
-                                        <div key={i} className="relative w-full aspect-[2/3] rounded-2xl overflow-hidden shadow-lg">
-                                            <img src={img} alt="" className="w-full h-full object-cover" />
+                                        <div key={i} className="relative w-full aspect-[2/3] rounded-2xl overflow-hidden shadow-2xl border border-white/10 group">
+                                            <div className="absolute inset-0 bg-purple-500/20 mix-blend-overlay z-10" />
+                                            <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/60 z-10" />
+                                            <img src={img} alt="" className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-1000 ease-out" />
                                         </div>
                                     ))}
                                 </div>
