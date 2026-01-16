@@ -20,6 +20,17 @@ export const LoginForm: React.FC = () => {
     const [showPassword, setShowPassword] = useState(false);
     const [formErrors, setFormErrors] = useState<{ username?: string; password?: string }>({});
 
+    // Rotating text state
+    const words = ["Thinking.", "Limits.", "Logic.", "Future."];
+    const [wordIndex, setWordIndex] = useState(0);
+
+    useEffect(() => {
+        const timer = setInterval(() => {
+            setWordIndex((prev) => (prev + 1) % words.length);
+        }, 3000);
+        return () => clearInterval(timer);
+    }, []);
+
 
 
 
