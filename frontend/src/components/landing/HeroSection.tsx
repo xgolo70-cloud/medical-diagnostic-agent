@@ -71,8 +71,16 @@ export const HeroSection = () => {
                                     </motion.span>
                                 </AnimatePresence>
                             </span>
-                             <svg className="absolute -bottom-3 left-1/2 -translate-x-1/2 w-[120%] h-4 text-blue-500/30 -z-10" viewBox="0 0 100 10" preserveAspectRatio="none">
-                                <path d="M0 5 Q 50 10 100 5" stroke="currentColor" strokeWidth="12" fill="none" />
+                             <svg className="absolute -bottom-6 left-1/2 -translate-x-1/2 w-[130%] h-8 -z-10" viewBox="0 0 200 20" preserveAspectRatio="none">
+                                <defs>
+                                    <linearGradient id="lineGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                                        <stop offset="0%" stopColor="#3b82f6" stopOpacity="0.2" />
+                                        <stop offset="50%" stopColor="#8b5cf6" stopOpacity="0.4" />
+                                        <stop offset="100%" stopColor="#3b82f6" stopOpacity="0.2" />
+                                    </linearGradient>
+                                </defs>
+                                <path d="M5 10 Q 50 18 90 9 T 195 10" stroke="url(#lineGradient)" strokeWidth="6" fill="none" strokeLinecap="round" />
+                                <path d="M10 14 Q 60 20 100 12 T 190 14" stroke="url(#lineGradient)" strokeWidth="4" fill="none" strokeLinecap="round" opacity="0.6" />
                             </svg>
                         </div>
                     </motion.h1>
