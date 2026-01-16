@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Eye, EyeOff, ArrowLeft, Brain, ArrowRight, AlertCircle, Lock } from 'lucide-react';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { loginStart, loginSuccess, loginFailure } from '../../store/authSlice';
+import { tokenManager } from '../../services/api';
 import { Link } from 'react-router-dom';
 
 const VALID_CREDENTIALS = [
@@ -54,6 +55,12 @@ export const LoginForm: React.FC = () => {
         );
 
         if (matchedUser) {
+            // Save mock tokens for session persistence (since backend is not available)
+            // This ensures the session survives page refresh
+            const mockAccessToken = `mock_access_${Date.now()}_${matchedUser.username}`;
+            const mockRefreshToken = `mock_refresh_${Date.now()}_${matchedUser.username}`;
+            tokenManager.setTokens(mockAccessToken, mockRefreshToken);
+            
             dispatch(loginSuccess({ username: matchedUser.username, role: matchedUser.role }));
         } else {
             dispatch(loginFailure('Invalid credentials.'));
