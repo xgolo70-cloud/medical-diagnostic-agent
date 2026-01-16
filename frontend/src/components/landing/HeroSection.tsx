@@ -24,7 +24,7 @@ export const HeroSection = () => {
             </div>
 
             <div className="container mx-auto px-4 relative z-10 flex flex-col items-center">
-                <div className="max-w-4xl mx-auto text-center flex flex-col items-center">
+                <div className="max-w-4xl mx-auto text-center flex flex-col items-center gap-y-8">
                     
                     {/* Announcement Badge */}
                     <motion.div
@@ -33,7 +33,7 @@ export const HeroSection = () => {
                         transition={{ duration: 0.5 }}
                         className="inline-flex items-center justify-center w-full"
                     >
-                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white border border-gray-200 text-sm hover:border-gray-300 transition-colors cursor-default shadow-sm mb-8">
+                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white border border-gray-200 text-sm hover:border-gray-300 transition-colors cursor-default shadow-sm">
                             <span className="flex items-center gap-1.5 text-gray-500 font-medium">
                                 <span className="relative flex h-2 w-2">
                                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
@@ -53,10 +53,10 @@ export const HeroSection = () => {
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.5, delay: 0.1 }}
-                        className="text-5xl md:text-7xl font-bold tracking-tight text-gray-900 mb-12 w-full"
+                        className="text-5xl md:text-7xl font-bold tracking-tight text-gray-900 w-full leading-tight"
                     >
                         Medical Intelligence <br className="hidden md:block" />
-                        <div className="relative inline-flex flex-col items-center">
+                        <div className="relative inline-flex flex-col items-center mt-2 md:mt-4">
                             <span className="relative inline-flex h-[1.2em] overflow-hidden">
                                 <AnimatePresence mode="popLayout">
                                     <motion.span
@@ -90,7 +90,7 @@ export const HeroSection = () => {
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.5, delay: 0.2 }}
-                        className="w-full text-lg md:text-xl text-gray-500 mb-16 max-w-3xl mx-auto leading-relaxed text-center px-4"
+                        className="w-full text-lg md:text-xl text-gray-500 max-w-3xl mx-auto leading-relaxed text-center px-4"
                     >
                         Advanced diagnostics and patient monitoring powered by local AI. 
                         Secure, private, and lightning fast. No cloud dependency required.
@@ -101,7 +101,7 @@ export const HeroSection = () => {
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.5, delay: 0.3 }}
-                        className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-20 w-full"
+                        className="flex flex-col sm:flex-row items-center justify-center gap-4 w-full"
                     >
                         <button 
                             onClick={() => navigate('/login')}
