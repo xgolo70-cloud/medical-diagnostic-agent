@@ -5,6 +5,15 @@ import { useNavigate } from 'react-router-dom';
 
 export const HeroSection = () => {
     const navigate = useNavigate();
+    const words = ["at the Edge", "for Everyone", "with Speed", "Securely"];
+    const [index, setIndex] = React.useState(0);
+
+    React.useEffect(() => {
+        const timer = setInterval(() => {
+            setIndex((prev) => (prev + 1) % words.length);
+        }, 3000);
+        return () => clearInterval(timer);
+    }, [words.length]);
 
     return (
         <section className="relative pt-10 pb-20 lg:pt-14 lg:pb-32 overflow-hidden">
@@ -47,34 +56,20 @@ export const HeroSection = () => {
                         className="text-5xl md:text-7xl font-bold tracking-tight text-gray-900 mb-8 w-full"
                     >
                         Medical Intelligence <br className="hidden md:block" />
-                        <span className="relative inline-flex h-[1.2em] overflow-hidden">
+                        <span className="relative inline-flex h-[1.2em] w-full justify-center overflow-hidden">
                             <AnimatePresence mode="popLayout">
-                                {(() => {
-                                    const words = ["at the Edge", "for Everyone", "with Speed", "Securely"];
-                                    const [index, setIndex] = React.useState(0);
-
-                                    React.useEffect(() => {
-                                        const timer = setInterval(() => {
-                                            setIndex((prev) => (prev + 1) % words.length);
-                                        }, 3000);
-                                        return () => clearInterval(timer);
-                                    }, []);
-
-                                    return (
-                                        <motion.span
-                                            key={index}
-                                            initial={{ y: "100%", opacity: 0 }}
-                                            animate={{ y: "0%", opacity: 1 }}
-                                            exit={{ y: "-100%", opacity: 0 }}
-                                            transition={{ duration: 0.5, ease: "circOut" }}
-                                            className="block bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent px-2"
-                                        >
-                                            {words[index]}
-                                        </motion.span>
-                                    );
-                                })()}
+                                <motion.span
+                                    key={index}
+                                    initial={{ y: "100%", opacity: 0 }}
+                                    animate={{ y: "0%", opacity: 1 }}
+                                    exit={{ y: "-100%", opacity: 0 }}
+                                    transition={{ duration: 0.5, ease: "circOut" }}
+                                    className="block bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent px-2"
+                                >
+                                    {words[index]}
+                                </motion.span>
                             </AnimatePresence>
-                             <svg className="absolute -bottom-2 left-0 w-full h-3 text-blue-500/20 -z-10" viewBox="0 0 100 10" preserveAspectRatio="none">
+                             <svg className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-[200px] h-3 text-blue-500/20 -z-10" viewBox="0 0 100 10" preserveAspectRatio="none">
                                 <path d="M0 5 Q 50 10 100 5" stroke="currentColor" strokeWidth="8" fill="none" />
                             </svg>
                         </span>
