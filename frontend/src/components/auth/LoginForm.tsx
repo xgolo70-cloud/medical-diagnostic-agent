@@ -125,20 +125,20 @@ export const LoginForm: React.FC = () => {
                             </style>
                             
                             {/* Tilted Grid Container */}
-                            <div className="grid grid-cols-3 gap-6 h-[150%] -mt-[20%] w-[150%] -ml-[25%] transform -rotate-12 scale-110 opacity-60">
+                            <div className="grid grid-cols-3 gap-6 h-[150%] -mt-[20%] w-[150%] -ml-[25%] transform -rotate-12 scale-110 opacity-85">
                                 
                                 {/* Column 1: Up */}
                                 <div className="flex flex-col gap-6 animate-scroll-up">
                                     {[
-                                        'https://images.unsplash.com/photo-1614027164847-1b28cfe1df60?q=80&w=1986&auto=format&fit=crop', // Lion
-                                        'https://images.unsplash.com/photo-1546182990-dffeafbe841d?q=80&w=2059&auto=format&fit=crop', // Flower Lion
-                                        'https://images.unsplash.com/photo-1504006833117-8886a36e6bf3?q=80&w=1887&auto=format&fit=crop', // Abstract
-                                        'https://images.unsplash.com/photo-1456926631375-92c8ce872def?q=80&w=2070&auto=format&fit=crop', // Leopard
+                                        'https://images.unsplash.com/photo-1620712943543-bcc4688e7485?q=80&w=1965&auto=format&fit=crop', // AI Neural Network
+                                        'https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=2070&auto=format&fit=crop', // Data Viz
+                                        'https://images.unsplash.com/photo-1579684385136-213fb0d02d25?q=80&w=2070&auto=format&fit=crop', // CT Scan
+                                        'https://images.unsplash.com/photo-1585435557343-3b092031a831?q=80&w=2070&auto=format&fit=crop', // VR Medicine
                                          // Duplicates for Loop
-                                        'https://images.unsplash.com/photo-1614027164847-1b28cfe1df60?q=80&w=1986&auto=format&fit=crop',
-                                        'https://images.unsplash.com/photo-1546182990-dffeafbe841d?q=80&w=2059&auto=format&fit=crop',
-                                        'https://images.unsplash.com/photo-1504006833117-8886a36e6bf3?q=80&w=1887&auto=format&fit=crop',
-                                        'https://images.unsplash.com/photo-1456926631375-92c8ce872def?q=80&w=2070&auto=format&fit=crop',
+                                        'https://images.unsplash.com/photo-1620712943543-bcc4688e7485?q=80&w=1965&auto=format&fit=crop',
+                                        'https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=2070&auto=format&fit=crop',
+                                        'https://images.unsplash.com/photo-1579684385136-213fb0d02d25?q=80&w=2070&auto=format&fit=crop',
+                                        'https://images.unsplash.com/photo-1585435557343-3b092031a831?q=80&w=2070&auto=format&fit=crop',
                                     ].map((img, i) => (
                                         <div key={i} className="relative w-full aspect-[2/3] rounded-2xl overflow-hidden shadow-lg">
                                             <img src={img} alt="" className="w-full h-full object-cover" />
@@ -149,15 +149,15 @@ export const LoginForm: React.FC = () => {
                                 {/* Column 2: Down (Center) */}
                                 <div className="flex flex-col gap-6 animate-scroll-down">
                                     {[
-                                        'https://images.unsplash.com/photo-1474511320723-9a56873867b5?q=80&w=2072&auto=format&fit=crop', // Fox
-                                        'https://images.unsplash.com/photo-1557004396-66e4174d7bf6?q=80&w=1887&auto=format&fit=crop', // Tiger
-                                        'https://images.unsplash.com/photo-1574158622682-e40e69881006?q=80&w=2080&auto=format&fit=crop', // Cat eye
-                                        'https://images.unsplash.com/photo-1505148230895-7165f08b5130?q=80&w=2070&auto=format&fit=crop', // Jellyfish
+                                        'https://images.unsplash.com/photo-1530482054429-cc255caa10c9?q=80&w=2069&auto=format&fit=crop', // DNA
+                                        'https://images.unsplash.com/photo-1581056771107-24ca5f03381f?q=80&w=2070&auto=format&fit=crop', // Doctor Tablet
+                                        'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2564&auto=format&fit=crop', // Abstract particles
+                                        'https://images.unsplash.com/photo-1551076805-e1869033e561?q=80&w=2070&auto=format&fit=crop', // Surgery
                                          // Duplicates for Loop
-                                        'https://images.unsplash.com/photo-1474511320723-9a56873867b5?q=80&w=2072&auto=format&fit=crop',
-                                        'https://images.unsplash.com/photo-1557004396-66e4174d7bf6?q=80&w=1887&auto=format&fit=crop',
-                                        'https://images.unsplash.com/photo-1574158622682-e40e69881006?q=80&w=2080&auto=format&fit=crop',
-                                        'https://images.unsplash.com/photo-1505148230895-7165f08b5130?q=80&w=2070&auto=format&fit=crop',
+                                        'https://images.unsplash.com/photo-1530482054429-cc255caa10c9?q=80&w=2069&auto=format&fit=crop',
+                                        'https://images.unsplash.com/photo-1581056771107-24ca5f03381f?q=80&w=2070&auto=format&fit=crop',
+                                        'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2564&auto=format&fit=crop',
+                                        'https://images.unsplash.com/photo-1551076805-e1869033e561?q=80&w=2070&auto=format&fit=crop',
                                     ].map((img, i) => (
                                         <div key={i} className="relative w-full aspect-[2/3] rounded-2xl overflow-hidden shadow-lg">
                                             <img src={img} alt="" className="w-full h-full object-cover" />
@@ -168,15 +168,15 @@ export const LoginForm: React.FC = () => {
                                 {/* Column 3: Up */}
                                 <div className="flex flex-col gap-6 animate-scroll-up">
                                     {[
-                                        'https://images.unsplash.com/photo-1497752531616-c3afd97aa9a1?q=80&w=1973&auto=format&fit=crop', // Owl
-                                        'https://images.unsplash.com/photo-1559717652-f9479361ad3e?q=80&w=1887&auto=format&fit=crop', // Deer
-                                        'https://images.unsplash.com/photo-1534188753412-3e26d0d618d6?q=80&w=1888&auto=format&fit=crop', // Wolf
-                                        'https://images.unsplash.com/photo-1564349683136-77e08dba1ef7?q=80&w=2072&auto=format&fit=crop', // Panda
+                                        'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?q=80&w=2070&auto=format&fit=crop', // Molecular
+                                        'https://images.unsplash.com/photo-1581093458891-2f30890918b6?q=80&w=2070&auto=format&fit=crop', // Lab Arm
+                                        'https://images.unsplash.com/photo-1532094349884-543bc11b234d?q=80&w=2070&auto=format&fit=crop', // Microscope
+                                        'https://images.unsplash.com/photo-1518770660439-4636190af475?q=80&w=2070&auto=format&fit=crop', // Chip
                                          // Duplicates for Loop
-                                        'https://images.unsplash.com/photo-1497752531616-c3afd97aa9a1?q=80&w=1973&auto=format&fit=crop',
-                                        'https://images.unsplash.com/photo-1559717652-f9479361ad3e?q=80&w=1887&auto=format&fit=crop',
-                                        'https://images.unsplash.com/photo-1534188753412-3e26d0d618d6?q=80&w=1888&auto=format&fit=crop',
-                                        'https://images.unsplash.com/photo-1564349683136-77e08dba1ef7?q=80&w=2072&auto=format&fit=crop',
+                                        'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?q=80&w=2070&auto=format&fit=crop',
+                                        'https://images.unsplash.com/photo-1581093458891-2f30890918b6?q=80&w=2070&auto=format&fit=crop',
+                                        'https://images.unsplash.com/photo-1532094349884-543bc11b234d?q=80&w=2070&auto=format&fit=crop',
+                                        'https://images.unsplash.com/photo-1518770660439-4636190af475?q=80&w=2070&auto=format&fit=crop',
                                     ].map((img, i) => (
                                         <div key={i} className="relative w-full aspect-[2/3] rounded-2xl overflow-hidden shadow-lg">
                                             <img src={img} alt="" className="w-full h-full object-cover" />
