@@ -221,16 +221,15 @@ export const LoginForm: React.FC = () => {
                                             </motion.span>
                                         </AnimatePresence>
                                     </span>
-                                    <svg className="absolute -bottom-4 left-0 w-[120%] h-6 -z-10" viewBox="0 0 200 20" preserveAspectRatio="none">
+                                    <svg className="absolute -bottom-3 left-0 w-full h-5 -z-10" viewBox="0 0 200 20" preserveAspectRatio="none">
                                         <defs>
                                             <linearGradient id="loginLineGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                                                <stop offset="0%" stopColor="#60a5fa" stopOpacity="0.4" />
-                                                <stop offset="50%" stopColor="#a78bfa" stopOpacity="0.8" />
-                                                <stop offset="100%" stopColor="#60a5fa" stopOpacity="0.4" />
+                                                <stop offset="0%" stopColor="#60a5fa" stopOpacity="0.5" />
+                                                <stop offset="50%" stopColor="#a78bfa" stopOpacity="0.9" />
+                                                <stop offset="100%" stopColor="#60a5fa" stopOpacity="0.5" />
                                             </linearGradient>
                                         </defs>
-                                        <path d="M5 10 Q 50 18 90 9 T 195 10" stroke="url(#loginLineGradient)" strokeWidth="6" fill="none" strokeLinecap="round" />
-                                        <path d="M10 14 Q 60 20 100 12 T 190 14" stroke="url(#loginLineGradient)" strokeWidth="4" fill="none" strokeLinecap="round" opacity="0.6" />
+                                        <path d="M5 10 Q 50 16 100 10 T 195 10" stroke="url(#loginLineGradient)" strokeWidth="5" fill="none" strokeLinecap="round" />
                                     </svg>
                                 </div>
                             </h2>
