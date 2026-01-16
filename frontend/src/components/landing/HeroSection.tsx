@@ -76,11 +76,14 @@ export const HeroSection = () => {
                         className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-20 w-full"
                     >
                         <button 
-                            onClick={() => navigate('/dashboard')}
-                            className="w-full sm:w-auto px-8 py-4 bg-black text-white rounded-xl font-semibold text-lg flex items-center justify-center gap-2 hover:bg-gray-800 hover:scale-105 active:scale-95 transition-all shadow-lg shadow-black/20"
+                            onClick={() => navigate('/login')}
+                            className="group relative w-full sm:w-auto px-8 py-4 bg-zinc-900 text-white rounded-xl font-semibold text-lg flex items-center justify-center gap-3 overflow-hidden transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] shadow-[0_10px_30px_-10px_rgba(0,0,0,0.5)] hover:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.6)]"
                         >
-                            Get Started
-                            <ArrowRight size={20} />
+                            <div className="absolute inset-0 bg-gradient-to-tr from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                            <span className="relative z-10">Sign In</span>
+                            <div className="relative z-10 p-1 rounded-full bg-white/10 group-hover:bg-white/20 transition-colors">
+                                <ArrowRight size={18} className="group-hover:translate-x-0.5 transition-transform duration-300" />
+                            </div>
                         </button>
                         <button className="w-full sm:w-auto px-8 py-4 bg-white text-gray-900 border border-gray-200 rounded-xl font-semibold text-lg flex items-center justify-center gap-2 hover:bg-gray-50 hover:border-gray-300 transition-all shadow-sm">
                             <Play size={20} className="fill-gray-900" />
