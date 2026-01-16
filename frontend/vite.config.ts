@@ -9,6 +9,16 @@ export default defineConfig({
     tailwindcss(),
     react(),
   ],
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor: ['react', 'react-dom', 'react-router-dom', 'framer-motion'],
+          ui: ['@mui/material', '@mui/icons-material', 'lucide-react'],
+        },
+      },
+    },
+  },
   test: {
     globals: true,
     environment: 'jsdom',

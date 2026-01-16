@@ -1,13 +1,53 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>frontend</title>
+    <title>AI and Things Agent</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
   </head>
+
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <style>
+        body {
+          background-color: #ffffff;
+          color: #171717;
+          margin: 0;
+        }
+
+        .initial-loader {
+          height: 100vh;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+
+        .spinner {
+          width: 40px;
+          height: 40px;
+          border: 3px solid rgba(0, 0, 0, 0.1);
+          border-radius: 50%;
+          border-top-color: #000000;
+          animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+          to {
+            transform: rotate(360deg);
+          }
+        }
+      </style>
+      <div class="initial-loader">
+        <div class="spinner"></div>
+      </div>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
