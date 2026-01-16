@@ -1,6 +1,6 @@
 import { useRef } from 'react';
-import { motion, useInView, useMotionTemplate, useMotionValue, useScroll, useTransform } from 'framer-motion';
-import { Activity, Shield, Globe, Lock, Cpu, Network, Sparkles, Zap, Smartphone } from 'lucide-react';
+import { motion, useInView, useMotionTemplate, useMotionValue } from 'framer-motion';
+import { Activity, Shield, Globe, Lock, Cpu, Network, Zap } from 'lucide-react';
 
 const features = [
     {

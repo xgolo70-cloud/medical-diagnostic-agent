@@ -11,15 +11,11 @@ import {
     ListItem,
     ListItemIcon,
     ListItemText,
-    Accordion,
-    AccordionSummary,
-    AccordionDetails,
 } from '@mui/material';
 import {
     CheckCircle as CheckIcon,
     Science as ScienceIcon,
     MenuBook as CitationIcon,
-    ExpandMore as ExpandMoreIcon,
     LocalHospital as DiagnosisIcon,
     TrendingUp as TrendingUpIcon,
     Warning as WarningIcon,
@@ -37,12 +33,6 @@ const getConfidenceColor = (confidence: number): 'success' | 'warning' | 'error'
     if (confidence >= 0.7) return 'success';
     if (confidence >= 0.4) return 'warning';
     return 'error';
-};
-
-const getConfidenceLabel = (confidence: number): string => {
-    if (confidence >= 0.7) return 'High Confidence';
-    if (confidence >= 0.4) return 'Moderate';
-    return 'Low Confidence';
 };
 
 export const DiagnosisResults: React.FC<DiagnosisResultsProps> = ({ result }) => {

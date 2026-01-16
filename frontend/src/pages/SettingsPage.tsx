@@ -4,18 +4,15 @@ import {
     Bell,
     Shield,
     Palette,
-    Save,
     Edit3,
     Camera,
     Keyboard,
     Settings,
-    ArrowLeft,
-    Plus
+    ArrowLeft
 } from 'lucide-react';
 import { useAppSelector } from '../store/hooks';
 import { toast } from '../components/ui/Toast';
 import { Button } from '../components/ui/Button';
-import { BackButton } from '../components/ui/BackButton';
 import { useNavigate } from 'react-router-dom';
 import { resetTour, DASHBOARD_TOUR_STEPS, useTour } from '../components/ui/TourProvider';
 

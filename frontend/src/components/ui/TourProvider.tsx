@@ -1,6 +1,6 @@
 import React, { useState, useEffect, createContext, useContext, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, ChevronLeft, ChevronRight, Check, Sparkles, ArrowRight, Lightbulb } from 'lucide-react';
+import { X, ChevronLeft, ChevronRight, Check, Sparkles, Lightbulb } from 'lucide-react';
 
 // ==================== Types ====================
 

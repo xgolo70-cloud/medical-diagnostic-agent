@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { Quote, Star, Sparkles } from 'lucide-react';
+import { Star, Sparkles } from 'lucide-react';
 
 const reviews = [
     {

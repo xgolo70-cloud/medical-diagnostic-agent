@@ -3,7 +3,13 @@ import { useRef } from 'react';
 import { Github, Twitter, Linkedin, Brain, ArrowUpRight } from 'lucide-react';
 import { Button } from '../ui/Button';
 
-const footerLinks = {
+interface FooterLink {
+    label: string;
+    href: string;
+    badge?: string;
+}
+
+const footerLinks: Record<string, { title: string; links: FooterLink[] }> = {
     platform: {
         title: "Platform",
         links: [

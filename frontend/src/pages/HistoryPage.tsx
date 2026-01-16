@@ -9,10 +9,8 @@ import {
     Filter as FilterIcon,
     Download as DownloadIcon,
     FileText,
-    Calendar,
     ArrowLeft,
-    Clock,
-    User
+    Clock
 } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { api } from '../services';
@@ -20,7 +18,6 @@ import gsap from 'gsap';
 import { useGsapContext } from '../lib/animations';
 import { exportToCSV, exportToJSON } from '../lib/export';
 import { toast } from '../components/ui/Toast';
-import { BackButton } from '../components/ui/BackButton';
 import { Button } from '../components/ui/Button';
 import { useNavigate } from 'react-router-dom';
 
@@ -78,7 +75,7 @@ const StatCard: React.FC<StatCardProps> = ({ title, value, icon, color }) => (
 
 export const HistoryPage: React.FC = () => {
     const navigate = useNavigate();
-    const { data: history, isLoading, isError, error, refetch } = useQuery<AuditEntry[]>({
+    const { data: history, isLoading, isError, refetch } = useQuery<AuditEntry[]>({
         queryKey: ['history'],
         queryFn: () => api.getHistory() as Promise<AuditEntry[]>,
         refetchInterval: 30000,

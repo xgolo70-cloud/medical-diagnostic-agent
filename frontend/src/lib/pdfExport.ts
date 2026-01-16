@@ -250,7 +250,7 @@ export const exportDiagnosisReport = async (
         pdf.setFontSize(10);
         pdf.setTextColor(60, 60, 60);
         
-        data.recommendations.forEach((rec, index) => {
+        data.recommendations.forEach((rec) => {
             const bullet = `• ${rec}`;
             const lines = pdf.splitTextToSize(bullet, contentWidth - 5);
             pdf.text(lines, margin + 5, yPos);

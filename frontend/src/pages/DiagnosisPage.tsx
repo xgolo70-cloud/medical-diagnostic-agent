@@ -8,7 +8,6 @@ import {
     FileText
 } from 'lucide-react';
 import { DiagnosisForm } from '../components/diagnosis';
-import { BackButton } from '../components/ui/BackButton';
 import { Button } from '../components/ui/Button';
 import { useNavigate } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';

@@ -121,12 +121,6 @@ const WorkflowStep = ({ step, index, isEven }: { step: any, index: number, isEve
     const rotateX = useTransform(yRotate, [-100, 100], [10, -10]);
     const rotateY = useTransform(x, [-100, 100], [-10, 10]);
 
-    function handleMouseMove(event: React.MouseEvent<HTMLDivElement>) {
-        const rect = currentTarget.getBoundingClientRect(); // Warning: currentTarget is not defined in this scope yet, need to use event.currentTarget
-        // Correcting TS error proactively by typing the event above
-    }
-    // Re-writing the function inside the JSX to be cleaner or just below:
-
     return (
         <motion.div 
             ref={ref}

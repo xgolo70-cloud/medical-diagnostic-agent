@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
-import { motion, AnimatePresence, useScroll, useMotionValue, useTransform } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { Brain, Menu, X, ArrowRight, LayoutDashboard, Sparkles } from 'lucide-react';
+import { Brain, Menu, X, ArrowRight, LayoutDashboard } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { useAppSelector } from '../../store/hooks';
 
@@ -10,7 +10,6 @@ export const SiteHeader = () => {
     const { isAuthenticated, user } = useAppSelector((state) => state.auth);
     const [isScrolled, setIsScrolled] = useState(false);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-    const { scrollY } = useScroll();
 
     useEffect(() => {
         const handleScroll = () => setIsScrolled(window.scrollY > 20);

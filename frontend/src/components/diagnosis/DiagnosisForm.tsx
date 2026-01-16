@@ -8,7 +8,6 @@ import {
     TextField,
     Button,
     Typography,
-    Grid,
     FormControl,
     InputLabel,
     Select,
@@ -198,8 +197,8 @@ export const DiagnosisForm: React.FC<DiagnosisFormProps> = ({ unified = false })
                                     Patient Information
                                 </Typography>
                             </Box>
-                            <Grid container spacing={3}>
-                                <Grid item xs={12} md={4}>
+                            <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'repeat(3, 1fr)' }, gap: 3 }}>
+                                <Box>
                                     <Controller
                                         name="patient_id"
                                         control={control}
@@ -226,8 +225,8 @@ export const DiagnosisForm: React.FC<DiagnosisFormProps> = ({ unified = false })
                                             />
                                         )}
                                     />
-                                </Grid>
-                                <Grid item xs={12} md={4}>
+                                </Box>
+                                <Box>
                                     <Controller
                                         name="age"
                                         control={control}
@@ -255,8 +254,8 @@ export const DiagnosisForm: React.FC<DiagnosisFormProps> = ({ unified = false })
                                             />
                                         )}
                                     />
-                                </Grid>
-                                <Grid item xs={12} md={4}>
+                                </Box>
+                                <Box>
                                     <Controller
                                         name="gender"
                                         control={control}
@@ -282,8 +281,8 @@ export const DiagnosisForm: React.FC<DiagnosisFormProps> = ({ unified = false })
                                             </FormControl>
                                         )}
                                     />
-                                </Grid>
-                            </Grid>
+                                </Box>
+                            </Box>
                         </Box>
 
                         {/* Symptoms Section */}
@@ -485,8 +484,8 @@ export const DiagnosisForm: React.FC<DiagnosisFormProps> = ({ unified = false })
                                 </Box>
                             </AccordionSummary>
                             <AccordionDetails>
-                                <Grid container spacing={3}>
-                                    <Grid item xs={12} md={4}>
+                                <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'repeat(3, 1fr)' }, gap: 3 }}>
+                                    <Box>
                                         <Controller
                                             name="vitals.temperature"
                                             control={control}
@@ -514,8 +513,8 @@ export const DiagnosisForm: React.FC<DiagnosisFormProps> = ({ unified = false })
                                                 />
                                             )}
                                         />
-                                    </Grid>
-                                    <Grid item xs={12} md={4}>
+                                    </Box>
+                                    <Box>
                                         <Controller
                                             name="vitals.blood_pressure"
                                             control={control}
@@ -543,8 +542,8 @@ export const DiagnosisForm: React.FC<DiagnosisFormProps> = ({ unified = false })
                                                 />
                                             )}
                                         />
-                                    </Grid>
-                                    <Grid item xs={12} md={4}>
+                                    </Box>
+                                    <Box>
                                         <Controller
                                             name="vitals.heart_rate"
                                             control={control}
@@ -571,8 +570,8 @@ export const DiagnosisForm: React.FC<DiagnosisFormProps> = ({ unified = false })
                                                 />
                                             )}
                                         />
-                                    </Grid>
-                                </Grid>
+                                    </Box>
+                                </Box>
                             </AccordionDetails>
                         </Accordion>
 

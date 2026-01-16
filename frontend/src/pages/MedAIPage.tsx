@@ -8,7 +8,6 @@ import {
     AlertCircle,
     CheckCircle2,
     Loader2,
-    X,
     Stethoscope,
     Brain,
     Eye,
@@ -16,15 +15,9 @@ import {
     Heart,
     Microscope,
     FileText,
-    Volume2,
     Pause,
-    Play,
     RotateCcw,
-    Cpu,
-    Clock,
-    Zap,
     Activity,
-    Plus,
     ChevronRight,
     ArrowLeft
 } from 'lucide-react';

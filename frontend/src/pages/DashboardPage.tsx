@@ -3,8 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { useAppSelector } from '../store/hooks';
 import { Button } from '../components/ui/Button';
 import { 
-    StatsCard, 
-    QuickAction, 
     RecentActivityTable,
     AnalyticsSummary 
 } from '../components/dashboard';
@@ -119,7 +117,7 @@ export const DashboardPage: React.FC = () => {
 
                 {/* Metrics Grid */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-10" data-tour="stats-cards">
-                    {statsData.map((stat, i) => (
+                    {statsData.map((stat) => (
                         <div 
                             key={stat.label}
                             className="group relative bg-white border border-gray-200 rounded-xl p-5 hover:border-gray-300 transition-all duration-200 shadow-sm hover:shadow-md"

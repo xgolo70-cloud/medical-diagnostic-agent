@@ -1,4 +1,3 @@
-import { useRef } from 'react';
 import { motion, useScroll, useSpring } from 'framer-motion';
 import { SiteHeader } from '../components/landing/SiteHeader';
 import { HeroSection } from '../components/landing/HeroSection';
