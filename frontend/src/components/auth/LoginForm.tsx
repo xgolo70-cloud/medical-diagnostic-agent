@@ -234,9 +234,16 @@ export const LoginForm: React.FC = () => {
                                     </svg>
                                 </div>
                             </h2>
-                            <p className="text-sm !text-gray-300 leading-relaxed font-light border-l border-white/40 pl-4 drop-shadow-sm mt-4">
-                                "Experience the next generation of intelligent healthcare management."
-                            </p>
+                            <div className="relative mt-6 p-4 rounded-2xl bg-white/5 backdrop-blur-sm border border-white/10 shadow-lg">
+                                <div className="absolute -top-2 -left-1 text-4xl text-blue-400/30 font-serif">"</div>
+                                <p className="text-sm text-gray-200/90 leading-relaxed font-light pl-4 italic">
+                                    Experience the next generation of intelligent healthcare management.
+                                </p>
+                                <div className="mt-3 flex items-center gap-2 pl-4">
+                                    <div className="w-6 h-6 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center text-[8px] font-bold text-white">AI</div>
+                                    <span className="text-[10px] text-gray-400 font-medium">Powered by MedGemma</span>
+                                </div>
+                            </div>
                          </div>
 
                          <div className="relative z-20 flex items-center gap-3 pt-6 mt-8 lg:mt-auto opacity-60">
