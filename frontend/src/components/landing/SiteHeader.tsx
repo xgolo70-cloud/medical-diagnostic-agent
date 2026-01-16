@@ -104,17 +104,14 @@ export const SiteHeader = () => {
                             <>
                                 <button 
                                     onClick={() => navigate('/login')} 
-                                    className="text-sm font-medium text-gray-600 hover:text-black px-3 py-2 transition-colors"
+                                    className="group relative flex items-center gap-2 px-5 py-2.5 bg-black text-white rounded-full text-sm font-medium overflow-hidden transition-all duration-300 hover:shadow-lg hover:shadow-black/20 hover:scale-[1.02] active:scale-[0.98]"
                                 >
-                                    Log in
+                                    <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out" />
+                                    <span className="relative z-10 flex items-center gap-2">
+                                        Sign In
+                                        <ArrowRight size={14} className="opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300" />
+                                    </span>
                                 </button>
-                                <Button 
-                                    size="sm" 
-                                    onClick={() => navigate('/login')} 
-                                    className="bg-black text-white hover:bg-gray-800 rounded-full px-5 h-9 text-sm shadow-lg shadow-gray-200/50 hover:shadow-gray-200/80 transition-all hover:-translate-y-0.5"
-                                >
-                                    Start Free
-                                </Button>
                             </>
                         )}
                     </div>
