@@ -92,18 +92,29 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileOpen = false, onMobileCl
                 `}
                 style={{ width: currentWidth }}
             >
-                {/* Floating Collapse Toggle (Desktop) */}
-                <button 
+                {/* Floating Collapse Toggle (Desktop) - Premium Pill Design */}
+                <motion.button 
                     onClick={toggleCollapse}
-                    className={`
-                        absolute -right-3 top-9
-                        hidden md:flex w-6 h-6 bg-white border border-zinc-200 shadow-md rounded-full items-center justify-center 
-                        text-zinc-500 hover:text-black hover:scale-110 active:scale-95 transition-all duration-200 z-50
-                        ${isCollapsed ? '' : 'rotate-180'}
-                    `}
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.95 }}
+                    className="
+                        absolute -right-4 top-1/2 -translate-y-1/2
+                        hidden md:flex w-8 h-14 
+                        bg-white/95 backdrop-blur-sm
+                        border border-zinc-200/80 shadow-lg shadow-black/5
+                        rounded-full items-center justify-center 
+                        text-zinc-400 hover:text-black hover:border-zinc-300 hover:shadow-xl
+                        transition-all duration-300 z-50
+                        group
+                    "
                 >
-                    <ChevronRight size={14} strokeWidth={2} />
-                </button>
+                    <motion.div
+                        animate={{ rotate: isCollapsed ? 0 : 180 }}
+                        transition={{ type: "spring", stiffness: 300, damping: 25 }}
+                    >
+                        <ChevronRight size={16} strokeWidth={2} className="group-hover:scale-110 transition-transform" />
+                    </motion.div>
+                </motion.button>
 
                 {/* Inner Content Wrapper (Handles Overflow) */}
                 <div className="flex flex-col w-full h-full overflow-hidden">
