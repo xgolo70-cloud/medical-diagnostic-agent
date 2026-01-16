@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { motion } from 'framer-motion';
 import {
     User,
@@ -12,7 +12,13 @@ import {
     ArrowLeft,
     Check,
     AlertTriangle,
-    Loader2
+    Loader2,
+    Sun,
+    Moon,
+    Monitor,
+    Download,
+    Trash2,
+    Database
 } from 'lucide-react';
 import { useAppSelector, useAppDispatch } from '../store/hooks';
 import {
@@ -22,7 +28,10 @@ import {
     setPushNotifications,
     setWeeklyReport,
     setDisplayName,
-    setEmail
+    setEmail,
+    setTheme,
+    setAvatar,
+    setAnalyticsEnabled
 } from '../store/settingsSlice';
 import { toast } from '../components/ui/Toast';
 import { Button } from '../components/ui/Button';
@@ -168,6 +177,9 @@ export const SettingsPage: React.FC = () => {
     const dispatch = useAppDispatch();
     const navigate = useNavigate();
     const { startTour } = useTour();
+    
+    // File input ref for avatar upload
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
     // Local state for profile editing
     const [localDisplayName, setLocalDisplayName] = useState(settings.displayName || user?.username || '');
@@ -311,17 +323,54 @@ export const SettingsPage: React.FC = () => {
                             whileHover={{ scale: 1.05 }}
                             className="relative group cursor-pointer"
                         >
-                            <div className="w-20 h-20 rounded-full bg-black flex items-center justify-center text-white text-2xl font-semibold shadow-md ring-4 ring-white">
-                                {user?.username?.charAt(0).toUpperCase() || 'U'}
-                            </div>
-                            <div className="absolute inset-0 rounded-full bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                            {/* Hidden file input */}
+                            <input
+                                ref={fileInputRef}
+                                type="file"
+                                accept="image/*"
+                                className="hidden"
+                                onChange={(e) => {
+                                    const file = e.target.files?.[0];
+                                    if (file) {
+                                        if (file.size > 2 * 1024 * 1024) {
+                                            toast.error('Image must be less than 2MB');
+                                            return;
+                                        }
+                                        const reader = new FileReader();
+                                        reader.onload = (event) => {
+                                            const base64 = event.target?.result as string;
+                                            dispatch(setAvatar(base64));
+                                            toast.success('Avatar updated!');
+                                        };
+                                        reader.readAsDataURL(file);
+                                    }
+                                }}
+                            />
+                            
+                            {/* Avatar display */}
+                            {settings.avatar ? (
+                                <img 
+                                    src={settings.avatar} 
+                                    alt="Avatar" 
+                                    className="w-20 h-20 rounded-full object-cover shadow-md ring-4 ring-white"
+                                />
+                            ) : (
+                                <div className="w-20 h-20 rounded-full bg-black flex items-center justify-center text-white text-2xl font-semibold shadow-md ring-4 ring-white">
+                                    {user?.username?.charAt(0).toUpperCase() || 'U'}
+                                </div>
+                            )}
+                            
+                            <div 
+                                className="absolute inset-0 rounded-full bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                                onClick={() => fileInputRef.current?.click()}
+                            >
                                 <Camera size={20} className="text-white" />
                             </div>
                             <motion.button 
                                 whileHover={{ scale: 1.2 }}
                                 whileTap={{ scale: 0.9 }}
                                 className="absolute -bottom-1 -right-1 p-2 rounded-full bg-white border border-gray-200 hover:bg-gray-50 transition-colors shadow-sm"
-                                onClick={() => toast.info('Avatar upload coming soon!')}
+                                onClick={() => fileInputRef.current?.click()}
                             >
                                 <Edit3 size={12} className="text-gray-600" />
                             </motion.button>
@@ -397,6 +446,33 @@ export const SettingsPage: React.FC = () => {
                     icon={<Palette size={16} />}
                 >
                     <div className="space-y-4">
+                        {/* Theme Mode Selector */}
+                        <div className="bg-gray-50 rounded-lg p-4 border border-gray-100">
+                            <p className="text-xs font-semibold text-gray-900 mb-3">Theme Mode</p>
+                            <div className="grid grid-cols-3 gap-3">
+                                {[
+                                    { mode: 'light' as const, icon: Sun, label: 'Light' },
+                                    { mode: 'dark' as const, icon: Moon, label: 'Dark' },
+                                    { mode: 'system' as const, icon: Monitor, label: 'System' },
+                                ].map(({ mode, icon: Icon, label }) => (
+                                    <motion.button
+                                        key={mode}
+                                        whileHover={{ scale: 1.02 }}
+                                        whileTap={{ scale: 0.98 }}
+                                        onClick={() => dispatch(setTheme(mode))}
+                                        className={`flex flex-col items-center gap-2 p-3 rounded-lg border transition-all ${
+                                            settings.theme === mode
+                                                ? 'bg-black text-white border-black shadow-md'
+                                                : 'bg-white text-gray-700 border-gray-200 hover:border-gray-300'
+                                        }`}
+                                    >
+                                        <Icon size={20} />
+                                        <span className="text-xs font-medium">{label}</span>
+                                    </motion.button>
+                                ))}
+                            </div>
+                        </div>
+
                         <ToggleSetting 
                             title="Compact View" 
                             description="Show more content with less spacing" 
@@ -571,6 +647,73 @@ export const SettingsPage: React.FC = () => {
                             {confirmPassword && newPassword !== confirmPassword && (
                                 <p className="text-xs text-red-500 mt-1">Passwords do not match</p>
                             )}
+                        </div>
+                    </div>
+                </SettingsSection>
+
+                {/* Data & Privacy Section */}
+                <SettingsSection
+                    title="Data & Privacy"
+                    description="Manage your data and privacy settings"
+                    icon={<Database size={16} />}
+                >
+                    <div className="space-y-4">
+                        <ToggleSetting 
+                            title="Analytics & Usage Data" 
+                            description="Help us improve by sharing anonymous usage data" 
+                            checked={settings.analyticsEnabled} 
+                            onChange={(val) => dispatch(setAnalyticsEnabled(val))} 
+                        />
+
+                        <div className="flex flex-col sm:flex-row gap-3 p-4 rounded-lg border border-gray-200 bg-gray-50">
+                            <div className="flex-1">
+                                <p className="text-sm font-medium text-gray-900">Export Your Data</p>
+                                <p className="text-xs text-gray-500">Download all your settings and preferences as a JSON file</p>
+                            </div>
+                            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                                <Button
+                                    variant="secondary"
+                                    size="sm"
+                                    onClick={() => {
+                                        const dataStr = JSON.stringify(settings, null, 2);
+                                        const blob = new Blob([dataStr], { type: 'application/json' });
+                                        const url = URL.createObjectURL(blob);
+                                        const a = document.createElement('a');
+                                        a.href = url;
+                                        a.download = 'ai-things-settings.json';
+                                        a.click();
+                                        URL.revokeObjectURL(url);
+                                        toast.success('Settings exported successfully!');
+                                    }}
+                                    className="gap-2"
+                                >
+                                    <Download size={14} />
+                                    Export
+                                </Button>
+                            </motion.div>
+                        </div>
+
+                        <div className="flex flex-col sm:flex-row gap-3 p-4 rounded-lg border border-red-100 bg-red-50/50">
+                            <div className="flex-1">
+                                <p className="text-sm font-medium text-red-800">Clear All Data</p>
+                                <p className="text-xs text-red-600/80">This will reset all your settings to defaults</p>
+                            </div>
+                            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => {
+                                        if (window.confirm('Are you sure you want to reset all settings? This cannot be undone.')) {
+                                            localStorage.removeItem('app_settings');
+                                            window.location.reload();
+                                        }
+                                    }}
+                                    className="gap-2 text-red-600 border-red-200 hover:bg-red-100"
+                                >
+                                    <Trash2 size={14} />
+                                    Reset
+                                </Button>
+                            </motion.div>
                         </div>
                     </div>
                 </SettingsSection>

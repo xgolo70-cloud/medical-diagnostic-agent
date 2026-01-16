@@ -2,14 +2,26 @@ import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 
 // ================== Types ==================
 
+type ThemeMode = 'light' | 'dark' | 'system';
+
 interface SettingsState {
+    // Profile
+    displayName: string;
+    email: string;
+    avatar: string | null; // Base64 encoded image or URL
+    
+    // Appearance
+    theme: ThemeMode;
     accentColor: string;
     compactView: boolean;
+    
+    // Notifications
     emailNotifications: boolean;
     pushNotifications: boolean;
     weeklyReport: boolean;
-    displayName: string;
-    email: string;
+    
+    // Privacy
+    analyticsEnabled: boolean;
 }
 
 // ================== Persistence ==================
@@ -17,13 +29,23 @@ interface SettingsState {
 const SETTINGS_STORAGE_KEY = 'app_settings';
 
 const defaultSettings: SettingsState = {
+    // Profile
+    displayName: '',
+    email: '',
+    avatar: null,
+    
+    // Appearance
+    theme: 'light',
     accentColor: '#000000',
     compactView: false,
+    
+    // Notifications
     emailNotifications: true,
     pushNotifications: true,
     weeklyReport: false,
-    displayName: '',
-    email: '',
+    
+    // Privacy
+    analyticsEnabled: true,
 };
 
 const loadSettingsFromStorage = (): SettingsState => {
@@ -55,6 +77,25 @@ const settingsSlice = createSlice({
     name: 'settings',
     initialState,
     reducers: {
+        // Profile
+        setDisplayName: (state, action: PayloadAction<string>) => {
+            state.displayName = action.payload;
+            saveSettingsToStorage(state);
+        },
+        setEmail: (state, action: PayloadAction<string>) => {
+            state.email = action.payload;
+            saveSettingsToStorage(state);
+        },
+        setAvatar: (state, action: PayloadAction<string | null>) => {
+            state.avatar = action.payload;
+            saveSettingsToStorage(state);
+        },
+        
+        // Appearance
+        setTheme: (state, action: PayloadAction<ThemeMode>) => {
+            state.theme = action.payload;
+            saveSettingsToStorage(state);
+        },
         setAccentColor: (state, action: PayloadAction<string>) => {
             state.accentColor = action.payload;
             saveSettingsToStorage(state);
@@ -63,6 +104,8 @@ const settingsSlice = createSlice({
             state.compactView = action.payload;
             saveSettingsToStorage(state);
         },
+        
+        // Notifications
         setEmailNotifications: (state, action: PayloadAction<boolean>) => {
             state.emailNotifications = action.payload;
             saveSettingsToStorage(state);
@@ -75,14 +118,14 @@ const settingsSlice = createSlice({
             state.weeklyReport = action.payload;
             saveSettingsToStorage(state);
         },
-        setDisplayName: (state, action: PayloadAction<string>) => {
-            state.displayName = action.payload;
+        
+        // Privacy
+        setAnalyticsEnabled: (state, action: PayloadAction<boolean>) => {
+            state.analyticsEnabled = action.payload;
             saveSettingsToStorage(state);
         },
-        setEmail: (state, action: PayloadAction<string>) => {
-            state.email = action.payload;
-            saveSettingsToStorage(state);
-        },
+        
+        // Bulk operations
         updateSettings: (state, action: PayloadAction<Partial<SettingsState>>) => {
             Object.assign(state, action.payload);
             saveSettingsToStorage(state);
@@ -95,15 +138,22 @@ const settingsSlice = createSlice({
 });
 
 export const {
+    setDisplayName,
+    setEmail,
+    setAvatar,
+    setTheme,
     setAccentColor,
     setCompactView,
     setEmailNotifications,
     setPushNotifications,
     setWeeklyReport,
-    setDisplayName,
-    setEmail,
+    setAnalyticsEnabled,
     updateSettings,
     resetSettings,
 } = settingsSlice.actions;
 
+// Export types for use in components
+export type { ThemeMode };
+
 export default settingsSlice.reducer;
+

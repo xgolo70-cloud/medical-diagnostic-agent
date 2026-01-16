@@ -42,12 +42,10 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileOpen = false, onMobileCl
     const navigate = useNavigate();
     const dispatch = useAppDispatch();
     const user = useAppSelector((state) => state.auth.user);
-    const [isCollapsed, setIsCollapsed] = useState(false);
-
-    useEffect(() => {
+    const [isCollapsed, setIsCollapsed] = useState(() => {
         const saved = localStorage.getItem('sidebar-collapsed');
-        if (saved) setIsCollapsed(JSON.parse(saved));
-    }, []);
+        return saved ? JSON.parse(saved) : false;
+    });
 
     useEffect(() => {
         localStorage.setItem('sidebar-collapsed', JSON.stringify(isCollapsed));
@@ -195,7 +193,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileOpen = false, onMobileCl
                                     ${isActive ? 'text-black scale-105' : 'text-zinc-500 group-hover:text-black group-hover:scale-105'}
                                 `}>
                                     {isActive 
-                                        ? React.cloneElement(item.icon as React.ReactElement, { strokeWidth: 2 } as any) 
+                                        ? React.cloneElement(item.icon as React.ReactElement, { strokeWidth: 2 } as React.SVGAttributes<SVGElement>) 
                                         : item.icon}
                                 </span>
 
@@ -276,12 +274,43 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileOpen = false, onMobileCl
 
                     {/* User Profile */}
                     <div className={`
-                        flex items-center gap-3.5 p-2 rounded-2xl bg-gradient-to-b from-white to-zinc-50/50 border border-white shadow-sm transition-all duration-300 hover:shadow-md
-                        ${isCollapsed ? 'justify-center p-2 bg-none border-none shadow-none' : ''}
+                        relative flex items-center gap-3.5 p-2 rounded-2xl transition-all duration-300 group
+                        ${isCollapsed 
+                            ? 'justify-center bg-transparent hover:bg-white hover:shadow-xl hover:ring-1 hover:ring-zinc-100' 
+                            : 'bg-gradient-to-b from-white to-zinc-50/50 border border-white shadow-sm hover:shadow-md'
+                        }
                     `}>
-                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-black to-zinc-700 text-white flex items-center justify-center text-xs font-bold shadow-md ring-2 ring-white cursor-default select-none shrink-0">
+                        <div className={`
+                            relative rounded-full bg-zinc-900 text-white flex items-center justify-center font-medium shadow-lg ring-4 ring-white shrink-0 transition-all duration-300 group-hover:scale-105 group-hover:shadow-xl group-hover:bg-black
+                            ${isCollapsed ? 'w-12 h-12 text-lg' : 'w-10 h-10 text-xs'}
+                        `}>
                             {user?.username?.charAt(0).toUpperCase() || 'U'}
+                            
+                            {/* Online Status Dot */}
+                            <div className="absolute bottom-0 right-0 w-3 h-3 bg-emerald-500 border-[2.5px] border-white rounded-full shadow-sm"></div>
                         </div>
+
+                        {/* Collapsed Profile Tooltip */}
+                        {isCollapsed && (
+                             <div className="absolute left-full bottom-0 ml-3 mb-[-10px] w-56 p-4 bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-zinc-100 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 translate-x-[-8px] group-hover:translate-x-0 z-50">
+                                <div className="flex items-center gap-3 mb-3 pb-3 border-b border-zinc-100">
+                                    <div className="w-10 h-10 rounded-full bg-zinc-100 flex items-center justify-center text-sm font-bold text-zinc-900">
+                                         {user?.username?.charAt(0).toUpperCase() || 'U'}
+                                    </div>
+                                    <div className="overflow-hidden">
+                                        <p className="text-sm font-bold text-zinc-900 truncate">{user?.username || 'User'}</p>
+                                        <p className="text-xs text-zinc-500 truncate">{user?.role || 'Administrator'}</p>
+                                    </div>
+                                </div>
+                                <button 
+                                    onClick={handleLogout}
+                                    className="w-full flex items-center gap-2 px-2 py-2 text-xs font-medium text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                                >
+                                    <LogOut size={14} />
+                                    Sign out
+                                </button>
+                             </div>
+                        )}
                         
                         <AnimatePresence>
                             {!isCollapsed && (
