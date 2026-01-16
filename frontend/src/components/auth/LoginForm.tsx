@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Eye, EyeOff, ArrowLeft, Brain, ArrowRight, AlertCircle, Lock } from 'lucide-react';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { loginStart, loginSuccess, loginFailure } from '../../store/authSlice';
@@ -192,11 +193,51 @@ export const LoginForm: React.FC = () => {
                          </div>
 
                          <div className="relative z-20 max-w-xs mt-12 lg:mt-0">
-                            <h2 className="text-4xl lg:text-5xl font-serif leading-none mb-6 !text-white drop-shadow-lg" style={{ color: '#ffffff' }}>
+                            <h2 className="text-4xl lg:text-5xl font-serif leading-none mb-6 !text-white drop-shadow-lg flex flex-col items-start" style={{ color: '#ffffff' }}>
                                 Beyond <br/>
-                                <span className="italic font-light !text-gray-200">Thinking.</span>
+                                <div className="relative inline-flex flex-col mt-2">
+                                    <span className="relative inline-flex h-[1.2em] overflow-hidden min-w-[200px]">
+                                        <AnimatePresence mode="popLayout">
+                                            {(() => {
+                                                const words = ["Thinking.", "Limits.", "Logic.", "Future."];
+                                                const [wordIndex, setWordIndex] = useState(0);
+
+                                                useEffect(() => {
+                                                    const timer = setInterval(() => {
+                                                        setWordIndex((prev) => (prev + 1) % words.length);
+                                                    }, 3000);
+                                                    return () => clearInterval(timer);
+                                                }, []);
+
+                                                return (
+                                                    <motion.span
+                                                        key={wordIndex}
+                                                        initial={{ y: "100%", opacity: 0 }}
+                                                        animate={{ y: "0%", opacity: 1 }}
+                                                        exit={{ y: "-100%", opacity: 0 }}
+                                                        transition={{ duration: 0.5, ease: "circOut" }}
+                                                        className="block italic font-light !text-blue-100 whitespace-nowrap"
+                                                    >
+                                                        {words[wordIndex]}
+                                                    </motion.span>
+                                                );
+                                            })()}
+                                        </AnimatePresence>
+                                    </span>
+                                    <svg className="absolute -bottom-4 left-0 w-[120%] h-6 -z-10" viewBox="0 0 200 20" preserveAspectRatio="none">
+                                        <defs>
+                                            <linearGradient id="loginLineGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                                                <stop offset="0%" stopColor="#60a5fa" stopOpacity="0.4" />
+                                                <stop offset="50%" stopColor="#a78bfa" stopOpacity="0.8" />
+                                                <stop offset="100%" stopColor="#60a5fa" stopOpacity="0.4" />
+                                            </linearGradient>
+                                        </defs>
+                                        <path d="M5 10 Q 50 18 90 9 T 195 10" stroke="url(#loginLineGradient)" strokeWidth="6" fill="none" strokeLinecap="round" />
+                                        <path d="M10 14 Q 60 20 100 12 T 190 14" stroke="url(#loginLineGradient)" strokeWidth="4" fill="none" strokeLinecap="round" opacity="0.6" />
+                                    </svg>
+                                </div>
                             </h2>
-                            <p className="text-sm !text-gray-200 leading-relaxed font-light border-l border-white/40 pl-4 drop-shadow-sm">
+                            <p className="text-sm !text-gray-300 leading-relaxed font-light border-l border-white/40 pl-4 drop-shadow-sm">
                                 "Experience the next generation of intelligent healthcare management."
                             </p>
                          </div>
