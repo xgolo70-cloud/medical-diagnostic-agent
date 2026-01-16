@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { Star, Sparkles, Quote, Activity, Users, Zap, ShieldCheck } from 'lucide-react';
+import { Star, Sparkles, Activity, Users, Zap, ShieldCheck } from 'lucide-react';
 
 const reviews = [
     {
@@ -60,42 +60,37 @@ const reviews = [
 
 const ReviewCard = ({ review }: { review: typeof reviews[0] }) => (
     <div className="group relative w-[400px] flex-shrink-0 mx-4">
-        {/* Glass Background */}
-        <div className="absolute inset-0 bg-white/60 backdrop-blur-xl rounded-3xl border border-white/40 shadow-sm transition-all duration-300 group-hover:bg-white/80 group-hover:shadow-xl group-hover:-translate-y-1" />
-        
-        <div className="relative p-8 h-full flex flex-col justify-between z-10">
+        <div className="relative p-8 h-full flex flex-col justify-between bg-white rounded-2xl border border-gray-200 hover:border-gray-300 shadow-sm hover:shadow-md transition-all duration-300">
             {/* Header */}
             <div>
                 <div className="flex items-center justify-between mb-6">
-                    <div className="flex gap-1">
+                    <div className="flex gap-0.5">
                         {[...Array(review.stars)].map((_, i) => (
                             <Star key={i} className="w-4 h-4 text-orange-400 fill-orange-400" />
                         ))}
                     </div>
-                    <div className="px-3 py-1 bg-black/5 rounded-full text-[11px] font-semibold text-gray-600 uppercase tracking-wider backdrop-blur-sm">
+                    <div className="px-3 py-1 bg-gray-50 rounded-full border border-gray-100 text-xs font-semibold text-gray-600 uppercase tracking-wider">
                         {review.tag}
                     </div>
                 </div>
 
-                <Quote className="w-10 h-10 text-black/5 absolute top-6 right-6 rotate-12" />
-
-                <p className="text-[17px] leading-[1.6] text-gray-700 font-medium mb-8">
+                <p className="text-lg leading-relaxed text-gray-700 font-medium mb-8">
                     "{review.text}"
                 </p>
             </div>
 
             {/* Footer */}
-            <div className="flex items-center gap-4 pt-6 border-t border-black/5">
+            <div className="flex items-center gap-4 pt-6 border-t border-gray-100">
                 <img 
                     src={review.avatar} 
                     alt={review.author} 
-                    className="w-12 h-12 rounded-full object-cover ring-2 ring-white shadow-sm"
+                    className="w-10 h-10 rounded-full object-cover ring-2 ring-gray-100"
                 />
                 <div>
-                    <div className="text-[15px] font-bold text-gray-900 leading-tight">
+                    <div className="text-sm font-bold text-gray-900 leading-tight">
                         {review.author}
                     </div>
-                    <div className="text-[13px] text-gray-500 font-medium leading-tight mt-0.5">
+                    <div className="text-xs text-gray-500 font-medium leading-tight mt-0.5">
                         {review.role}, {review.company}
                     </div>
                 </div>
@@ -110,25 +105,23 @@ export const Testimonials = () => {
     const row2 = [...reviews, ...reviews].reverse();
 
     return (
-        <section className="py-32 relative overflow-hidden bg-[#fafafa]">
-            {/* Dynamic Backgrounds */}
-            <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-gray-200 to-transparent" />
-            <div className="absolute inset-0 pointer-events-none overflow-hidden">
-                <div className="absolute top-0 left-1/4 w-[600px] h-[600px] bg-blue-400/5 rounded-full blur-[120px] mix-blend-multiply" />
-                <div className="absolute bottom-0 right-1/4 w-[600px] h-[600px] bg-purple-400/5 rounded-full blur-[120px] mix-blend-multiply" />
-            </div>
+        <section className="py-24 lg:py-32 relative overflow-hidden bg-white">
+            {/* Subtle Background Pattern matching Hero */}
+            <div className="absolute inset-0 bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:16px_16px] [mask-image:radial-gradient(ellipse_50%_50%_at_50%_50%,#000_70%,transparent_100%)] opacity-30 pointer-events-none" />
+            <div className="absolute top-0 inset-x-0 h-24 bg-gradient-to-b from-white to-transparent z-10" />
+            <div className="absolute bottom-0 inset-x-0 h-24 bg-gradient-to-t from-white to-transparent z-10" />
 
             <div className="max-w-7xl mx-auto px-6 relative z-10 flex flex-col items-center">
                 {/* Header */}
-                <div className="text-center mb-24 flex flex-col items-center max-w-4xl mx-auto">
+                <div className="text-center mb-20 flex flex-col items-center max-w-4xl mx-auto">
                     <motion.div 
                         initial={{ opacity: 0, y: 20 }}
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
-                        className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white border border-gray-200 shadow-sm mb-8"
+                        className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gray-50 border border-gray-200 shadow-sm mb-6"
                     >
-                        <Sparkles className="w-4 h-4 text-amber-500 fill-amber-500" />
-                        <span className="text-sm font-semibold text-gray-800">Verified Customer Stories</span>
+                        <Sparkles className="w-3.5 h-3.5 text-orange-500 fill-orange-500" />
+                        <span className="text-xs font-semibold text-gray-700 uppercase tracking-wide">Customer Stories</span>
                     </motion.div>
                     
                     <motion.h2 
@@ -136,7 +129,7 @@ export const Testimonials = () => {
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
                         transition={{ delay: 0.1 }}
-                        className="text-5xl md:text-6xl lg:text-7xl font-bold text-gray-900 mb-8 tracking-tight w-full"
+                        className="text-4xl md:text-5xl lg:text-6xl font-black text-gray-900 mb-6 tracking-tight"
                     >
                         Loved by innovators
                     </motion.h2>
@@ -146,62 +139,62 @@ export const Testimonials = () => {
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
                         transition={{ delay: 0.2 }}
-                        className="text-xl text-gray-500 leading-relaxed max-w-2xl mx-auto w-full"
+                        className="text-lg text-gray-500 leading-relaxed max-w-2xl mx-auto"
                     >
-                        Join thousands of healthcare professionals and engineering teams who trust AI & Things for their critical edge infrastructure.
+                        Join thousands of healthcare professionals and engineering teams who rely on our infrastructure daily.
                     </motion.p>
                 </div>
-            </div>
 
-            {/* Marquee Section */}
-            <div className="relative w-full space-y-10">
-                {/* Gradient Masks */}
-                <div className="absolute left-0 top-0 bottom-0 w-40 bg-gradient-to-r from-[#fafafa] via-[#fafafa]/80 to-transparent z-20 pointer-events-none" />
-                <div className="absolute right-0 top-0 bottom-0 w-40 bg-gradient-to-l from-[#fafafa] via-[#fafafa]/80 to-transparent z-20 pointer-events-none" />
+                {/* Marquee Section */}
+                <div className="relative w-full space-y-8 mb-24">
+                    {/* Gradient Masks */}
+                    <div className="absolute left-0 top-0 bottom-0 w-32 bg-gradient-to-r from-white to-transparent z-20 pointer-events-none" />
+                    <div className="absolute right-0 top-0 bottom-0 w-32 bg-gradient-to-l from-white to-transparent z-20 pointer-events-none" />
 
-                {/* Row 1 */}
-                <div className="relative w-full overflow-hidden py-4">
-                    <div className="flex animate-marquee hover:[animation-play-state:paused] w-max">
-                        {row1.map((review, i) => (
-                            <ReviewCard key={`r1-${i}`} review={review} />
-                        ))}
+                    {/* Row 1 */}
+                    <div className="relative w-full overflow-hidden">
+                        <div className="flex animate-marquee hover:[animation-play-state:paused] w-max">
+                            {row1.map((review, i) => (
+                                <ReviewCard key={`r1-${i}`} review={review} />
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Row 2 */}
+                    <div className="relative w-full overflow-hidden">
+                        <div className="flex animate-marquee-reverse hover:[animation-play-state:paused] w-max">
+                            {row2.map((review, i) => (
+                                <ReviewCard key={`r2-${i}`} review={review} />
+                            ))}
+                        </div>
                     </div>
                 </div>
 
-                {/* Row 2 */}
-                <div className="relative w-full overflow-hidden py-4">
-                    <div className="flex animate-marquee-reverse hover:[animation-play-state:paused] w-max">
-                        {row2.map((review, i) => (
-                            <ReviewCard key={`r2-${i}`} review={review} />
+                {/* Stats Section */}
+                <div className="max-w-6xl mx-auto w-full relative z-10">
+                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-8 divide-x divide-gray-100 lg:divide-x-0">
+                        {[
+                            { label: "Uptime SLA", value: "99.99%", icon: Activity },
+                            { label: "Active Nodes", value: "50k+", icon: Zap },
+                            { label: "Daily Predictions", value: "10M+", icon: Users },
+                            { label: "Security Score", value: "100%", icon: ShieldCheck },
+                        ].map((stat, i) => (
+                            <motion.div
+                                key={i}
+                                initial={{ opacity: 0, y: 20 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                viewport={{ once: true }}
+                                transition={{ delay: 0.3 + (i * 0.1) }}
+                                className="flex flex-col items-center justify-center text-center p-4"
+                            >
+                                <div className="w-12 h-12 rounded-xl bg-gray-50 border border-gray-100 flex items-center justify-center mb-4 text-gray-900 shadow-sm">
+                                    <stat.icon className="w-6 h-6" />
+                                </div>
+                                <div className="text-3xl font-bold text-gray-900 mb-2 tracking-tight">{stat.value}</div>
+                                <div className="text-xs font-semibold text-gray-500 uppercase tracking-widest">{stat.label}</div>
+                            </motion.div>
                         ))}
                     </div>
-                </div>
-            </div>
-
-            {/* Stats Section with Glass Cards */}
-            <div className="max-w-6xl mx-auto px-6 mt-40 relative z-10">
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
-                    {[
-                        { label: "Uptime SLA", value: "99.99%", icon: Activity },
-                        { label: "Active Nodes", value: "50k+", icon: Zap },
-                        { label: "Daily Predictions", value: "10M+", icon: Users },
-                        { label: "Security Score", value: "100%", icon: ShieldCheck },
-                    ].map((stat, i) => (
-                        <motion.div
-                            key={i}
-                            initial={{ opacity: 0, y: 20 }}
-                            whileInView={{ opacity: 1, y: 0 }}
-                            viewport={{ once: true }}
-                            transition={{ delay: 0.2 + (i * 0.1) }}
-                            className="bg-white/50 backdrop-blur-md rounded-3xl p-8 border border-white/50 shadow-xl shadow-gray-200/50 flex flex-col items-center justify-center text-center group hover:-translate-y-2 transition-transform duration-500"
-                        >
-                            <div className="w-14 h-14 rounded-2xl bg-black text-white flex items-center justify-center mb-5 group-hover:scale-110 transition-transform duration-300 shadow-lg shadow-black/20">
-                                <stat.icon className="w-7 h-7" />
-                            </div>
-                            <div className="text-4xl font-bold text-gray-900 mb-2 tracking-tight">{stat.value}</div>
-                            <div className="text-sm font-semibold text-gray-500 uppercase tracking-widest">{stat.label}</div>
-                        </motion.div>
-                    ))}
                 </div>
             </div>
 
