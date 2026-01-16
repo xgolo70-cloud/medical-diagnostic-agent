@@ -193,35 +193,21 @@ export const LoginForm: React.FC = () => {
                          </div>
 
                          <div className="relative z-20 max-w-xs mt-12 lg:mt-0">
-                            <h2 className="text-4xl lg:text-5xl font-serif leading-none mb-6 !text-white drop-shadow-lg flex flex-col items-start" style={{ color: '#ffffff' }}>
+                            <h2 className="text-4xl lg:text-5xl font-serif leading-none mb-12 !text-white drop-shadow-lg flex flex-col items-start" style={{ color: '#ffffff' }}>
                                 Beyond <br/>
                                 <div className="relative inline-flex flex-col mt-2">
                                     <span className="relative inline-flex h-[1.2em] overflow-hidden min-w-[200px]">
                                         <AnimatePresence mode="popLayout">
-                                            {(() => {
-                                                const words = ["Thinking.", "Limits.", "Logic.", "Future."];
-                                                const [wordIndex, setWordIndex] = useState(0);
-
-                                                useEffect(() => {
-                                                    const timer = setInterval(() => {
-                                                        setWordIndex((prev) => (prev + 1) % words.length);
-                                                    }, 3000);
-                                                    return () => clearInterval(timer);
-                                                }, []);
-
-                                                return (
-                                                    <motion.span
-                                                        key={wordIndex}
-                                                        initial={{ y: "100%", opacity: 0 }}
-                                                        animate={{ y: "0%", opacity: 1 }}
-                                                        exit={{ y: "-100%", opacity: 0 }}
-                                                        transition={{ duration: 0.5, ease: "circOut" }}
-                                                        className="block italic font-light !text-blue-100 whitespace-nowrap"
-                                                    >
-                                                        {words[wordIndex]}
-                                                    </motion.span>
-                                                );
-                                            })()}
+                                            <motion.span
+                                                key={wordIndex}
+                                                initial={{ y: "100%", opacity: 0 }}
+                                                animate={{ y: "0%", opacity: 1 }}
+                                                exit={{ y: "-100%", opacity: 0 }}
+                                                transition={{ duration: 0.5, ease: "circOut" }}
+                                                className="block italic font-light !text-blue-100 whitespace-nowrap"
+                                            >
+                                                {words[wordIndex]}
+                                            </motion.span>
                                         </AnimatePresence>
                                     </span>
                                     <svg className="absolute -bottom-4 left-0 w-[120%] h-6 -z-10" viewBox="0 0 200 20" preserveAspectRatio="none">
@@ -237,7 +223,7 @@ export const LoginForm: React.FC = () => {
                                     </svg>
                                 </div>
                             </h2>
-                            <p className="text-sm !text-gray-300 leading-relaxed font-light border-l border-white/40 pl-4 drop-shadow-sm">
+                            <p className="text-sm !text-gray-300 leading-relaxed font-light border-l border-white/40 pl-4 drop-shadow-sm mt-4">
                                 "Experience the next generation of intelligent healthcare management."
                             </p>
                          </div>
