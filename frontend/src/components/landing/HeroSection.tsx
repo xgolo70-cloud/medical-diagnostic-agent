@@ -55,24 +55,23 @@ export const HeroSection = () => {
                         transition={{ duration: 0.5, delay: 0.1 }}
                         className="text-5xl md:text-7xl font-bold tracking-tight text-gray-900 mb-8 w-full"
                     >
-                        <span className="relative inline-flex h-[1.2em] w-full justify-center">
+                        Medical Intelligence <br className="hidden md:block" />
+                        <span className="relative inline-flex h-[1.2em] w-full justify-center overflow-hidden">
                             <AnimatePresence mode="popLayout">
                                 <motion.span
                                     key={index}
-                                    initial={{ y: "100%", opacity: 0, filter: "blur(10px)" }}
-                                    animate={{ y: "0%", opacity: 1, filter: "blur(0px)" }}
-                                    exit={{ y: "-100%", opacity: 0, filter: "blur(10px)" }}
+                                    initial={{ y: "100%", opacity: 0 }}
+                                    animate={{ y: "0%", opacity: 1 }}
+                                    exit={{ y: "-100%", opacity: 0 }}
                                     transition={{ duration: 0.5, ease: "circOut" }}
-                                    className="block bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent px-2 relative z-10"
+                                    className="block bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent px-2"
                                 >
                                     {words[index]}
                                 </motion.span>
                             </AnimatePresence>
-                            <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 w-[120%] h-6 -z-0 pointer-events-none">
-                                <svg className="w-full h-full text-blue-500/30" viewBox="0 0 200 20" preserveAspectRatio="none">
-                                    <path d="M10 10 Q 100 25 190 10" stroke="currentColor" strokeWidth="6" fill="none" strokeLinecap="round" />
-                                </svg>
-                            </div>
+                             <svg className="absolute -bottom-4 left-1/2 -translate-x-1/2 w-[120%] h-4 text-blue-500/30 -z-10" viewBox="0 0 100 10" preserveAspectRatio="none">
+                                <path d="M0 5 Q 50 10 100 5" stroke="currentColor" strokeWidth="12" fill="none" />
+                            </svg>
                         </span>
                     </motion.h1>
 
