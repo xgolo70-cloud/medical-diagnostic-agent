@@ -49,32 +49,46 @@ export const LoginForm: React.FC = () => {
     };
 
     return (
-        <div className="h-screen flex items-center justify-center bg-[#F8FAFC] relative overflow-hidden font-sans p-4 sm:p-6 lg:p-8 selection:bg-black selection:text-white">
+        <div className="h-screen flex items-center justify-center bg-[#030712] relative overflow-hidden font-sans p-4 sm:p-6 lg:p-8 selection:bg-emerald-500 selection:text-white">
             <style>
                 {`
-                    @keyframes movePattern {
-                        0% { background-position: 0 0; }
-                        100% { background-position: 24px 24px; }
+                    @keyframes blob {
+                        0% { transform: translate(0px, 0px) scale(1); }
+                        33% { transform: translate(30px, -50px) scale(1.1); }
+                        66% { transform: translate(-20px, 20px) scale(0.9); }
+                        100% { transform: translate(0px, 0px) scale(1); }
+                    }
+                    .animate-blob {
+                        animation: blob 10s infinite;
+                    }
+                    .animation-delay-2000 {
+                        animation-delay: 2s;
+                    }
+                    .animation-delay-4000 {
+                        animation-delay: 4s;
+                    }
+                    .bg-grid-white {
+                        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32' width='32' height='32' fill='none' stroke='rgba(255, 255, 255, 0.05)'%3e%3cpath d='M0 .5H31.5V32'/%3e%3c/svg%3e");
                     }
                 `}
             </style>
 
-            {/* Animated Grid Pattern */}
-            <div 
-                className="absolute inset-0 pointer-events-none opacity-[0.3]"
-                style={{
-                    backgroundImage: 'linear-gradient(#cbd5e1 1px, transparent 1px), linear-gradient(90deg, #cbd5e1 1px, transparent 1px)',
-                    backgroundSize: '24px 24px',
-                    animation: 'movePattern 20s linear infinite'
-                }}
-            />
+            {/* Deep Space Background Layer */}
+            <div className="absolute inset-0 bg-[#030712]">
+                <div className="absolute inset-0 bg-grid-white/[0.02] bg-[length:50px_50px]" />
+                <div className="absolute inset-0 bg-gradient-to-b from-black/0 via-black/0 to-[#030712]" />
+            </div>
 
-            {/* Organic Mesh Background */}
-            <div className="absolute top-[-20%] right-[0%] w-[70%] h-[70%] bg-indigo-200/30 rounded-full blur-[120px] pointer-events-none mix-blend-multiply animate-pulse" />
-            <div className="absolute bottom-[-20%] left-[-10%] w-[60%] h-[60%] bg-rose-200/30 rounded-full blur-[100px] pointer-events-none mix-blend-multiply animate-pulse" style={{ animationDuration: '6s' }} />
+            {/* Animated Cosmic Orbs */}
+            <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                <div className="absolute top-0 -left-4 w-96 h-96 bg-purple-500 rounded-full mix-blend-multiply filter blur-[128px] opacity-40 animate-blob" />
+                <div className="absolute top-0 -right-4 w-96 h-96 bg-cyan-500 rounded-full mix-blend-multiply filter blur-[128px] opacity-40 animate-blob animation-delay-2000" />
+                <div className="absolute -bottom-32 left-20 w-96 h-96 bg-blue-600 rounded-full mix-blend-multiply filter blur-[128px] opacity-40 animate-blob animation-delay-4000" />
+                <div className="absolute bottom-1/2 left-1/2 transform -translate-x-1/2 translate-y-1/2 w-[800px] h-[800px] bg-indigo-500/10 rounded-full blur-[100px] animate-pulse" />
+            </div>
             
             <div className="w-full max-w-5xl relative z-10">
-                <div className="bg-white/70 backdrop-blur-2xl rounded-[2rem] lg:rounded-[2.5rem] shadow-[0_20px_50px_rgba(0,0,0,0.03)] border border-white/60 overflow-hidden flex flex-col lg:flex-row lg:min-h-[600px] transition-shadow duration-300 hover:shadow-[0_20px_50px_rgba(0,0,0,0.06)]">
+                <div className="bg-white/80 backdrop-blur-3xl rounded-[2rem] lg:rounded-[2.5rem] shadow-[0_0_100px_-20px_rgba(255,255,255,0.1)] border border-white/50 overflow-hidden flex flex-col lg:flex-row lg:min-h-[600px] transition-all duration-500 hover:shadow-[0_0_120px_-20px_rgba(100,255,218,0.2)]">
                     
                      {/* Left Side - Brand Visual */}
                     <div className="lg:w-5/12 relative overflow-hidden bg-[#0A0A0A] p-8 lg:p-12 flex flex-col justify-between text-white group">
