@@ -85,8 +85,8 @@ export const LoginForm: React.FC = () => {
                 <div className="absolute -bottom-32 left-20 w-96 h-96 bg-pink-200 rounded-full mix-blend-multiply filter blur-[96px] opacity-70 animate-blob animation-delay-4000" />
             </div>
             
-            <div className="w-full max-w-5xl relative z-10">
-                <div className="bg-white/70 backdrop-blur-2xl rounded-[2rem] lg:rounded-[2.5rem] shadow-[0_20px_60px_-15px_rgba(0,0,0,0.05)] border border-white/60 overflow-hidden flex flex-col lg:flex-row lg:min-h-[600px] transition-all duration-500 hover:shadow-[0_25px_70px_-15px_rgba(0,0,0,0.08)]">
+            <div className="w-full max-w-5xl relative z-10 p-4">
+                <div className="bg-white/60 backdrop-blur-xl rounded-[2.5rem] shadow-[0_30px_60px_-15px_rgba(0,0,0,0.1),0_0_0_1px_rgba(255,255,255,0.5)] overflow-hidden flex flex-col lg:flex-row lg:min-h-[600px] transition-all duration-500 hover:shadow-[0_45px_80px_-20px_rgba(0,0,0,0.15),0_0_0_1px_rgba(255,255,255,0.6)] group/card">
                     
                      {/* Left Side - Brand Visual */}
                     <div className="lg:w-5/12 relative overflow-hidden bg-[#0A0A0A] p-8 lg:p-12 flex flex-col justify-between text-white group">
