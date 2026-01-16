@@ -50,6 +50,25 @@ export const LoginForm: React.FC = () => {
 
     return (
         <div className="h-screen flex items-center justify-center bg-[#F8FAFC] relative overflow-hidden font-sans p-4 sm:p-6 lg:p-8 selection:bg-black selection:text-white">
+            <style>
+                {`
+                    @keyframes movePattern {
+                        0% { background-position: 0 0; }
+                        100% { background-position: 24px 24px; }
+                    }
+                `}
+            </style>
+
+            {/* Animated Grid Pattern */}
+            <div 
+                className="absolute inset-0 pointer-events-none opacity-[0.3]"
+                style={{
+                    backgroundImage: 'linear-gradient(#cbd5e1 1px, transparent 1px), linear-gradient(90deg, #cbd5e1 1px, transparent 1px)',
+                    backgroundSize: '24px 24px',
+                    animation: 'movePattern 20s linear infinite'
+                }}
+            />
+
             {/* Organic Mesh Background */}
             <div className="absolute top-[-20%] right-[0%] w-[70%] h-[70%] bg-indigo-200/30 rounded-full blur-[120px] pointer-events-none mix-blend-multiply animate-pulse" />
             <div className="absolute bottom-[-20%] left-[-10%] w-[60%] h-[60%] bg-rose-200/30 rounded-full blur-[100px] pointer-events-none mix-blend-multiply animate-pulse" style={{ animationDuration: '6s' }} />
