@@ -120,7 +120,7 @@ export const SiteFooter = () => {
                             </p>
                             
                             {/* Social Icons */}
-                            <div className="flex gap-3 mt-8">
+                            <div className="flex gap-3 mt-16">
                                 {socialLinks.map((social, i) => (
                                     <a 
                                         key={i}
