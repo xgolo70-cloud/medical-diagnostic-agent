@@ -100,9 +100,8 @@ const ReviewCard = ({ review }: { review: typeof reviews[0] }) => (
 );
 
 export const Testimonials = () => {
-    // Create infinite rows
+    // Create infinite row
     const row1 = [...reviews, ...reviews];
-    const row2 = [...reviews, ...reviews].reverse();
 
     return (
         <section className="py-24 lg:py-32 relative overflow-hidden bg-white">
@@ -145,26 +144,17 @@ export const Testimonials = () => {
                     </motion.p>
                 </div>
 
-                {/* Marquee Section */}
-                <div className="relative w-full space-y-8 mb-24">
+                {/* Single Marquee Row */}
+                <div className="relative w-full mb-20">
                     {/* Gradient Masks */}
                     <div className="absolute left-0 top-0 bottom-0 w-32 bg-gradient-to-r from-white to-transparent z-20 pointer-events-none" />
                     <div className="absolute right-0 top-0 bottom-0 w-32 bg-gradient-to-l from-white to-transparent z-20 pointer-events-none" />
 
-                    {/* Row 1 */}
+                    {/* Single Row */}
                     <div className="relative w-full overflow-hidden">
                         <div className="flex animate-marquee hover:[animation-play-state:paused] w-max">
                             {row1.map((review, i) => (
                                 <ReviewCard key={`r1-${i}`} review={review} />
-                            ))}
-                        </div>
-                    </div>
-
-                    {/* Row 2 */}
-                    <div className="relative w-full overflow-hidden">
-                        <div className="flex animate-marquee-reverse hover:[animation-play-state:paused] w-max">
-                            {row2.map((review, i) => (
-                                <ReviewCard key={`r2-${i}`} review={review} />
                             ))}
                         </div>
                     </div>

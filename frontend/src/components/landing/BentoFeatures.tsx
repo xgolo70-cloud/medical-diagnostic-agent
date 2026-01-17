@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import { motion, useInView, useMotionTemplate, useMotionValue } from 'framer-motion';
 import { Activity, Shield, Globe, Lock, Cpu, Network, Zap } from 'lucide-react';
 
@@ -42,6 +42,144 @@ const features = [
     },
 ];
 
+// ECG Waveform Component - Clean Light Mode
+const ECGWaveform = () => {
+    return (
+        <div className="absolute inset-0 flex items-center justify-center overflow-hidden">
+            {/* ECG Line */}
+            <svg 
+                className="w-full h-full" 
+                viewBox="0 0 600 80" 
+                preserveAspectRatio="none"
+            >
+                <defs>
+                    {/* Main gradient - subtle black/gray */}
+                    <linearGradient id="ecgGradientLight" x1="0%" y1="0%" x2="100%" y2="0%">
+                        <stop offset="0%" stopColor="#171717" stopOpacity="0.1" />
+                        <stop offset="50%" stopColor="#171717" stopOpacity="0.8" />
+                        <stop offset="100%" stopColor="#171717" stopOpacity="0.1" />
+                    </linearGradient>
+                    
+                    {/* Subtle shadow filter */}
+                    <filter id="ecgShadow" x="-20%" y="-20%" width="140%" height="140%">
+                        <feGaussianBlur stdDeviation="1" result="blur"/>
+                        <feMerge>
+                            <feMergeNode in="blur"/>
+                            <feMergeNode in="SourceGraphic"/>
+                        </feMerge>
+                    </filter>
+                </defs>
+                
+                {/* Background grid - very subtle */}
+                <pattern id="lightGrid" width="40" height="40" patternUnits="userSpaceOnUse">
+                    <path d="M 40 0 L 0 0 0 40" fill="none" stroke="rgba(0,0,0,0.04)" strokeWidth="0.5"/>
+                </pattern>
+                <rect width="100%" height="100%" fill="url(#lightGrid)" />
+                
+                {/* Baseline reference */}
+                <line x1="0" y1="40" x2="600" y2="40" stroke="rgba(0,0,0,0.06)" strokeWidth="1" strokeDasharray="2 6" />
+                
+                {/* Main ECG path */}
+                <motion.path
+                    d="M0,40 C30,40 50,40 70,40 L90,40 L100,38 L105,42 L110,30 L115,50 L120,12 L125,68 L130,30 L140,40 C160,40 190,40 220,40 L240,40 L250,38 L255,42 L260,30 L265,50 L270,12 L275,68 L280,30 L290,40 C310,40 340,40 370,40 L390,40 L400,38 L405,42 L410,30 L415,50 L420,12 L425,68 L430,30 L440,40 C460,40 490,40 520,40 L540,40 L550,38 L555,42 L560,30 L565,50 L570,12 L575,68 L580,30 L590,40 L600,40"
+                    stroke="url(#ecgGradientLight)"
+                    strokeWidth="2"
+                    fill="none"
+                    filter="url(#ecgShadow)"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    initial={{ pathLength: 0, opacity: 0 }}
+                    animate={{ pathLength: 1, opacity: 1 }}
+                    transition={{ 
+                        pathLength: { duration: 2.5, ease: "easeOut" },
+                        opacity: { duration: 0.8 }
+                    }}
+                />
+                
+                {/* Scanning indicator */}
+                <motion.rect
+                    x="0"
+                    y="0"
+                    width="3"
+                    height="80"
+                    fill="#171717"
+                    opacity="0.15"
+                    animate={{ x: [-3, 600] }}
+                    transition={{ 
+                        duration: 6, 
+                        repeat: Infinity, 
+                        ease: "linear",
+                        repeatDelay: 1
+                    }}
+                />
+            </svg>
+        </div>
+    );
+};
+
+// Live Stats Component - Clean Light Mode
+const LiveStats = () => {
+    const [latency, setLatency] = useState(0.3);
+
+    useEffect(() => {
+        const interval = setInterval(() => {
+            setLatency(Number((0.2 + Math.random() * 0.5).toFixed(1)));
+        }, 2000);
+        return () => clearInterval(interval);
+    }, []);
+
+    return (
+        <div className="absolute top-2 right-2 flex items-center gap-3">
+            {/* Latency indicator */}
+            <div className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-white border border-gray-200 shadow-sm">
+                <motion.div 
+                    className="w-1.5 h-1.5 rounded-full bg-green-500"
+                    animate={{ opacity: [1, 0.4, 1] }}
+                    transition={{ duration: 2, repeat: Infinity }}
+                />
+                <span className="text-[10px] font-mono font-medium text-gray-900">{latency}ms</span>
+            </div>
+            {/* Status */}
+            <div className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-gray-50 border border-gray-200">
+                <Activity className="w-3 h-3 text-gray-600" />
+                <span className="text-[10px] font-medium text-gray-600">Active</span>
+            </div>
+        </div>
+    );
+};
+
+// Processing status messages - Clean Light Mode
+const processingStatuses = [
+    { text: "Analyzing...", color: "text-gray-600" },
+    { text: "Processing", color: "text-gray-700" },
+    { text: "Complete", color: "text-gray-900" },
+];
+
+// Processing Status Component - Clean Light Mode
+const ProcessingStatus = () => {
+    const [status, setStatus] = useState(0);
+
+    useEffect(() => {
+        const interval = setInterval(() => {
+            setStatus(s => (s + 1) % processingStatuses.length);
+        }, 2500);
+        return () => clearInterval(interval);
+    }, []);
+
+    return (
+        <div className="absolute bottom-2 left-2 flex items-center gap-2 px-2.5 py-1.5 rounded-md bg-white border border-gray-200 shadow-sm">
+            <motion.div 
+                className="w-1.5 h-1.5 rounded-full bg-gray-900"
+                animate={{ scale: [1, 1.2, 1] }}
+                transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+            />
+            <span className={`text-[10px] font-medium ${processingStatuses[status].color}`}>
+                {processingStatuses[status].text}
+            </span>
+        </div>
+    );
+};
+
 const FeatureCard = ({ feature, index }: { feature: typeof features[0], index: number }) => {
     const ref = useRef<HTMLDivElement>(null);
     const isInView = useInView(ref, { once: true, margin: "-50px" });
@@ -68,10 +206,14 @@ const FeatureCard = ({ feature, index }: { feature: typeof features[0], index: n
             className={`group relative bg-white rounded-xl overflow-hidden ${spanClass}`}
             onMouseMove={handleMouseMove}
         >
-            {/* Border Beam Effect */}
+            {/* Border Beam Effect - Enhanced for large card */}
             <div className="absolute inset-0 z-0 rounded-xl overflow-hidden pointer-events-none">
                  <motion.div 
-                    className="absolute top-0 left-0 w-[200%] h-[200%] -translate-x-1/2 -translate-y-1/2 bg-[conic-gradient(from_0deg,transparent_0_340deg,rgba(0,0,0,0.8)_360deg)] opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+                    className={`absolute top-0 left-0 w-[200%] h-[200%] -translate-x-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-500 ${
+                        feature.size === 'large' 
+                            ? 'bg-[conic-gradient(from_0deg,transparent_0_320deg,#10b981_340deg,#06b6d4_360deg)]' 
+                            : 'bg-[conic-gradient(from_0deg,transparent_0_340deg,rgba(0,0,0,0.8)_360deg)]'
+                    }`}
                     animate={{ rotate: 360 }}
                     transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
                  />
@@ -80,8 +222,12 @@ const FeatureCard = ({ feature, index }: { feature: typeof features[0], index: n
             {/* Masking Background */}
             <div className="absolute inset-[1px] bg-white rounded-[10px] z-0" />
             
-            {/* Default Light Border */}
-            <div className="absolute inset-0 rounded-xl border border-gray-200 pointer-events-none z-10" />
+            {/* Default Light Border - Gradient for large card */}
+            <div className={`absolute inset-0 rounded-xl border pointer-events-none z-10 ${
+                feature.size === 'large' 
+                    ? 'border-emerald-200/50 group-hover:border-cyan-300/50 transition-colors duration-300' 
+                    : 'border-gray-200'
+            }`} />
 
             {/* Spotlight Effect (Internal) */}
             <motion.div
@@ -90,7 +236,7 @@ const FeatureCard = ({ feature, index }: { feature: typeof features[0], index: n
                     background: useMotionTemplate`
                         radial-gradient(
                             600px circle at ${mouseX}px ${mouseY}px,
-                            rgba(0, 0, 0, 0.03),
+                            ${feature.size === 'large' ? 'rgba(16, 185, 129, 0.08)' : 'rgba(0, 0, 0, 0.03)'},
                             transparent 80%
                         )
                     `
@@ -103,34 +249,31 @@ const FeatureCard = ({ feature, index }: { feature: typeof features[0], index: n
                     <div className="w-10 h-10 rounded-lg bg-gray-50 border border-gray-100 flex items-center justify-center group-hover:bg-black transition-all duration-300 shadow-sm">
                         <feature.icon className="w-5 h-5 text-gray-700 group-hover:text-white transition-colors" />
                     </div>
+                    
+                    {/* Metric Badge - Consistent style for all cards */}
                     {feature.metric && (
-                         <div className="px-2 py-1 rounded-md bg-gray-50 border border-gray-100 text-[10px] font-mono font-medium text-gray-600">
+                        <div className="px-2.5 py-1 rounded-md bg-gray-50 border border-gray-200 text-xs font-mono font-medium text-gray-700">
                             {feature.metric}
                         </div>
                     )}
                 </div>
 
-                <div className={`mt-auto mb-4 ${feature.size === 'full' ? 'max-w-xl' : ''}`}>
-                     <h3 className="text-lg font-bold text-gray-900 mb-2 tracking-tight">{feature.title}</h3>
+                <div className={`${feature.size === 'large' ? 'mt-4' : 'mt-auto mb-4'} ${feature.size === 'full' ? 'max-w-xl' : ''}`}>
+                     <h3 className="text-lg font-bold mb-1 tracking-tight text-gray-900">{feature.title}</h3>
                      <p className="text-gray-500 text-sm leading-relaxed max-w-sm">{feature.description}</p>
                 </div>
 
-                {/* Visual Elements for Large Cards */}
+                {/* Visual Elements for Large Cards - Clean Light Mode */}
                 {feature.size === 'large' && (
-                    <div className="relative w-full h-32 mt-4 rounded-lg bg-gray-50 border border-gray-100 overflow-hidden">
-                        <div className="absolute inset-0 flex items-end justify-between px-2 pb-0 gap-1 opacity-60">
-                            {[...Array(24)].map((_, i) => (
-                                <motion.div
-                                    key={i}
-                                    className="flex-1 bg-black rounded-t-sm"
-                                    animate={{ 
-                                        height: [`${10 + Math.random() * 30}%`, `${30 + Math.random() * 60}%`, `${10 + Math.random() * 30}%`],
-                                        opacity: [0.2, 0.5, 0.2]
-                                    }}
-                                    transition={{ duration: 1.5 + Math.random(), repeat: Infinity, ease: "easeInOut" }}
-                                />
-                            ))}
-                        </div>
+                    <div className="relative w-full h-28 mt-2 rounded-lg bg-gray-50 overflow-hidden border border-gray-200">
+                        {/* ECG Waveform */}
+                        <ECGWaveform />
+                        
+                        {/* Live Stats */}
+                        <LiveStats />
+                        
+                        {/* Processing Status */}
+                        <ProcessingStatus />
                     </div>
                 )}
 
