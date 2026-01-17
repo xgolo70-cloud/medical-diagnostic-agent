@@ -90,7 +90,7 @@ export const HeroSection = () => {
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.5, delay: 0.2 }}
-                        className="w-full text-lg md:text-xl text-gray-500 max-w-3xl mx-auto leading-relaxed text-center px-4"
+                        className="w-full text-lg md:text-xl text-gray-600 md:text-gray-500 max-w-3xl mx-auto leading-relaxed text-center px-4"
                     >
                         Advanced diagnostics and patient monitoring powered by local AI. 
                         Secure, private, and lightning fast. No cloud dependency required.

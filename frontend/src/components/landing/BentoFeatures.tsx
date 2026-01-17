@@ -365,7 +365,7 @@ export const BentoFeatures = () => {
                 </motion.div>
 
                 {/* Bento Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-3 auto-rows-[300px] gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 auto-rows-auto gap-4">
                     {features.map((feature, index) => (
                         <FeatureCard 
                             key={index} 

@@ -32,7 +32,7 @@ export const SiteHeader = () => {
             y: 0,
             borderRadius: "0px",
             backgroundColor: "rgba(255, 255, 255, 0)",
-            borderBottomColor: "rgba(229, 231, 235, 0)",
+            borderColor: "transparent",
             padding: "1.5rem 1.5rem"
         },
         scrolled: { 
@@ -41,7 +41,7 @@ export const SiteHeader = () => {
             y: 20, // Increased float distance
             borderRadius: "9999px",
             backgroundColor: "rgba(255, 255, 255, 0.85)",
-            borderBottomColor: "rgba(229, 231, 235, 1)", // visible border
+            borderColor: "rgba(0,0,0,0.05)",
             padding: "0.75rem 1.25rem",
             boxShadow: "0 8px 32px -8px rgba(0,0,0,0.08)"
         }
@@ -56,9 +56,6 @@ export const SiteHeader = () => {
                     animate={isScrolled ? "scrolled" : "top"}
                     transition={{ duration: 0.3, ease: "easeInOut" }}
                     className="pointer-events-auto flex items-center justify-between border border-transparent backdrop-blur-xl"
-                    style={{
-                        borderColor: isScrolled ? "rgba(0,0,0,0.05)" : "transparent"
-                    }}
                 >
                     {/* Logo Section */}
                     <div 

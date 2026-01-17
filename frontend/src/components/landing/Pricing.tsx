@@ -60,23 +60,23 @@ export const Pricing = () => {
     const isInView = useInView(sectionRef, { once: true, margin: "-100px" });
 
     return (
-        <section id="pricing" ref={sectionRef} className="py-24 relative bg-white">
-            <div className="max-w-7xl mx-auto px-6 relative z-10">
+        <section id="pricing" ref={sectionRef} className="py-16 lg:py-24 relative bg-white">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 relative z-10">
                 
                 {/* Header */}
                 <motion.div 
                     initial={{ opacity: 0, y: 20 }}
                     animate={isInView ? { opacity: 1, y: 0 } : {}}
                     transition={{ duration: 0.5 }}
-                    className="text-center mb-20"
+                    className="text-center mb-12 lg:mb-20"
                 >
-                    <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6 tracking-tight">
+                    <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 mb-4 sm:mb-6 tracking-tight">
                         Predictable pricing,
                         <br />
                         designed to scale.
                     </h2>
                     <div className="flex justify-center w-full">
-                        <p className="text-lg text-gray-500 max-w-xl w-full mb-10 text-center">
+                        <p className="text-base lg:text-lg text-gray-500 max-w-xl w-full mb-8 lg:mb-10 text-center">
                             Start for free, scale with your fleet. No hidden fees.
                         </p>
                     </div>
@@ -104,7 +104,7 @@ export const Pricing = () => {
                 </motion.div>
 
                 {/* Cards */}
-                <div className="grid md:grid-cols-3 gap-6 max-w-6xl mx-auto items-stretch">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 max-w-6xl mx-auto items-stretch">
                     {plans.map((plan, index) => (
                         <motion.div 
                             key={index} 
@@ -122,7 +122,7 @@ export const Pricing = () => {
                                 </div>
                             )}
                             
-                            <div className={`relative h-full rounded-2xl p-8 flex flex-col transition-all duration-300 ${
+                            <div className={`relative h-full rounded-2xl p-6 sm:p-8 flex flex-col transition-all duration-300 ${
                                 plan.highlight 
                                     ? 'bg-gray-50/50 scale-100 z-10' 
                                     : 'bg-white border border-gray-100 hover:border-gray-200 hover:shadow-lg'
@@ -135,16 +135,16 @@ export const Pricing = () => {
                                 )}
 
                                 {/* Header - Fixed Min Height for alignment */}
-                                <div className="mb-6 min-h-[140px] flex flex-col">
+                                <div className="mb-4 sm:mb-6 md:min-h-[140px] flex flex-col">
                                     <div className="flex justify-between items-start w-full">
-                                        <div className={`w-12 h-12 rounded-xl flex items-center justify-center mb-4 transition-all duration-300 ${
+                                        <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center mb-3 sm:mb-4 transition-all duration-300 ${
                                             plan.highlight ? 'bg-black text-white shadow-xl shadow-black/10' : 'bg-gray-50 text-gray-900 border border-gray-100'
                                         }`}>
-                                            <plan.icon size={22} strokeWidth={1.5} />
+                                            <plan.icon size={20} strokeWidth={1.5} className="sm:w-[22px] sm:h-[22px]" />
                                         </div>
                                         {plan.highlight && <Crown size={20} className="text-black/20" />}
                                     </div>
-                                    <h3 className="text-xl font-bold text-gray-900 mb-2">{plan.name}</h3>
+                                    <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-1 sm:mb-2">{plan.name}</h3>
                                     <p className="text-sm text-gray-500 font-medium leading-relaxed max-w-[200px]">{plan.description}</p>
                                 </div>
 
@@ -152,13 +152,13 @@ export const Pricing = () => {
                                 <div className="w-full h-px bg-gray-100 mb-6" />
 
                                 {/* Price - Fixed Height */}
-                                <div className="mb-8 min-h-[80px]">
+                                <div className="mb-6 sm:mb-8 md:min-h-[80px]">
                                     <div className="flex items-baseline gap-1">
                                         <motion.span 
                                             key={isYearly ? "year" : "month"}
                                             initial={{ opacity: 0, x: -10 }}
                                             animate={{ opacity: 1, x: 0 }}
-                                            className="text-5xl font-bold text-gray-900 tracking-tighter"
+                                            className="text-4xl sm:text-5xl font-bold text-gray-900 tracking-tighter"
                                         >
                                             {isYearly ? plan.price.yearly : plan.price.monthly}
                                         </motion.span>
@@ -175,7 +175,7 @@ export const Pricing = () => {
                                 </div>
 
                                 {/* Features */}
-                                <div className="space-y-4 mb-8 flex-1">
+                                <div className="space-y-3 sm:space-y-4 mb-6 sm:mb-8 flex-1">
                                     {plan.features.map((feature, i) => (
                                         <div key={i} className="flex items-start gap-3 py-0.5">
                                             {feature.included ? (
@@ -198,7 +198,7 @@ export const Pricing = () => {
 
                                 {/* CTA */}
                                 <Button
-                                    className={`w-full py-6 rounded-xl font-bold text-sm tracking-wide transition-all ${
+                                    className={`w-full py-4 sm:py-6 rounded-xl font-bold text-sm tracking-wide transition-all ${
                                         plan.highlight 
                                             ? 'bg-black text-white hover:bg-gray-800 shadow-xl hover:-translate-y-1' 
                                             : 'bg-white text-gray-900 border border-gray-200 hover:bg-gray-50 hover:border-gray-300'

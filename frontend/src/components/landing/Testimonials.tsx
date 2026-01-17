@@ -59,7 +59,7 @@ const reviews = [
 ];
 
 const ReviewCard = ({ review }: { review: typeof reviews[0] }) => (
-    <div className="group relative w-[400px] flex-shrink-0 mx-4">
+    <div className="group relative w-[300px] sm:w-[360px] md:w-[400px] flex-shrink-0 mx-2 sm:mx-4">
         <div className="relative p-8 h-full flex flex-col justify-between bg-white rounded-2xl border border-gray-200 hover:border-gray-300 shadow-sm hover:shadow-md transition-all duration-300">
             {/* Header */}
             <div>
@@ -112,7 +112,7 @@ export const Testimonials = () => {
 
             <div className="max-w-7xl mx-auto px-6 relative z-10 flex flex-col items-center">
                 {/* Header */}
-                <div className="text-center mb-20 flex flex-col items-center max-w-4xl mx-auto">
+                <div className="text-center mb-12 sm:mb-20 flex flex-col items-center max-w-4xl mx-auto px-4 sm:px-0">
                     <motion.div 
                         initial={{ opacity: 0, y: 20 }}
                         whileInView={{ opacity: 1, y: 0 }}
@@ -128,7 +128,7 @@ export const Testimonials = () => {
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
                         transition={{ delay: 0.1 }}
-                        className="text-4xl md:text-5xl lg:text-6xl font-black text-gray-900 mb-6 tracking-tight"
+                        className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black text-gray-900 mb-4 sm:mb-6 tracking-tight"
                     >
                         Loved by innovators
                     </motion.h2>
@@ -161,8 +161,8 @@ export const Testimonials = () => {
                 </div>
 
                 {/* Stats Section */}
-                <div className="max-w-6xl mx-auto w-full relative z-10">
-                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-8 divide-x divide-gray-100 lg:divide-x-0">
+                <div className="max-w-6xl mx-auto w-full relative z-10 px-4 sm:px-0">
+                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-8">
                         {[
                             { label: "Uptime SLA", value: "99.99%", icon: Activity },
                             { label: "Active Nodes", value: "50k+", icon: Zap },
@@ -175,13 +175,13 @@ export const Testimonials = () => {
                                 whileInView={{ opacity: 1, y: 0 }}
                                 viewport={{ once: true }}
                                 transition={{ delay: 0.3 + (i * 0.1) }}
-                                className="flex flex-col items-center justify-center text-center p-4"
+                                className="flex flex-col items-center justify-center text-center p-3 sm:p-4"
                             >
-                                <div className="w-12 h-12 rounded-xl bg-gray-50 border border-gray-100 flex items-center justify-center mb-4 text-gray-900 shadow-sm">
-                                    <stat.icon className="w-6 h-6" />
+                                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-gray-50 border border-gray-100 flex items-center justify-center mb-3 sm:mb-4 text-gray-900 shadow-sm">
+                                    <stat.icon className="w-5 h-5 sm:w-6 sm:h-6" />
                                 </div>
-                                <div className="text-3xl font-bold text-gray-900 mb-2 tracking-tight">{stat.value}</div>
-                                <div className="text-xs font-semibold text-gray-500 uppercase tracking-widest">{stat.label}</div>
+                                <div className="text-2xl sm:text-3xl font-bold text-gray-900 mb-1 sm:mb-2 tracking-tight">{stat.value}</div>
+                                <div className="text-[10px] sm:text-xs font-semibold text-gray-500 uppercase tracking-widest">{stat.label}</div>
                             </motion.div>
                         ))}
                     </div>

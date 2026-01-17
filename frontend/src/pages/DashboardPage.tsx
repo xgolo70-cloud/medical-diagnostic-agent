@@ -60,31 +60,31 @@ export const DashboardPage: React.FC = () => {
         <div className="min-h-screen bg-[#fafafa]">
             {/* Glass Header */}
             <header className="border-b border-gray-200 bg-white/80 backdrop-blur-md sticky top-0 z-50">
-                <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-                    <div className="flex items-center gap-3">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 sm:py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div className="flex items-center gap-2 sm:gap-3">
                          <motion.div 
                             whileHover={{ scale: 1.1, rotate: 90 }}
                             whileTap={{ scale: 0.9 }}
                             transition={{ type: "spring", stiffness: 400, damping: 15 }}
-                            className="w-8 h-8 rounded-lg bg-black flex items-center justify-center shadow-md shadow-black/20 cursor-pointer"
+                            className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-black flex items-center justify-center shadow-md shadow-black/20 cursor-pointer"
                         >
-                            <Plus className="w-4 h-4 text-white" />
+                            <Plus className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white" />
                         </motion.div>
-                        <h1 className="text-xl font-semibold text-gray-900 tracking-tight">
+                        <h1 className="text-lg sm:text-xl font-semibold text-gray-900 tracking-tight">
                             Dashboard
                         </h1>
-                        <span className="text-gray-300">/</span>
-                        <span className="text-sm text-gray-500 font-medium">Overview</span>
+                        <span className="text-gray-300 hidden sm:inline">/</span>
+                        <span className="text-xs sm:text-sm text-gray-500 font-medium hidden sm:inline">Overview</span>
                     </div>
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2 sm:gap-3">
                         <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                             <Button 
                                 size="sm" 
                                 variant="secondary"
                                 onClick={() => navigate('/settings')}
-                                className="h-9 px-4 bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 hover:border-gray-300 rounded-lg text-sm font-medium transition-all shadow-sm"
+                                className="h-8 sm:h-9 px-3 sm:px-4 bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 hover:border-gray-300 rounded-lg text-sm font-medium transition-all shadow-sm"
                             >
-                                <Settings size={15} />
+                                <Settings size={14} className="sm:w-[15px] sm:h-[15px]" />
                             </Button>
                         </motion.div>
                         <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
@@ -92,17 +92,18 @@ export const DashboardPage: React.FC = () => {
                                 size="sm" 
                                 variant="primary" 
                                 onClick={() => navigate('/diagnosis')}
-                                className="h-9 px-4 bg-black text-white hover:bg-gray-800 rounded-lg text-sm font-medium gap-2 shadow-md shadow-gray-200 hover:shadow-lg transition-all"
+                                className="h-8 sm:h-9 px-3 sm:px-4 bg-black text-white hover:bg-gray-800 rounded-lg text-xs sm:text-sm font-medium gap-1.5 sm:gap-2 shadow-md shadow-gray-200 hover:shadow-lg transition-all"
                             >
-                                <Plus size={15} />
-                                <span>New Analysis</span>
+                                <Plus size={14} className="sm:w-[15px] sm:h-[15px]" />
+                                <span className="hidden sm:inline">New Analysis</span>
+                                <span className="sm:hidden">New</span>
                             </Button>
                         </motion.div>
                     </div>
                 </div>
             </header>
 
-            <main className="max-w-7xl mx-auto px-6 py-10">
+            <main className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
                 {/* Welcome Section */}
                 <motion.div 
                     initial={{ opacity: 0, y: 20 }}
