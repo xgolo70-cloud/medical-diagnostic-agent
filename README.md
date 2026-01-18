@@ -11,7 +11,7 @@
 
 - **Advanced Image Analysis**: Powered by MedGemma 1.5 (Local) for X-Ray, CT, MRI, and more.
 - **Secure & Compliant**: JWT Authentication, Audit Logging, and Data Encryption.
-- **Modern UI**: "Cosmic Glass" aesthetic with intuitive navigation and smooth animations.
+- **Modern UI**: Clean, professional design with intuitive navigation and smooth animations.
 - **Productivity Tools**:
   - 🎤 **MedASR**: Real-time medical speech-to-text dictation.
   - 📄 **PDF Reports**: Instant export of diagnostic findings.

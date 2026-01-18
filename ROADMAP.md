@@ -10,9 +10,9 @@ A unified platform that serves as a holistic health hub ("The Place") for patien
 ## 📅 Phase 1: Foundation & Core Experience (Current - Month 1-2)
 **Goal:** Solidify the basic architecture, UI/UX, and basic AI integration.
 
-### 1.1 UI/UX Perfection ("Cosmic Glass")
+### 1.1 UI/UX Perfection ("Clean Professional")
 - [x] Landing Page & Hero Section (Complete)
-- [ ] **Unified Dashboard System**: Ensure the "Cosmic Glass" aesthetic is applied consistently to:
+- [ ] **Unified Dashboard System**: Ensure a clean, modern professional aesthetic is applied consistently to:
     - Patient Dashboard (Personal metrics).
     - Doctor Dashboard (Patient list, triaging).
 - [ ] **Mobile Responsiveness**: Critical for a "Super App". Ensure touch-friendliness.
