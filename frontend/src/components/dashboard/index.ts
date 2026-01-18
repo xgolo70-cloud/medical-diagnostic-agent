@@ -3,3 +3,8 @@ export { QuickAction } from './QuickAction';
 export { LiveFeed } from './LiveFeed';
 export { RecentActivityTable } from './RecentActivityTable';
 export { AnalyticsSummary } from './AnalyticsSummary';
+export { SearchModal } from './SearchModal';
+export { NotificationsDropdown } from './NotificationsDropdown';
+export { MedASRPromo } from './MedASRPromo';
+export { AppointmentsCard } from './AppointmentsCard';
+export { KeyboardShortcutsCard } from './KeyboardShortcutsCard';

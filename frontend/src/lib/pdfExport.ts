@@ -1,10 +1,12 @@
 /**
  * PDF Export Utility
  * Uses jspdf and html2canvas to generate PDF reports from DOM elements
+ * Libraries are loaded dynamically to reduce initial bundle size
  */
 
-import jsPDF from 'jspdf';
-import html2canvas from 'html2canvas';
+// Dynamic imports for code splitting - these libraries are ~600KB combined
+const loadJsPDF = () => import('jspdf').then(m => m.default);
+const loadHtml2Canvas = () => import('html2canvas').then(m => m.default);
 
 // ==================== Types ====================
 
@@ -57,6 +59,9 @@ export const exportElementToPDF = async (
     } = options;
 
     try {
+        // Load libraries dynamically
+        const [jsPDF, html2canvas] = await Promise.all([loadJsPDF(), loadHtml2Canvas()]);
+
         // Capture the element as canvas
         const canvas = await html2canvas(element, {
             scale: 2,
@@ -157,6 +162,9 @@ export const exportDiagnosisReport = async (
         format = 'a4',
         margin = 20,
     } = options;
+
+    // Load jsPDF dynamically
+    const jsPDF = await loadJsPDF();
 
     const pdf = new jsPDF({
         orientation,

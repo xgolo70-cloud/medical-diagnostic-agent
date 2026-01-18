@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo, useLayoutEffect } from 'react';
 
 type Theme = 'dark' | 'light' | 'system';
 
@@ -11,6 +11,12 @@ interface UseThemeReturn {
 
 const THEME_STORAGE_KEY = 'app-theme';
 
+// Helper to get system theme preference
+const getSystemTheme = (): 'dark' | 'light' => {
+    if (typeof window === 'undefined') return 'dark';
+    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+};
+
 export function useTheme(): UseThemeReturn {
     const [theme, setThemeState] = useState<Theme>(() => {
         if (typeof window === 'undefined') return 'dark';
@@ -18,35 +24,30 @@ export function useTheme(): UseThemeReturn {
         return stored || 'dark';
     });
 
-    const [resolvedTheme, setResolvedTheme] = useState<'dark' | 'light'>('dark');
+    const [systemTheme, setSystemTheme] = useState<'dark' | 'light'>(getSystemTheme);
 
-    // Resolve system theme
-    const getSystemTheme = useCallback((): 'dark' | 'light' => {
-        if (typeof window === 'undefined') return 'dark';
-        return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-    }, []);
+    // Compute resolved theme without setState
+    const resolvedTheme = useMemo((): 'dark' | 'light' => {
+        return theme === 'system' ? systemTheme : theme;
+    }, [theme, systemTheme]);
 
-    // Update resolved theme whenever theme or system preference changes
-    useEffect(() => {
-        const resolved = theme === 'system' ? getSystemTheme() : theme;
-        setResolvedTheme(resolved);
-
-        // Apply to document
+    // Apply theme to DOM (useLayoutEffect to avoid flash)
+    useLayoutEffect(() => {
         document.documentElement.classList.remove('light', 'dark');
-        document.documentElement.classList.add(resolved);
-        document.documentElement.setAttribute('data-theme', resolved);
-    }, [theme, getSystemTheme]);
+        document.documentElement.classList.add(resolvedTheme);
+        document.documentElement.setAttribute('data-theme', resolvedTheme);
+    }, [resolvedTheme]);
 
     // Listen for system theme changes
     useEffect(() => {
-        if (theme !== 'system') return;
-
         const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-        const handler = () => setResolvedTheme(getSystemTheme());
+        const handler = (e: MediaQueryListEvent) => {
+            setSystemTheme(e.matches ? 'dark' : 'light');
+        };
 
         mediaQuery.addEventListener('change', handler);
         return () => mediaQuery.removeEventListener('change', handler);
-    }, [theme, getSystemTheme]);
+    }, []);
 
     const setTheme = useCallback((newTheme: Theme) => {
         setThemeState(newTheme);

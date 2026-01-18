@@ -1,27 +1,12 @@
 import React, { useState, useEffect, createContext, useContext, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, ChevronLeft, ChevronRight, Check, Sparkles, Lightbulb } from 'lucide-react';
+import { X, ChevronLeft, ChevronRight, Check, Lightbulb } from 'lucide-react';
+import type { TourStep, TourContextType } from './tourConfig';
+import { TOUR_COMPLETED_KEY, TOUR_SKIPPED_KEY } from './tourConfig';
 
-// ==================== Types ====================
-
-interface TourStep {
-    target: string;
-    title: string;
-    content: string;
-    placement?: 'top' | 'bottom' | 'left' | 'right';
-    icon?: React.ReactNode;
-}
-
-interface TourContextType {
-    isOpen: boolean;
-    currentStep: number;
-    steps: TourStep[];
-    startTour: (steps: TourStep[]) => void;
-    endTour: () => void;
-    nextStep: () => void;
-    prevStep: () => void;
-    skipTour: () => void;
-}
+// Re-export for backwards compatibility
+export type { TourStep, TourContextType } from './tourConfig';
+export { DASHBOARD_TOUR_STEPS, MEDAI_TOUR_STEPS, resetTour } from './tourConfig';
 
 // ==================== Context ====================
 
@@ -34,11 +19,6 @@ export const useTour = () => {
     }
     return context;
 };
-
-// ==================== Storage Keys ====================
-
-const TOUR_COMPLETED_KEY = 'tour_completed';
-const TOUR_SKIPPED_KEY = 'tour_skipped';
 
 // ==================== Helper Functions ====================
 
@@ -474,45 +454,6 @@ export const TourProvider: React.FC<TourProviderProps> = ({ children }) => {
     );
 };
 
-// ==================== Pre-defined Tour Steps ====================
-
-export const DASHBOARD_TOUR_STEPS: TourStep[] = [
-    {
-        target: '[data-tour="stats-cards"]',
-        title: '📊 إحصائياتك',
-        content: 'لوحة سريعة تعرض أهم الأرقام: عدد التحليلات المنجزة، دقة النموذج، وحالة النظام الحالية.',
-        placement: 'bottom',
-        icon: <Sparkles className="text-white" size={20} />,
-    },
-    {
-        target: '[data-tour="quick-actions"]',
-        title: '⚡ إجراءات سريعة',
-        content: 'اختصارات للمهام الأكثر استخداماً - ابدأ تحليل جديد أو استعرض سجلاتك بضغطة واحدة.',
-        placement: 'left',
-    },
-    {
-        target: '[data-tour="recent-activity"]',
-        title: '📋 النشاط الأخير',
-        content: 'تابع آخر تحليلاتك مع حالة كل منها. اضغط على أي سجل للتفاصيل الكاملة.',
-        placement: 'top',
-    },
-];
-
-export const MEDAI_TOUR_STEPS: TourStep[] = [
-    {
-        target: '[data-tour="modality-select"]',
-        title: '🏥 اختر نوع الفحص',
-        content: 'حدد نوع الصورة الطبية المراد تحليلها: أشعة سينية، تصوير مقطعي، رنين مغناطيسي، أو فحص جلدي.',
-        placement: 'bottom',
-    },
-    {
-        target: '[data-tour="upload-area"]',
-        title: '📤 ارفع صورتك',
-        content: 'اسحب وأفلت الصورة هنا أو اضغط لاختيار ملف. يدعم DICOM و PNG و JPG.',
-        placement: 'top',
-    },
-];
-
 // ==================== Utility Hook ====================
 
 export const useAutoStartTour = (tourSteps: TourStep[], delay: number = 1500) => {
@@ -532,10 +473,4 @@ export const useAutoStartTour = (tourSteps: TourStep[], delay: number = 1500) =>
     }, [startTour, tourSteps, delay]);
 };
 
-export const resetTour = () => {
-    localStorage.removeItem(TOUR_COMPLETED_KEY);
-    localStorage.removeItem(TOUR_SKIPPED_KEY);
-};
-
 export default TourProvider;
-
