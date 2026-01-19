@@ -3,6 +3,23 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowRight, Play, ChevronRight, Activity, Shield, Zap } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
+// Waterfall Images - Medical Diagnostic AI Theme
+const leftColumnImages = [
+    'https://images.unsplash.com/photo-1559757148-5c350d0d3c56?q=80&w=400&auto=format&fit=crop', // Doctor analyzing
+    'https://images.unsplash.com/photo-1516549655169-df83a0774514?q=80&w=400&auto=format&fit=crop', // X-Ray scan
+    'https://images.unsplash.com/photo-1530497610245-94d3c16cda28?q=80&w=400&auto=format&fit=crop', // Medical tablet
+    'https://images.unsplash.com/photo-1576091160550-2173dba999ef?q=80&w=400&auto=format&fit=crop', // Doctor with tech
+    'https://images.unsplash.com/photo-1551076805-e1869033e561?q=80&w=400&auto=format&fit=crop', // Surgery room
+];
+
+const rightColumnImages = [
+    'https://images.unsplash.com/photo-1579684385127-1ef15d508118?q=80&w=400&auto=format&fit=crop', // Stethoscope
+    'https://images.unsplash.com/photo-1551190822-a9333d879b1f?q=80&w=400&auto=format&fit=crop', // Doctor team
+    'https://images.unsplash.com/photo-1584982751601-97dcc096659c?q=80&w=400&auto=format&fit=crop', // Health data
+    'https://images.unsplash.com/photo-1638202993928-7267aad84c31?q=80&w=400&auto=format&fit=crop', // Medical AI screen
+    'https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?q=80&w=400&auto=format&fit=crop', // Doctor portrait
+];
+
 export const HeroSection = () => {
     const navigate = useNavigate();
     const words = ["at the Edge", "for Everyone", "with Speed", "Securely"];
@@ -15,12 +32,86 @@ export const HeroSection = () => {
         return () => clearInterval(timer);
     }, [words.length]);
 
+    // Waterfall CSS Animations
+    const waterfallStyles = `
+        @keyframes scrollDown {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(-50%); }
+        }
+        @keyframes scrollUp {
+            0% { transform: translateY(-50%); }
+            100% { transform: translateY(0); }
+        }
+        .animate-waterfall-down {
+            animation: scrollDown 25s linear infinite;
+        }
+        .animate-waterfall-up {
+            animation: scrollUp 25s linear infinite;
+        }
+    `;
+
     return (
         <section className="relative pt-10 pb-20 lg:pt-14 lg:pb-32 overflow-hidden">
+            <style>{waterfallStyles}</style>
+
             {/* Background Effects */}
             <div className="absolute inset-0 z-0">
                 <div className="absolute inset-0 bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:16px_16px] [mask-image:radial-gradient(ellipse_50%_50%_at_50%_50%,#000_70%,transparent_100%)] opacity-30" />
                 <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[400px] opacity-30 bg-gradient-to-b from-blue-50/50 to-transparent blur-3xl pointer-events-none" />
+            </div>
+
+            {/* Left Waterfall Column */}
+            <div className="absolute left-0 top-0 bottom-0 w-32 lg:w-48 xl:w-64 overflow-hidden z-0 hidden md:block">
+                {/* Fade Overlays */}
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-transparent to-white z-20 pointer-events-none" />
+                <div className="absolute inset-0 bg-gradient-to-b from-white via-transparent to-white z-20 pointer-events-none" />
+                
+                {/* Tilted Container */}
+                <div className="absolute inset-0 transform -rotate-6 scale-125 origin-center opacity-60">
+                    <div className="flex flex-col gap-4 animate-waterfall-down">
+                        {[...leftColumnImages, ...leftColumnImages].map((img, i) => (
+                            <div 
+                                key={`left-${i}`} 
+                                className="relative w-full aspect-[3/4] rounded-2xl overflow-hidden shadow-xl border border-gray-100/50"
+                            >
+                                <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-purple-500/10 z-10" />
+                                <img 
+                                    src={img} 
+                                    alt="" 
+                                    className="w-full h-full object-cover" 
+                                    loading="lazy"
+                                />
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </div>
+
+            {/* Right Waterfall Column */}
+            <div className="absolute right-0 top-0 bottom-0 w-32 lg:w-48 xl:w-64 overflow-hidden z-0 hidden md:block">
+                {/* Fade Overlays */}
+                <div className="absolute inset-0 bg-gradient-to-l from-transparent via-transparent to-white z-20 pointer-events-none" />
+                <div className="absolute inset-0 bg-gradient-to-b from-white via-transparent to-white z-20 pointer-events-none" />
+                
+                {/* Tilted Container */}
+                <div className="absolute inset-0 transform rotate-6 scale-125 origin-center opacity-60">
+                    <div className="flex flex-col gap-4 animate-waterfall-up">
+                        {[...rightColumnImages, ...rightColumnImages].map((img, i) => (
+                            <div 
+                                key={`right-${i}`} 
+                                className="relative w-full aspect-[3/4] rounded-2xl overflow-hidden shadow-xl border border-gray-100/50"
+                            >
+                                <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/10 to-pink-500/10 z-10" />
+                                <img 
+                                    src={img} 
+                                    alt="" 
+                                    className="w-full h-full object-cover" 
+                                    loading="lazy"
+                                />
+                            </div>
+                        ))}
+                    </div>
+                </div>
             </div>
 
             <div className="container mx-auto px-4 relative z-10 flex flex-col items-center">
@@ -33,7 +124,7 @@ export const HeroSection = () => {
                         transition={{ duration: 0.5 }}
                         className="inline-flex items-center justify-center w-full"
                     >
-                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white border border-gray-200 text-sm hover:border-gray-300 transition-colors cursor-default shadow-sm">
+                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/90 backdrop-blur-sm border border-gray-200 text-sm hover:border-gray-300 transition-colors cursor-default shadow-sm">
                             <span className="flex items-center gap-1.5 text-gray-500 font-medium">
                                 <span className="relative flex h-2 w-2">
                                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
@@ -126,15 +217,15 @@ export const HeroSection = () => {
                         transition={{ duration: 0.5, delay: 0.4 }}
                         className="flex flex-wrap items-center justify-center gap-4 text-sm font-medium text-gray-500"
                     >
-                        <div className="flex items-center gap-2 px-4 py-2 bg-gray-50 rounded-full border border-gray-100">
+                        <div className="flex items-center gap-2 px-4 py-2 bg-white/80 backdrop-blur-sm rounded-full border border-gray-100 shadow-sm">
                             <Shield size={16} className="text-gray-900" />
                             <span>HIPAA Compliant</span>
                         </div>
-                        <div className="flex items-center gap-2 px-4 py-2 bg-gray-50 rounded-full border border-gray-100">
+                        <div className="flex items-center gap-2 px-4 py-2 bg-white/80 backdrop-blur-sm rounded-full border border-gray-100 shadow-sm">
                             <Activity size={16} className="text-gray-900" />
                             <span>99.9% Accuracy</span>
                         </div>
-                        <div className="flex items-center gap-2 px-4 py-2 bg-gray-50 rounded-full border border-gray-100">
+                        <div className="flex items-center gap-2 px-4 py-2 bg-white/80 backdrop-blur-sm rounded-full border border-gray-100 shadow-sm">
                             <Zap size={16} className="text-gray-900" />
                             <span>Real-time Analysis</span>
                         </div>
