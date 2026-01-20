@@ -47,7 +47,7 @@ def test_diagnose_endpoint():
             mock_log.assert_called_once()
             args, kwargs = mock_log.call_args
             assert kwargs["action"] == "generate_diagnosis"
-            assert kwargs["user_id"] == "system"
+            assert kwargs["user_id"] == "anonymous"
             assert kwargs["details"]["patient_id"] == "p123"
     finally:
         # Clean up override

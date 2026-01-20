@@ -36,7 +36,8 @@ import {
 import { toast } from '../components/ui/Toast';
 import { Button } from '../components/ui/Button';
 import { useNavigate } from 'react-router-dom';
-import { resetTour, DASHBOARD_TOUR_STEPS, useTour } from '../components/ui/TourProvider';
+import { useTour } from '../components/ui/TourProvider';
+import { resetTour, DASHBOARD_TOUR_STEPS } from '../components/ui/tourConfig';
 
 // Animation variants
 const containerVariants = {

@@ -443,3 +443,23 @@ a:focus-visible {
   outline: 2px solid var(--border-color-focus);
   outline-offset: 2px;
 }
+
+/* -------------------- Footer-specific Link Styles -------------------- */
+footer a:not(.btn) {
+  color: var(--text-secondary) !important;
+  text-decoration: none !important;
+}
+
+footer a:not(.btn):hover {
+  color: var(--text-primary) !important;
+}
+
+footer .text-gray-400,
+footer .text-gray-500 {
+  color: var(--text-secondary) !important;
+}
+
+footer .hover\:text-gray-900:hover,
+footer .hover\:text-gray-700:hover {
+  color: var(--text-primary) !important;
+}

@@ -18,6 +18,7 @@ const ThemeContext = createContext<ThemeContextValue>({
     compactView: false,
 });
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useThemeContext = () => useContext(ThemeContext);
 
 // ================== Theme Provider ==================

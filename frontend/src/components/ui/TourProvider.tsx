@@ -4,14 +4,11 @@ import { X, ChevronLeft, ChevronRight, Check, Lightbulb } from 'lucide-react';
 import type { TourStep, TourContextType } from './tourConfig';
 import { TOUR_COMPLETED_KEY, TOUR_SKIPPED_KEY } from './tourConfig';
 
-// Re-export for backwards compatibility
-export type { TourStep, TourContextType } from './tourConfig';
-export { DASHBOARD_TOUR_STEPS, MEDAI_TOUR_STEPS, resetTour } from './tourConfig';
-
 // ==================== Context ====================
 
 const TourContext = createContext<TourContextType | null>(null);
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useTour = () => {
     const context = useContext(TourContext);
     if (!context) {
@@ -77,7 +74,7 @@ const TourTooltip: React.FC<TooltipProps> = ({
                 
                 let top = 0;
                 let left = 0;
-                let arrowPosition = placement;
+                const arrowPosition = placement;
 
                 switch (placement) {
                     case 'bottom':
@@ -127,7 +124,11 @@ const TourTooltip: React.FC<TooltipProps> = ({
         const handleKeyDown = (e: KeyboardEvent) => {
             if (e.key === 'Escape') onSkip();
             if (e.key === 'ArrowRight' || e.key === 'Enter') {
-                isLast ? onFinish() : onNext();
+                if (isLast) {
+                    onFinish();
+                } else {
+                    onNext();
+                }
             }
             if (e.key === 'ArrowLeft') onPrev();
         };
@@ -456,6 +457,7 @@ export const TourProvider: React.FC<TourProviderProps> = ({ children }) => {
 
 // ==================== Utility Hook ====================
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useAutoStartTour = (tourSteps: TourStep[], delay: number = 1500) => {
     const { startTour } = useTour();
 

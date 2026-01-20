@@ -30,7 +30,7 @@ export const LoginForm: React.FC = () => {
             setWordIndex((prev) => (prev + 1) % words.length);
         }, 3000);
         return () => clearInterval(timer);
-    }, []);
+    }, [words.length]);
 
 
 
@@ -292,7 +292,7 @@ export const LoginForm: React.FC = () => {
                                     <input
                                         type="text"
                                         value={username}
-                                        onChange={(e) => { setUsername(e.target.value); formErrors.username && setFormErrors({ ...formErrors, username: undefined }); }}
+                                        onChange={(e) => { setUsername(e.target.value); if (formErrors.username) setFormErrors({ ...formErrors, username: undefined }); }}
                                         className={`w-full h-12 px-4 rounded-xl bg-white/60 border ${formErrors.username ? 'border-red-300 ring-2 ring-red-50' : 'border-gray-200'} text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-black/5 focus:border-black focus:bg-white transition-all shadow-sm text-sm`}
                                         placeholder="e.g. dr.smith"
                                         disabled={isLoading}

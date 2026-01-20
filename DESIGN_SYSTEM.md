@@ -82,3 +82,38 @@
 -   **Easing:** `ease` or `cubic-bezier(0.16, 1, 0.3, 1)` (spring-like).
 -   **Fade In:** `opacity: 0` -> `1`, `y: 10px` -> `0`.
 -   **Hover:** Subtle scale (`1.01` or `1.02`), not exaggerated.
+
+---
+
+## 🛠️ Troubleshooting & Implementation Patterns
+
+### 1. Absolute Centering (The "Unbreakable" Center)
+When `mx-auto` or `text-center` fails to center an element (often due to `w-full` conflicts or parent constraints), use this Flexbox wrapper pattern:
+
+```tsx
+<div className="w-full flex justify-center">
+    <Element className="text-center" />
+</div>
+```
+*   **Why:** This decouples the centering logic from the element's internal sizing. The parent handles horizontal alignment, and the child handles text alignment.
+
+### 2. Stubborn Link Styling (Footer Links)
+If global CSS or browser defaults force links (anchors) to be blue despite utility classes (e.g., `text-gray-500`), use this "Span-Link" pattern as a last resort:
+
+```tsx
+<span 
+    onClick={() => window.location.href = link.href}
+    className="cursor-pointer transition-colors duration-200"
+    style={{ color: '#6b7280' }} // Force gray color
+    onMouseEnter={(e) => e.currentTarget.style.color = '#111827'} // Darker on hover
+    onMouseLeave={(e) => e.currentTarget.style.color = '#6b7280'}
+>
+    Link Text
+</span>
+```
+*   **Use Case:** Critical UI components like Footers where design consistency overrides semantic constraints and CSS specificity battles are breaking the theme.
+
+### 3. Footer Design Standards
+*   **Links:** Must be Gray (`text-gray-500` / `#6b7280`) by default, never Blue.
+*   **Hover:** Dark Gray / Black (`text-gray-900` / `#111827`).
+*   **Structure:** Clean columns, bold headers (uppercase), subtle animations.

@@ -104,7 +104,14 @@ export const InteractiveWorkflow = () => {
     );
 };
 
-const WorkflowStep = ({ step, index, isEven }: { step: any, index: number, isEven: boolean }) => {
+interface StepType {
+    icon: React.ComponentType<{ size?: number; className?: string }>;
+    title: string;
+    subtitle: string;
+    description: string;
+}
+
+const WorkflowStep = ({ step, index, isEven }: { step: StepType, index: number, isEven: boolean }) => {
     const ref = useRef(null);
     const { scrollYProgress } = useScroll({
         target: ref,

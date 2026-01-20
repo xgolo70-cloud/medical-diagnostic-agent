@@ -24,7 +24,7 @@ export const ToastProvider: React.FC = () => {
     );
 };
 
-// Re-export toast function for convenience
+// eslint-disable-next-line react-refresh/only-export-components
 export { toast } from 'sonner';
 
 export default ToastProvider;

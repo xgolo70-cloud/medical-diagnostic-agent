@@ -61,24 +61,24 @@ export const HeroSection = () => {
             </div>
 
             {/* Left Waterfall Column */}
-            <div className="absolute left-0 top-0 bottom-0 w-32 lg:w-48 xl:w-64 overflow-hidden z-0 hidden md:block">
-                {/* Fade Overlays */}
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-transparent to-white z-20 pointer-events-none" />
+            <div className="absolute left-0 top-0 bottom-0 w-40 lg:w-56 xl:w-72 overflow-hidden z-0 hidden md:block">
+                {/* Fade Overlays - Softer */}
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-white z-20 pointer-events-none" />
                 <div className="absolute inset-0 bg-gradient-to-b from-white via-transparent to-white z-20 pointer-events-none" />
                 
-                {/* Tilted Container */}
-                <div className="absolute inset-0 transform -rotate-6 scale-125 origin-center opacity-60">
-                    <div className="flex flex-col gap-4 animate-waterfall-down">
+                {/* Tilted Container - Higher opacity */}
+                <div className="absolute inset-0 transform -rotate-12 scale-150 origin-center opacity-70">
+                    <div className="flex flex-col gap-5 animate-waterfall-down">
                         {[...leftColumnImages, ...leftColumnImages].map((img, i) => (
                             <div 
                                 key={`left-${i}`} 
-                                className="relative w-full aspect-[3/4] rounded-2xl overflow-hidden shadow-xl border border-gray-100/50"
+                                className="relative w-full aspect-[3/4] rounded-3xl overflow-hidden shadow-2xl shadow-blue-500/20 border border-white/30 group"
                             >
-                                <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-purple-500/10 z-10" />
+                                <div className="absolute inset-0 bg-gradient-to-br from-blue-500/20 to-indigo-500/20 z-10 group-hover:opacity-0 transition-opacity duration-500" />
                                 <img 
                                     src={img} 
                                     alt="" 
-                                    className="w-full h-full object-cover" 
+                                    className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700" 
                                     loading="lazy"
                                 />
                             </div>
@@ -88,24 +88,24 @@ export const HeroSection = () => {
             </div>
 
             {/* Right Waterfall Column */}
-            <div className="absolute right-0 top-0 bottom-0 w-32 lg:w-48 xl:w-64 overflow-hidden z-0 hidden md:block">
-                {/* Fade Overlays */}
-                <div className="absolute inset-0 bg-gradient-to-l from-transparent via-transparent to-white z-20 pointer-events-none" />
+            <div className="absolute right-0 top-0 bottom-0 w-40 lg:w-56 xl:w-72 overflow-hidden z-0 hidden md:block">
+                {/* Fade Overlays - Softer */}
+                <div className="absolute inset-0 bg-gradient-to-l from-transparent via-white/30 to-white z-20 pointer-events-none" />
                 <div className="absolute inset-0 bg-gradient-to-b from-white via-transparent to-white z-20 pointer-events-none" />
                 
-                {/* Tilted Container */}
-                <div className="absolute inset-0 transform rotate-6 scale-125 origin-center opacity-60">
-                    <div className="flex flex-col gap-4 animate-waterfall-up">
+                {/* Tilted Container - Higher opacity */}
+                <div className="absolute inset-0 transform rotate-12 scale-150 origin-center opacity-70">
+                    <div className="flex flex-col gap-5 animate-waterfall-up">
                         {[...rightColumnImages, ...rightColumnImages].map((img, i) => (
                             <div 
                                 key={`right-${i}`} 
-                                className="relative w-full aspect-[3/4] rounded-2xl overflow-hidden shadow-xl border border-gray-100/50"
+                                className="relative w-full aspect-[3/4] rounded-3xl overflow-hidden shadow-2xl shadow-purple-500/20 border border-white/30 group"
                             >
-                                <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/10 to-pink-500/10 z-10" />
+                                <div className="absolute inset-0 bg-gradient-to-br from-purple-500/20 to-pink-500/20 z-10 group-hover:opacity-0 transition-opacity duration-500" />
                                 <img 
                                     src={img} 
                                     alt="" 
-                                    className="w-full h-full object-cover" 
+                                    className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700" 
                                     loading="lazy"
                                 />
                             </div>
@@ -113,6 +113,7 @@ export const HeroSection = () => {
                     </div>
                 </div>
             </div>
+
 
             <div className="container mx-auto px-4 relative z-10 flex flex-col items-center">
                 <div className="max-w-4xl mx-auto text-center flex flex-col items-center gap-y-8">

@@ -30,6 +30,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         return (
             <motion.button
                 ref={ref}
+                disabled={isLoading || props.disabled}
                 whileTap={{ scale: 0.98 }}
                 className={cn(
                     "relative inline-flex items-center justify-center rounded-md font-medium transition-all duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#171717] focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 select-none",

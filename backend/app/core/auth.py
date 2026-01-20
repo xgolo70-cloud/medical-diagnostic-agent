@@ -4,7 +4,7 @@ Provides JWT-based authentication and authorization with Refresh Token Rotation
 """
 import os
 import secrets
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Optional, Tuple
 from fastapi import HTTPException, Depends, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
@@ -69,9 +69,9 @@ def _base64url_decode(data: str) -> bytes:
 def _create_token(data: dict, secret: str, expires_delta: timedelta) -> str:
     """Create a JWT token with given secret and expiration"""
     to_encode = data.copy()
-    expire = datetime.utcnow() + expires_delta
+    expire = datetime.now(timezone.utc) + expires_delta
     to_encode["exp"] = int(expire.timestamp())
-    to_encode["iat"] = int(datetime.utcnow().timestamp())
+    to_encode["iat"] = int(datetime.now(timezone.utc).timestamp())
     to_encode["jti"] = secrets.token_hex(16)  # Unique token ID for revocation
     
     # Create JWT manually (header.payload.signature)
@@ -106,7 +106,7 @@ def _verify_token(token: str, secret: str, check_revocation: bool = True) -> Opt
         payload = json.loads(_base64url_decode(payload_encoded))
         
         # Check expiration
-        if payload.get("exp", 0) < datetime.utcnow().timestamp():
+        if payload.get("exp", 0) < datetime.now(timezone.utc).timestamp():
             return None
         
         # Check revocation
