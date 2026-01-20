@@ -90,9 +90,11 @@ export const LoginForm: React.FC = () => {
                 // Dispatch login success with Google data
                 // Map Google profile to our app's user structure
                 dispatch(loginSuccess({
-                    username: userInfo.name || userInfo.email,
+                    username: userInfo.email,
                     role: 'specialist', // Default role for Google sign-in users
-                    // We could also store email/avatar if the auth slice supports it
+                    email: userInfo.email,
+                    avatar: userInfo.picture,
+                    displayName: userInfo.name,
                 }));
                 
             } catch (err) {

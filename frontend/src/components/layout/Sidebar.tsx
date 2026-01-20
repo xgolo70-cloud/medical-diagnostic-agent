@@ -281,10 +281,19 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileOpen = false, onMobileCl
                         }
                     `}>
                         <div className={`
-                            relative rounded-full bg-zinc-900 text-white flex items-center justify-center font-medium shadow-lg ring-4 ring-white shrink-0 transition-all duration-300 group-hover:scale-105 group-hover:shadow-xl group-hover:bg-black
+                            relative rounded-full bg-zinc-900 text-white flex items-center justify-center font-medium shadow-lg ring-4 ring-white shrink-0 transition-all duration-300 group-hover:scale-105 group-hover:shadow-xl overflow-hidden
                             ${isCollapsed ? 'w-12 h-12 text-lg' : 'w-10 h-10 text-xs'}
                         `}>
-                            {user?.username?.charAt(0).toUpperCase() || 'U'}
+                            {user?.avatar ? (
+                                <img 
+                                    src={user.avatar} 
+                                    alt={user.displayName || user.username} 
+                                    className="w-full h-full object-cover"
+                                    referrerPolicy="no-referrer"
+                                />
+                            ) : (
+                                <span>{(user?.displayName || user?.username)?.charAt(0).toUpperCase() || 'U'}</span>
+                            )}
                             
                             {/* Online Status Dot */}
                             <div className="absolute bottom-0 right-0 w-3 h-3 bg-emerald-500 border-[2.5px] border-white rounded-full shadow-sm"></div>
@@ -294,12 +303,16 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileOpen = false, onMobileCl
                         {isCollapsed && (
                              <div className="absolute left-full bottom-0 ml-3 mb-[-10px] w-56 p-4 bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-zinc-100 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 translate-x-[-8px] group-hover:translate-x-0 z-50">
                                 <div className="flex items-center gap-3 mb-3 pb-3 border-b border-zinc-100">
-                                    <div className="w-10 h-10 rounded-full bg-zinc-100 flex items-center justify-center text-sm font-bold text-zinc-900">
-                                         {user?.username?.charAt(0).toUpperCase() || 'U'}
+                                    <div className="w-10 h-10 rounded-full bg-zinc-100 flex items-center justify-center text-sm font-bold text-zinc-900 overflow-hidden">
+                                         {user?.avatar ? (
+                                             <img src={user.avatar} alt="" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                                         ) : (
+                                             <span>{(user?.displayName || user?.username)?.charAt(0).toUpperCase() || 'U'}</span>
+                                         )}
                                     </div>
                                     <div className="overflow-hidden">
-                                        <p className="text-sm font-bold text-zinc-900 truncate">{user?.username || 'User'}</p>
-                                        <p className="text-xs text-zinc-500 truncate">{user?.role || 'Administrator'}</p>
+                                        <p className="text-sm font-bold text-zinc-900 truncate">{user?.displayName || user?.username || 'User'}</p>
+                                        <p className="text-xs text-zinc-500 truncate">{user?.email || user?.role || 'Administrator'}</p>
                                     </div>
                                 </div>
                                 <button 
@@ -322,9 +335,9 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileOpen = false, onMobileCl
                                     className="flex-1 min-w-0 overflow-hidden"
                                 >
                                     <p className="text-[13px] font-bold text-black truncate tracking-tight">
-                                        {user?.username || 'User'}
+                                        {user?.displayName || user?.username || 'User'}
                                     </p>
-                                    <p className="text-[11px] text-zinc-400 truncate font-medium">{user?.role || 'Administrator'}</p>
+                                    <p className="text-[11px] text-zinc-400 truncate font-medium">{user?.email || user?.role || 'Administrator'}</p>
                                 </motion.div>
                             )}
                         </AnimatePresence>

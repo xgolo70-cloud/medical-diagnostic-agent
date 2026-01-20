@@ -3,7 +3,7 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import Response
-from app.api import ingest, diagnose, history, auth
+from app.api import ingest, diagnose, history, auth, google_auth
 from app.api.medgemma import router as medgemma_router
 from collections import defaultdict
 import time
@@ -93,6 +93,7 @@ app.add_middleware(
 # ================== Routes ==================
 
 app.include_router(auth.router, prefix="/api", tags=["Authentication"])
+app.include_router(google_auth.router, prefix="/api", tags=["Google OAuth"])
 app.include_router(ingest.router, prefix="/api/ingest")
 app.include_router(diagnose.router, prefix="/api/diagnose")
 app.include_router(history.router, prefix="/api/history")
