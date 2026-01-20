@@ -421,22 +421,22 @@ export const LoginForm: React.FC = () => {
                                     <span className="text-[10px] font-semibold text-emerald-700">Demo Mode</span>
                                 </div>
                             </div>
-                            <div className="grid grid-cols-3 gap-3">
+                            <div className="grid grid-cols-3 gap-2">
                                 {VALID_CREDENTIALS.map((cred) => (
                                     <button
                                         key={cred.role}
                                         type="button"
                                         onClick={() => { setUsername(cred.username); setPassword(cred.password); }}
-                                        className="group relative flex items-center justify-center gap-2 h-10 px-2 rounded-full border border-gray-200 bg-white hover:bg-zinc-950 hover:border-zinc-950 hover:scale-105 hover:shadow-xl hover:shadow-black/20 active:scale-95 transition-all duration-300 cursor-pointer"
+                                        className="group relative flex items-center justify-center gap-2 h-10 w-full px-3 rounded-full border border-gray-200 bg-white hover:bg-zinc-950 hover:border-zinc-950 hover:scale-[1.02] hover:shadow-lg hover:shadow-black/15 active:scale-[0.98] transition-all duration-300 cursor-pointer"
                                     >
-                                        <div className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold transition-all ${
+                                        <div className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold transition-all shrink-0 ${
                                             cred.role === 'gp' ? 'bg-blue-100 text-blue-600 group-hover:bg-white group-hover:text-blue-600' : 
                                             cred.role === 'specialist' ? 'bg-purple-100 text-purple-600 group-hover:bg-white group-hover:text-purple-600' : 
                                             'bg-orange-100 text-orange-600 group-hover:bg-white group-hover:text-orange-600'
                                         }`}>
                                             {cred.role.charAt(0).toUpperCase()}
                                         </div>
-                                        <span className="text-[11px] font-semibold text-gray-600 group-hover:text-white capitalize truncate transition-colors">
+                                        <span className="text-xs font-semibold text-gray-600 group-hover:text-white capitalize transition-colors truncate">
                                             {cred.role === 'gp' ? 'GP' : cred.role}
                                         </span>
                                     </button>
