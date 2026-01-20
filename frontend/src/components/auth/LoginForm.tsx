@@ -69,7 +69,7 @@ export const LoginForm: React.FC = () => {
     };
 
     const handleGoogleLogin = useGoogleLogin({
-        onSuccess: async (tokenResponse: any) => {
+        onSuccess: async (tokenResponse) => {
             try {
                 dispatch(loginStart());
                 
