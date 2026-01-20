@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useGoogleLogin } from '@react-oauth/google';
 import { Eye, EyeOff, ArrowLeft, Brain, ArrowRight, AlertCircle, Lock } from 'lucide-react';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { loginStart, loginSuccess, loginFailure } from '../../store/authSlice';
@@ -66,6 +67,43 @@ export const LoginForm: React.FC = () => {
             dispatch(loginFailure('Invalid credentials.'));
         }
     };
+
+    const handleGoogleLogin = useGoogleLogin({
+        onSuccess: async (tokenResponse: any) => {
+            try {
+                dispatch(loginStart());
+                
+                // Fetch user info from Google
+                const userInfoResponse = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+                    headers: { Authorization: `Bearer ${tokenResponse.access_token}` },
+                });
+                
+                if (!userInfoResponse.ok) {
+                    throw new Error('Failed to fetch user info');
+                }
+                
+                const userInfo = await userInfoResponse.json();
+                
+                // Store tokens
+                tokenManager.setTokens(tokenResponse.access_token, tokenResponse.access_token);
+                
+                // Dispatch login success with Google data
+                // Map Google profile to our app's user structure
+                dispatch(loginSuccess({
+                    username: userInfo.name || userInfo.email,
+                    role: 'specialist', // Default role for Google sign-in users
+                    // We could also store email/avatar if the auth slice supports it
+                }));
+                
+            } catch (err) {
+                console.error('Google login error:', err);
+                dispatch(loginFailure('Google sign-in failed. Please try again.'));
+            }
+        },
+        onError: () => {
+             dispatch(loginFailure('Google sign-in failed.'));
+        }
+    });
 
     return (
         <div className="h-screen flex items-center justify-center bg-[#F8FAFC] relative overflow-hidden font-sans p-4 sm:p-6 lg:p-8 selection:bg-indigo-500 selection:text-white">
@@ -346,6 +384,27 @@ export const LoginForm: React.FC = () => {
                                             <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
                                         </>
                                     )}
+                                </button>
+                                
+                                <div className="relative flex py-2 items-center">
+                                    <div className="flex-grow border-t border-gray-200"></div>
+                                    <span className="flex-shrink-0 mx-4 text-gray-400 text-xs uppercase font-bold tracking-widest">Or</span>
+                                    <div className="flex-grow border-t border-gray-200"></div>
+                                </div>
+
+                                <button
+                                    type="button"
+                                    onClick={() => handleGoogleLogin()}
+                                    disabled={isLoading}
+                                    className="w-full h-12 bg-white text-gray-700 border border-gray-200 rounded-xl font-bold text-sm tracking-wide hover:bg-gray-50 hover:border-gray-300 hover:shadow-md hover:-translate-y-0.5 active:translate-y-0 transition-all flex items-center justify-center gap-2 group"
+                                >
+                                    <svg className="w-5 h-5" viewBox="0 0 24 24">
+                                        <path
+                                            fill="currentColor"
+                                            d="M21.35 11.1h-9.17v2.73h6.51c-.33 3.81-3.5 5.44-6.5 5.44C8.36 19.27 5 16.25 5 12c0-4.1 3.2-7.27 7.2-7.27c3.09 0 4.9 1.97 4.9 1.97L19 4.72S16.56 2 12.1 2C6.42 2 2.03 6.8 2.03 12c0 5.05 4.13 10 10.22 10c5.35 0 9.25-3.67 9.25-9.09c0-1.15-.15-1.81-.15-1.81Z"
+                                        />
+                                    </svg>
+                                    Sign in with Google
                                 </button>
                             </form>
                         </div>

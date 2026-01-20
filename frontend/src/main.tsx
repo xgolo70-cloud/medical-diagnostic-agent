@@ -12,20 +12,27 @@ import { ThemeProvider } from './components/ui/ThemeProvider';
 import App from './App';
 import './index.css';
 
+import { GoogleOAuthProvider } from '@react-oauth/google';
+import { GOOGLE_CLIENT_ID } from './config/oauth';
+
+// ... other imports
+
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <Provider store={store}>
-      <QueryClientProvider client={queryClient}>
-        <MuiThemeProvider theme={theme}>
-          <CssBaseline />
-          <ThemeProvider>
-            <BrowserRouter>
-              <App />
-            </BrowserRouter>
-          </ThemeProvider>
-        </MuiThemeProvider>
-      </QueryClientProvider>
-    </Provider>
+    <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
+      <Provider store={store}>
+        <QueryClientProvider client={queryClient}>
+          <MuiThemeProvider theme={theme}>
+            <CssBaseline />
+            <ThemeProvider>
+              <BrowserRouter>
+                <App />
+              </BrowserRouter>
+            </ThemeProvider>
+          </MuiThemeProvider>
+        </QueryClientProvider>
+      </Provider>
+    </GoogleOAuthProvider>
   </StrictMode>
 );
 
