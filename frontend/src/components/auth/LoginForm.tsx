@@ -7,11 +7,15 @@ import { loginStart, loginSuccess, loginFailure } from '../../store/authSlice';
 import { tokenManager } from '../../services/api';
 import { Link } from 'react-router-dom';
 
-const VALID_CREDENTIALS = [
-    { username: 'admin', password: 'password', role: 'gp' as const },
-    { username: 'dr.smith', password: 'specialist123', role: 'specialist' as const },
-    { username: 'auditor', password: 'audit2024', role: 'auditor' as const },
+// Demo credentials for quick login (still connect to real API)
+const DEMO_CREDENTIALS = [
+    { username: 'admin', password: 'Admin123!', role: 'admin' as const },
+    { username: 'dr.smith', password: 'Doctor123!', role: 'specialist' as const },
+    { username: 'auditor', password: 'Auditor123!', role: 'auditor' as const },
 ];
+
+// API base URL
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
 export const LoginForm: React.FC = () => {
     const dispatch = useAppDispatch();
@@ -49,22 +53,50 @@ export const LoginForm: React.FC = () => {
         if (!validateForm()) return;
 
         dispatch(loginStart());
-        await new Promise((resolve) => setTimeout(resolve, 800)); // Slightly longer delay for "premium" feel
 
-        const matchedUser = VALID_CREDENTIALS.find(
-            (cred) => cred.username === username && cred.password === password
-        );
+        try {
+            const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    username: username,
+                    password: password,
+                }),
+            });
 
-        if (matchedUser) {
-            // Save mock tokens for session persistence (since backend is not available)
-            // This ensures the session survives page refresh
-            const mockAccessToken = `mock_access_${Date.now()}_${matchedUser.username}`;
-            const mockRefreshToken = `mock_refresh_${Date.now()}_${matchedUser.username}`;
-            tokenManager.setTokens(mockAccessToken, mockRefreshToken);
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.detail || 'Invalid credentials');
+            }
+
+            // Save tokens from API response
+            tokenManager.setTokens(data.access_token, data.refresh_token);
             
-            dispatch(loginSuccess({ username: matchedUser.username, role: matchedUser.role }));
-        } else {
-            dispatch(loginFailure('Invalid credentials.'));
+            // Fetch user info to get full profile
+            const userResponse = await fetch(`${API_BASE_URL}/api/auth/me`, {
+                headers: {
+                    'Authorization': `Bearer ${data.access_token}`,
+                },
+            });
+
+            if (userResponse.ok) {
+                const userData = await userResponse.json();
+                dispatch(loginSuccess({ 
+                    username: userData.username, 
+                    role: userData.role,
+                    email: userData.email,
+                    displayName: userData.full_name,
+                    avatar: userData.avatar_url,
+                }));
+            } else {
+                // Fallback: use basic info from token claims
+                dispatch(loginSuccess({ username: username, role: 'specialist' }));
+            }
+        } catch (err) {
+            dispatch(loginFailure(err instanceof Error ? err.message : 'Login failed'));
         }
     };
 
@@ -73,33 +105,43 @@ export const LoginForm: React.FC = () => {
             try {
                 dispatch(loginStart());
                 
-                // Fetch user info from Google
-                const userInfoResponse = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
-                    headers: { Authorization: `Bearer ${tokenResponse.access_token}` },
+                // Send Google token to our backend for verification and user creation
+                const response = await fetch(`${API_BASE_URL}/api/auth/google`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ access_token: tokenResponse.access_token }),
                 });
                 
-                if (!userInfoResponse.ok) {
-                    throw new Error('Failed to fetch user info');
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(data.detail || 'Google sign-in failed');
                 }
                 
-                const userInfo = await userInfoResponse.json();
+                // Store our app's JWT tokens
+                tokenManager.setTokens(data.access_token, data.refresh_token);
                 
-                // Store tokens
-                tokenManager.setTokens(tokenResponse.access_token, tokenResponse.access_token);
+                // Fetch user info with our JWT
+                const userResponse = await fetch(`${API_BASE_URL}/api/auth/me`, {
+                    headers: { 'Authorization': `Bearer ${data.access_token}` },
+                });
                 
-                // Dispatch login success with Google data
-                // Map Google profile to our app's user structure
-                dispatch(loginSuccess({
-                    username: userInfo.email,
-                    role: 'specialist', // Default role for Google sign-in users
-                    email: userInfo.email,
-                    avatar: userInfo.picture,
-                    displayName: userInfo.name,
-                }));
+                if (userResponse.ok) {
+                    const userData = await userResponse.json();
+                    dispatch(loginSuccess({
+                        username: userData.username,
+                        role: userData.role,
+                        email: userData.email,
+                        avatar: userData.avatar_url,
+                        displayName: userData.full_name,
+                    }));
+                } else {
+                    throw new Error('Failed to fetch user profile');
+                }
                 
             } catch (err) {
                 console.error('Google login error:', err);
-                dispatch(loginFailure('Google sign-in failed. Please try again.'));
+                dispatch(loginFailure(err instanceof Error ? err.message : 'Google sign-in failed'));
             }
         },
         onError: () => {
@@ -108,47 +150,30 @@ export const LoginForm: React.FC = () => {
     });
 
     return (
-        <div className="h-screen flex items-center justify-center bg-[#F8FAFC] relative overflow-hidden font-sans p-4 sm:p-6 lg:p-8 selection:bg-indigo-500 selection:text-white">
-            <style>
-                {`
-                    @keyframes blob {
-                        0% { transform: translate(0px, 0px) scale(1); }
-                        33% { transform: translate(30px, -50px) scale(1.1); }
-                        66% { transform: translate(-20px, 20px) scale(0.9); }
-                        100% { transform: translate(0px, 0px) scale(1); }
-                    }
-                    .animate-blob {
-                        animation: blob 10s infinite;
-                    }
-                    .animation-delay-2000 {
-                        animation-delay: 2s;
-                    }
-                    .animation-delay-4000 {
-                        animation-delay: 4s;
-                    }
-                `}
-            </style>
-
-            {/* Light Creative Background */}
-            <div className="absolute inset-0 bg-[#F8FAFC]">
-                {/* Subtle Grid */}
-                <div className="absolute inset-0 opacity-[0.4]" 
-                     style={{ backgroundImage: 'radial-gradient(#cbd5e1 1px, transparent 1px)', backgroundSize: '32px 32px' }} 
+        <div className="min-h-screen flex items-center justify-center bg-[#fafafa] relative overflow-hidden font-['Inter',sans-serif] p-4 sm:p-6 lg:p-8">
+            {/* Subtle Background Grid - Clean Light Mode */}
+            <div className="absolute inset-0 bg-[#fafafa]">
+                <div 
+                    className="absolute inset-0 opacity-30" 
+                    style={{ 
+                        backgroundImage: 'radial-gradient(#d4d4d4 1px, transparent 1px)', 
+                        backgroundSize: '24px 24px' 
+                    }} 
                 />
             </div>
 
-            {/* Animated Pastel Orbs */}
+            {/* Minimal Accent Orbs */}
             <div className="absolute inset-0 overflow-hidden pointer-events-none">
-                <div className="absolute top-0 -left-4 w-96 h-96 bg-indigo-200 rounded-full mix-blend-multiply filter blur-[96px] opacity-70 animate-blob" />
-                <div className="absolute top-0 -right-4 w-96 h-96 bg-purple-200 rounded-full mix-blend-multiply filter blur-[96px] opacity-70 animate-blob animation-delay-2000" />
-                <div className="absolute -bottom-32 left-20 w-96 h-96 bg-pink-200 rounded-full mix-blend-multiply filter blur-[96px] opacity-70 animate-blob animation-delay-4000" />
+                <div className="absolute top-[-10%] left-[-5%] w-[400px] h-[400px] bg-gradient-to-br from-blue-100/40 to-transparent rounded-full blur-3xl" />
+                <div className="absolute bottom-[-10%] right-[-5%] w-[400px] h-[400px] bg-gradient-to-tl from-purple-100/40 to-transparent rounded-full blur-3xl" />
             </div>
             
-            <div className="w-full max-w-5xl relative z-10 p-4">
-                <div className="bg-white rounded-[3rem] shadow-[0_0_80px_-10px_rgba(0,0,0,0.1),0_0_0_1px_rgba(255,255,255,1)] border-[4px] border-white/40 overflow-hidden flex flex-col lg:flex-row lg:min-h-[640px] transition-all duration-500 hover:shadow-[0_0_120px_-10px_rgba(0,0,0,0.15)] ring-1 ring-black/5">
+            <div className="w-full max-w-4xl relative z-10">
+                {/* Main Card - Unified Clean Design */}
+                <div className="bg-white rounded-xl border border-[#eaeaea] shadow-[0_4px_12px_rgba(0,0,0,0.05)] overflow-hidden flex flex-col lg:flex-row min-h-[400px] sm:min-h-[450px] lg:min-h-[520px] max-h-[95vh] transition-shadow duration-200 hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)]">
                     
                      {/* Left Side - Brand Visual */}
-                    <div className="lg:w-5/12 relative overflow-hidden bg-[#0A0A0A] p-8 lg:p-12 flex flex-col justify-between text-white group">
+                    <div className="lg:w-5/12 relative overflow-hidden bg-[#171717] p-4 sm:p-5 lg:p-6 flex flex-col justify-between text-white min-h-[160px] sm:min-h-[200px] lg:min-h-auto">
                          {/* Dynamic Background Slideshow - Merged & Fluid */}
                          {/* Dynamic Background: Creative Waterfall Marquee */}
                          <div className="absolute inset-0 z-0 overflow-hidden bg-slate-900">
@@ -286,70 +311,70 @@ export const LoginForm: React.FC = () => {
                          </div>
                     </div>
 
-                    {/* Right Side - Smart Form */}
-                    <div className="lg:w-7/12 p-6 lg:p-10 flex flex-col bg-white/40 backdrop-blur-sm relative">
-                         <div className="max-w-md mx-auto w-full flex-1 flex flex-col justify-center">
+                    {/* Right Side - Form */}
+                    <div className="lg:w-7/12 p-4 sm:p-5 lg:p-6 flex flex-col bg-white">
+                         <div className="max-w-sm mx-auto w-full flex-1 flex flex-col justify-center">
+                            {/* Header */}
                             <div className="flex justify-between items-center mb-6">
                                 <Link 
                                     to="/" 
-                                    className="inline-flex items-center gap-2 px-3 py-1.5 -ml-3 rounded-full text-[10px] font-bold uppercase tracking-widest text-gray-400 hover:bg-gray-50 hover:text-black transition-all group"
+                                    className="inline-flex items-center gap-1.5 px-2.5 py-1.5 -ml-2.5 rounded-md text-xs font-medium text-[#666666] hover:bg-[#fafafa] hover:text-[#171717] transition-colors duration-150"
                                 >
-                                    <ArrowLeft size={14} className="group-hover:-translate-x-0.5 transition-transform" />
+                                    <ArrowLeft size={14} />
                                     Back
                                 </Link>
-                                <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-50 border border-slate-100 text-slate-500 shadow-sm">
-                                    <Lock size={10} className="text-emerald-500" />
-                                    <span className="text-[10px] font-bold uppercase tracking-widest">Secure Entry</span>
+                                <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md bg-[#fafafa] border border-[#eaeaea] text-[#666666]">
+                                    <Lock size={10} className="text-emerald-600" />
+                                    <span className="text-[10px] font-semibold uppercase tracking-wider">Secure</span>
                                 </div>
                             </div>
 
-                            <div className="mb-6 flex flex-col gap-3">
-                                <h3 className="text-2xl font-bold text-gray-900">Welcome Back</h3>
+                            {/* Title & Error */}
+                            <div className="mb-6">
+                                <h3 className="text-xl font-semibold text-[#171717] tracking-[-0.02em] mb-1.5">Welcome Back</h3>
                                 {error ? (
-                                    <div className="bg-red-500 text-white px-4 py-2.5 rounded-xl shadow-lg shadow-red-500/30 flex items-center gap-3 animate-in slide-in-from-left-2 duration-300">
-                                        <div className="p-1.5 bg-white/20 rounded-lg backdrop-blur-sm">
-                                            <AlertCircle size={18} className="text-white" /> 
-                                        </div>
-                                        <span className="text-sm font-bold tracking-wide">{error}</span>
+                                    <div className="bg-red-50 text-red-600 px-3 py-2 rounded-md border border-red-100 flex items-center gap-2">
+                                        <AlertCircle size={14} />
+                                        <span className="text-sm font-medium">{error}</span>
                                     </div>
                                 ) : (
-                                    <p className="text-gray-500 text-sm pl-1">Sign in to access your intelligent dashboard.</p>
+                                    <p className="text-[#666666] text-sm">Sign in to access your intelligent dashboard.</p>
                                 )}
                             </div>
 
                             <form onSubmit={handleSubmit} className="space-y-4">
-                                <div className="space-y-1.5 group">
+                                {/* Username */}
+                                <div className="space-y-1.5">
                                     <div className="flex justify-between items-center">
-                                        <div className="flex items-center gap-2">
-                                            <label className="text-xs font-bold uppercase tracking-wider text-gray-500 group-focus-within:text-black transition-colors">Username</label>
-                                            {formErrors.username && (
-                                                <span className="text-[10px] font-bold text-red-500 animate-in fade-in flex items-center gap-1 bg-red-50 px-2 py-0.5 rounded-full border border-red-100">
-                                                    <AlertCircle size={10} /> {formErrors.username}
-                                                </span>
-                                            )}
-                                        </div>
+                                        <label className="text-xs font-medium text-[#666666]">Username</label>
+                                        {formErrors.username && (
+                                            <span className="text-[11px] font-medium text-red-500 flex items-center gap-1">
+                                                <AlertCircle size={10} /> {formErrors.username}
+                                            </span>
+                                        )}
                                     </div>
                                     <input
                                         type="text"
                                         value={username}
                                         onChange={(e) => { setUsername(e.target.value); if (formErrors.username) setFormErrors({ ...formErrors, username: undefined }); }}
-                                        className={`w-full h-12 px-4 rounded-xl bg-white/60 border ${formErrors.username ? 'border-red-300 ring-2 ring-red-50' : 'border-gray-200'} text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-black/5 focus:border-black focus:bg-white transition-all shadow-sm text-sm`}
+                                        className={`w-full h-10 px-3.5 rounded-md bg-white border ${formErrors.username ? 'border-red-300 focus:border-red-400' : 'border-[#eaeaea] focus:border-[#171717]'} text-[#171717] placeholder-[#a3a3a3] focus:outline-none focus:ring-2 focus:ring-[#eaeaea] transition-all duration-150 text-sm`}
                                         placeholder="e.g. dr.smith"
                                         disabled={isLoading}
                                     />
                                 </div>
 
-                                <div className="space-y-1.5 group">
+                                {/* Password */}
+                                <div className="space-y-1.5">
                                     <div className="flex justify-between items-center">
-                                        <div className="flex items-center gap-2">
-                                            <label className="text-xs font-bold uppercase tracking-wider text-gray-500 group-focus-within:text-black transition-colors">Password</label>
+                                        <label className="text-xs font-medium text-[#666666]">Password</label>
+                                        <div className="flex items-center gap-3">
                                             {formErrors.password && (
-                                                <span className="text-[10px] font-bold text-red-500 animate-in fade-in flex items-center gap-1 bg-red-50 px-2 py-0.5 rounded-full border border-red-100">
+                                                <span className="text-[11px] font-medium text-red-500 flex items-center gap-1">
                                                     <AlertCircle size={10} /> {formErrors.password}
                                                 </span>
                                             )}
+                                            <Link to="/forgot-password" className="text-[11px] font-medium text-[#888888] hover:text-[#171717] transition-colors duration-150">Forgot?</Link>
                                         </div>
-                                        <button type="button" className="text-[10px] font-bold uppercase tracking-wider text-gray-400 hover:text-black transition-colors">Forgot?</button>
                                     </div>
                                     <div className="relative">
                                         <input
@@ -359,90 +384,100 @@ export const LoginForm: React.FC = () => {
                                                 setPassword(e.target.value); 
                                                 if (formErrors.password) setFormErrors({ ...formErrors, password: undefined }); 
                                             }}
-                                            className={`w-full h-12 px-4 rounded-xl bg-white/60 border ${formErrors.password ? 'border-red-300 ring-2 ring-red-50' : 'border-gray-200'} text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-black/5 focus:border-black focus:bg-white transition-all shadow-sm text-sm`}
+                                            className={`w-full h-10 px-3.5 pr-10 rounded-md bg-white border ${formErrors.password ? 'border-red-300 focus:border-red-400' : 'border-[#eaeaea] focus:border-[#171717]'} text-[#171717] placeholder-[#a3a3a3] focus:outline-none focus:ring-2 focus:ring-[#eaeaea] transition-all duration-150 text-sm`}
                                             placeholder="••••••••"
                                             disabled={isLoading}
                                         />
                                         <button
                                             type="button"
                                             onClick={() => setShowPassword(!showPassword)}
-                                            className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-black transition-colors"
+                                            className="absolute right-3 top-1/2 -translate-y-1/2 text-[#a3a3a3] hover:text-[#171717] transition-colors duration-150"
                                         >
                                             {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                                         </button>
                                     </div>
                                 </div>
 
+                                {/* Submit Button */}
                                 <button
                                     type="submit"
                                     disabled={isLoading}
-                                    className="w-full h-12 bg-black text-white rounded-xl font-bold text-sm tracking-wide hover:bg-gray-800 hover:shadow-lg hover:shadow-black/20 hover:-translate-y-0.5 active:translate-y-0 transition-all flex items-center justify-center gap-2 group"
+                                    className="w-full h-10 bg-[#171717] text-white rounded-md font-medium text-sm hover:bg-[#404040] active:scale-[0.99] transition-all duration-150 flex items-center justify-center gap-2"
                                 >
                                     {isLoading ? (
-                                        <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                        <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                                     ) : (
                                         <>
                                             Sign In
-                                            <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
+                                            <ArrowRight size={14} />
                                         </>
                                     )}
                                 </button>
                                 
+                                {/* Divider */}
                                 <div className="relative flex py-2 items-center">
-                                    <div className="flex-grow border-t border-gray-200"></div>
-                                    <span className="flex-shrink-0 mx-4 text-gray-400 text-xs uppercase font-bold tracking-widest">Or</span>
-                                    <div className="flex-grow border-t border-gray-200"></div>
+                                    <div className="flex-grow border-t border-[#eaeaea]"></div>
+                                    <span className="flex-shrink-0 mx-3 text-[#888888] text-xs font-medium">Or</span>
+                                    <div className="flex-grow border-t border-[#eaeaea]"></div>
                                 </div>
 
+                                {/* Google Button */}
                                 <button
                                     type="button"
                                     onClick={() => handleGoogleLogin()}
                                     disabled={isLoading}
-                                    className="relative w-full h-12 bg-white text-zinc-700 border border-zinc-200/80 rounded-xl font-bold text-sm tracking-wide hover:bg-zinc-50 hover:border-zinc-300 hover:shadow-[0_0_20px_-5px_rgba(0,0,0,0.1)] hover:-translate-y-0.5 active:translate-y-0 transition-all flex items-center justify-center gap-3 group overflow-hidden"
+                                    className="w-full h-10 bg-white text-[#171717] border border-[#eaeaea] rounded-md font-medium text-sm hover:bg-[#fafafa] hover:border-[#d4d4d4] active:scale-[0.99] transition-all duration-150 flex items-center justify-center gap-2.5"
                                 >
-                                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-zinc-100/50 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
-                                    <svg className="w-5 h-5 relative z-10" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                         <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
                                         <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
                                         <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.21-1.19-2.22z" fill="#FBBC05"/>
                                         <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
                                     </svg>
-                                    <span className="relative z-10">Sign in with Google</span>
+                                    Sign in with Google
                                 </button>
                             </form>
                         </div>
 
-                        {/* Smart Quick Login Footer */}
-                        <div className="mt-6 bg-gray-50/50 rounded-2xl p-4 border border-gray-100">
+                        {/* Quick Select Footer */}
+                        <div className="mt-6 bg-[#fafafa] rounded-md p-4 border border-[#eaeaea]">
                             <div className="flex items-center justify-between mb-3">
-                                <p className="text-[10px] text-gray-400 uppercase tracking-widest font-bold font-mono">Quick Select</p>
-                                <div className="px-3 py-1 rounded-full bg-white border border-emerald-100 flex items-center gap-1.5 shadow-sm">
+                                <p className="text-[10px] text-[#888888] uppercase tracking-wider font-medium">Quick Select</p>
+                                <div className="px-2 py-0.5 rounded-full bg-emerald-50 border border-emerald-100 flex items-center gap-1">
                                     <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                                    <span className="text-[10px] font-semibold text-emerald-700">Demo Mode</span>
+                                    <span className="text-[10px] font-medium text-emerald-700">Demo</span>
                                 </div>
                             </div>
                             <div className="grid grid-cols-3 gap-2">
-                                {VALID_CREDENTIALS.map((cred) => (
+                                {DEMO_CREDENTIALS.map((cred) => (
                                     <button
                                         key={cred.role}
                                         type="button"
                                         onClick={() => { setUsername(cred.username); setPassword(cred.password); }}
-                                        className="group relative flex items-center justify-center gap-2 h-10 w-full px-3 rounded-full border border-gray-200 bg-white hover:bg-zinc-950 hover:border-zinc-950 hover:scale-[1.02] hover:shadow-lg hover:shadow-black/15 active:scale-[0.98] transition-all duration-300 cursor-pointer"
+                                        className="group flex items-center justify-center gap-1.5 h-9 px-2 rounded-md border border-[#eaeaea] bg-white hover:bg-[#171717] hover:border-[#171717] hover:text-white active:scale-[0.98] transition-all duration-150"
                                     >
-                                        <div className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold transition-all shrink-0 ${
-                                            cred.role === 'gp' ? 'bg-blue-100 text-blue-600 group-hover:bg-white group-hover:text-blue-600' : 
+                                        <div className={`w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-semibold transition-colors ${
+                                            cred.role === 'admin' ? 'bg-blue-100 text-blue-600 group-hover:bg-white group-hover:text-blue-600' : 
                                             cred.role === 'specialist' ? 'bg-purple-100 text-purple-600 group-hover:bg-white group-hover:text-purple-600' : 
                                             'bg-orange-100 text-orange-600 group-hover:bg-white group-hover:text-orange-600'
                                         }`}>
                                             {cred.role.charAt(0).toUpperCase()}
                                         </div>
-                                        <span className="text-xs font-semibold text-gray-600 group-hover:text-white capitalize transition-colors truncate">
-                                            {cred.role === 'gp' ? 'GP' : cred.role}
+                                        <span className="text-xs font-medium text-[#666666] group-hover:text-white capitalize transition-colors">
+                                            {cred.role}
                                         </span>
                                     </button>
                                 ))}
                             </div>
                         </div>
+
+                        {/* Create Account Link */}
+                        <p className="text-center text-xs text-[#888888] mt-4">
+                            Don't have an account?{' '}
+                            <Link to="/register" className="text-[#171717] font-semibold hover:underline">
+                                Create one
+                            </Link>
+                        </p>
                     </div>
                 </div>
             </div>

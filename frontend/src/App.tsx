@@ -1,7 +1,7 @@
 import { Suspense, lazy } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { Layout } from './components/layout';
-import { LoginForm } from './components/auth';
+import { LoginForm, RegisterForm } from './components/auth';
 import { LandingPage } from './pages'; // Keep LandingPage eager for fast LCP
 import { useAppSelector } from './store/hooks';
 import { Activity } from 'lucide-react';
@@ -14,6 +14,10 @@ const DiagnosisPage = lazy(() => import('./pages').then(module => ({ default: mo
 const HistoryPage = lazy(() => import('./pages').then(module => ({ default: module.HistoryPage })));
 const SettingsPage = lazy(() => import('./pages').then(module => ({ default: module.SettingsPage })));
 const MedAIPage = lazy(() => import('./pages').then(module => ({ default: module.MedAIPage })));
+const AdminUsersPage = lazy(() => import('./pages').then(module => ({ default: module.AdminUsersPage })));
+const VerifyEmailPage = lazy(() => import('./pages').then(module => ({ default: module.VerifyEmailPage })));
+const ForgotPasswordPage = lazy(() => import('./pages').then(module => ({ default: module.ForgotPasswordPage })));
+const ResetPasswordPage = lazy(() => import('./pages').then(module => ({ default: module.ResetPasswordPage })));
 
 // Loading Component
 const LoadingFallback = () => (
@@ -49,6 +53,13 @@ function App() {
             path="/login"
             element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <LoginForm />}
           />
+          <Route
+            path="/register"
+            element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <RegisterForm />}
+          />
+          <Route path="/verify-email" element={<VerifyEmailPage />} />
+          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+          <Route path="/reset-password" element={<ResetPasswordPage />} />
 
           {/* Protected routes (Layout applied to all) */}
           <Route
@@ -63,6 +74,7 @@ function App() {
             <Route path="/medai" element={<MedAIPage />} />
             <Route path="/history" element={<HistoryPage />} />
             <Route path="/settings" element={<SettingsPage />} />
+            <Route path="/admin/users" element={<AdminUsersPage />} />
           </Route>
 
           {/* Catch-all - redirect to dashboard if logged in, else landing */}

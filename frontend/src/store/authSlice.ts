@@ -3,7 +3,7 @@ import { tokenManager } from '../services/api';
 
 interface User {
     username: string;
-    role: 'gp' | 'specialist' | 'auditor' | 'admin';
+    role: 'patient' | 'doctor' | 'gp' | 'specialist' | 'auditor' | 'admin';
     email?: string;
     avatar?: string;
     displayName?: string;

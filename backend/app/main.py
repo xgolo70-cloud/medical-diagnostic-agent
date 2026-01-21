@@ -3,10 +3,25 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import Response
-from app.api import ingest, diagnose, history, auth, google_auth
+from contextlib import asynccontextmanager
+from app.api import ingest, diagnose, history, auth, google_auth, admin
 from app.api.medgemma import router as medgemma_router
+from app.database.init_db import init_database
 from collections import defaultdict
 import time
+
+
+# ================== Application Lifespan ==================
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Application lifespan handler for startup/shutdown events"""
+    # Startup: Initialize database
+    print("🚀 Starting Medical Diagnostic Agent API...")
+    init_database()
+    yield
+    # Shutdown: Cleanup if needed
+    print("👋 Shutting down Medical Diagnostic Agent API...")
 
 # ================== Security Configuration ==================
 
@@ -71,6 +86,7 @@ app = FastAPI(
     title="Medical Diagnostic Agent API",
     description="AI-powered medical diagnosis with MedGemma 1.5 integration",
     version="2.0.0",
+    lifespan=lifespan,
     docs_url="/api/docs" if os.getenv("ENABLE_DOCS", "true").lower() == "true" else None,
     redoc_url="/api/redoc" if os.getenv("ENABLE_DOCS", "true").lower() == "true" else None,
 )
@@ -98,6 +114,7 @@ app.include_router(ingest.router, prefix="/api/ingest")
 app.include_router(diagnose.router, prefix="/api/diagnose")
 app.include_router(history.router, prefix="/api/history")
 app.include_router(medgemma_router, prefix="/api", tags=["MedGemma AI"])
+app.include_router(admin.router, prefix="/api", tags=["Admin"])
 
 @app.get("/")
 def read_root():

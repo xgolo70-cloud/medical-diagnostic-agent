@@ -1,0 +1,1090 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>اختبار المهندس المدني - نموذج الأسئلة</title>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Noto+Naskh+Arabic:wght@400;500;600;700&display=swap");
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Noto Naskh Arabic", "Traditional Arabic", serif;
+        font-size: 14px;
+        line-height: 1.8;
+        color: #1a1a1a;
+        background: #fff;
+        padding: 20mm;
+      }
+
+      @media print {
+        body {
+          padding: 15mm;
+        }
+        .page-break {
+          page-break-before: always;
+        }
+        .no-break {
+          page-break-inside: avoid;
+        }
+      }
+
+      .header {
+        text-align: center;
+        border: 3px double #333;
+        padding: 20px;
+        margin-bottom: 30px;
+      }
+
+      .header h1 {
+        font-size: 24px;
+        font-weight: 700;
+        margin-bottom: 10px;
+        color: #1a1a1a;
+      }
+
+      .header h2 {
+        font-size: 18px;
+        font-weight: 600;
+        color: #444;
+        margin-bottom: 15px;
+      }
+
+      .exam-info {
+        display: flex;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 15px;
+        margin-top: 15px;
+        padding-top: 15px;
+        border-top: 1px solid #ccc;
+      }
+
+      .exam-info div {
+        font-size: 13px;
+      }
+
+      .candidate-info {
+        background: #f8f8f8;
+        padding: 15px;
+        margin-bottom: 25px;
+        border: 1px solid #ddd;
+      }
+
+      .candidate-info table {
+        width: 100%;
+      }
+
+      .candidate-info td {
+        padding: 8px 5px;
+        border-bottom: 1px dotted #999;
+      }
+
+      .candidate-info td:first-child {
+        width: 120px;
+        font-weight: 600;
+      }
+
+      .instructions {
+        background: #fff9e6;
+        border: 1px solid #e6d9a3;
+        padding: 15px;
+        margin-bottom: 25px;
+      }
+
+      .instructions h3 {
+        font-size: 15px;
+        margin-bottom: 10px;
+        color: #8b7000;
+      }
+
+      .instructions ul {
+        padding-right: 20px;
+      }
+
+      .instructions li {
+        margin-bottom: 5px;
+      }
+
+      .section {
+        margin-bottom: 30px;
+      }
+
+      .section-title {
+        background: #2c3e50;
+        color: #fff;
+        padding: 12px 20px;
+        font-size: 16px;
+        font-weight: 700;
+        margin-bottom: 20px;
+      }
+
+      .section-subtitle {
+        font-size: 13px;
+        font-weight: normal;
+        opacity: 0.9;
+      }
+
+      .question {
+        margin-bottom: 20px;
+        padding-bottom: 15px;
+        border-bottom: 1px dashed #ddd;
+      }
+
+      .question:last-child {
+        border-bottom: none;
+      }
+
+      .question-number {
+        display: inline-block;
+        background: #3498db;
+        color: #fff;
+        width: 28px;
+        height: 28px;
+        text-align: center;
+        line-height: 28px;
+        border-radius: 50%;
+        font-size: 13px;
+        font-weight: 600;
+        margin-left: 10px;
+      }
+
+      .question-text {
+        display: inline;
+        font-weight: 500;
+      }
+
+      .options {
+        margin-top: 10px;
+        padding-right: 40px;
+      }
+
+      .option {
+        display: inline-block;
+        margin-left: 25px;
+        margin-bottom: 5px;
+      }
+
+      .option-letter {
+        display: inline-block;
+        width: 22px;
+        height: 22px;
+        border: 1px solid #333;
+        border-radius: 3px;
+        text-align: center;
+        line-height: 20px;
+        margin-left: 5px;
+        font-size: 12px;
+      }
+
+      .problem {
+        background: #f9f9f9;
+        padding: 20px;
+        margin-bottom: 20px;
+        border: 1px solid #e0e0e0;
+      }
+
+      .problem-title {
+        font-weight: 700;
+        font-size: 15px;
+        color: #2c3e50;
+        margin-bottom: 15px;
+        padding-bottom: 10px;
+        border-bottom: 2px solid #3498db;
+      }
+
+      .problem-data {
+        margin-bottom: 15px;
+        padding: 10px;
+        background: #fff;
+        border-right: 3px solid #3498db;
+      }
+
+      .requirements {
+        margin-top: 15px;
+      }
+
+      .requirements ol {
+        padding-right: 25px;
+      }
+
+      .requirements li {
+        margin-bottom: 8px;
+      }
+
+      .points {
+        display: inline-block;
+        background: #27ae60;
+        color: #fff;
+        padding: 2px 8px;
+        border-radius: 3px;
+        font-size: 11px;
+        margin-right: 5px;
+      }
+
+      .answer-space {
+        min-height: 80px;
+        border: 1px dashed #ccc;
+        margin-top: 10px;
+        background: #fafafa;
+      }
+
+      .answer-lines {
+        margin-top: 10px;
+      }
+
+      .answer-line {
+        border-bottom: 1px solid #ccc;
+        height: 30px;
+        margin-bottom: 5px;
+      }
+
+      .scenario-question {
+        margin-bottom: 25px;
+      }
+
+      .scenario-question h4 {
+        font-size: 14px;
+        font-weight: 600;
+        margin-bottom: 10px;
+        color: #2c3e50;
+      }
+
+      .choice-box {
+        background: #e8f4f8;
+        padding: 15px;
+        margin: 15px 0;
+        border: 1px solid #b8d4e3;
+      }
+
+      .choice-box strong {
+        color: #2980b9;
+      }
+
+      .footer {
+        text-align: center;
+        margin-top: 40px;
+        padding-top: 20px;
+        border-top: 2px solid #333;
+        font-size: 12px;
+        color: #666;
+      }
+
+      .total-box {
+        background: #2c3e50;
+        color: #fff;
+        padding: 15px;
+        text-align: center;
+        margin-top: 30px;
+      }
+
+      .total-box span {
+        font-size: 20px;
+        font-weight: 700;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- الصفحة الأولى: الغلاف والتعليمات -->
+    <div class="header">
+      <h1>اختبار تقييم المهندس المدني</h1>
+      <h2>الاختبار التحريري الشامل</h2>
+      <div class="exam-info">
+        <div><strong>المدة:</strong> ساعتان و30 دقيقة</div>
+        <div><strong>الدرجة الكلية:</strong> 110 درجة</div>
+        <div><strong>التاريخ:</strong> _____ / _____ / _____</div>
+      </div>
+    </div>
+
+    <div class="candidate-info">
+      <table>
+        <tr>
+          <td>اسم المتقدم:</td>
+          <td>____________________________________________</td>
+        </tr>
+        <tr>
+          <td>التخصص:</td>
+          <td>____________________________________________</td>
+        </tr>
+        <tr>
+          <td>سنوات الخبرة:</td>
+          <td>____________________________________________</td>
+        </tr>
+        <tr>
+          <td>التوقيع:</td>
+          <td>____________________________________________</td>
+        </tr>
+      </table>
+    </div>
+
+    <div class="instructions">
+      <h3>📋 تعليمات الاختبار</h3>
+      <ul>
+        <li>المسموح به: آلة حاسبة علمية + قلم + مسطرة</li>
+        <li>الممنوع: الهاتف المحمول أو أي جهاز إلكتروني آخر</li>
+        <li>اقرأ الأسئلة بعناية قبل الإجابة</li>
+        <li>الأسئلة الأساسية مشتركة لجميع التخصصات</li>
+        <li>في الأسئلة الاختيارية، اختر خياراً واحداً فقط</li>
+        <li>وضّح خطوات الحل في المسائل الحسابية</li>
+      </ul>
+    </div>
+
+    <!-- القسم A: اختيار من متعدد -->
+    <div class="section page-break">
+      <div class="section-title">
+        القسم (A): اختيار من متعدد - أساسيات هندسية عامة
+        <span class="section-subtitle">(20 سؤال × 1 درجة = 20 درجة)</span>
+      </div>
+
+      <p style="margin-bottom: 20px; font-style: italic; color: #666">
+        ✏️ ضع دائرة حول الإجابة الصحيحة لكل سؤال
+      </p>
+
+      <div class="question no-break">
+        <span class="question-number">1</span>
+        <span class="question-text">الهدف من الـ Slump Test هو قياس:</span>
+        <div class="options">
+          <span class="option"
+            ><span class="option-letter">A</span> مقاومة الضغط</span
+          >
+          <span class="option"
+            ><span class="option-letter">B</span> قابلية التشغيل</span
+          >
+          <span class="option"
+            ><span class="option-letter">C</span> زمن الشك</span
+          >
+          <span class="option"
+            ><span class="option-letter">D</span> نسبة الهواء</span
+          >
+        </div>
+      </div>
+
+      <div class="question no-break">
+        <span class="question-number">2</span>
+        <span class="question-text"
+          >أي مما يلي يزيد خطر التعشيش (Honeycombing) أكثر شيء؟</span
+        >
+        <div class="options">
+          <span class="option"
+            ><span class="option-letter">A</span> زيادة الدمك</span
+          >
+          <span class="option"
+            ><span class="option-letter">B</span> زيادة الغطاء</span
+          >
+          <span class="option"
+            ><span class="option-letter">C</span> سوء الدمك/فجوات</span
+          >
+          <span class="option"
+            ><span class="option-letter">D</span> تبريد الخرسانة</span
+          >
+        </div>
+      </div>
+
+      <div class="question no-break">
+        <span class="question-number">3</span>
+        <span class="question-text"
+          >الحد الأدنى الشائع لتغطية التسليح في العناصر المعرضة للجو
+          (تقريباً):</span
+        >
+        <div class="options">
+          <span class="option"><span class="option-letter">A</span> 10mm</span>
+          <span class="option"><span class="option-letter">B</span> 15mm</span>
+          <span class="option"
+            ><span class="option-letter">C</span> 25–40mm</span
+          >
+          <span class="option"><span class="option-letter">D</span> 80mm</span>
+        </div>
+      </div>
+
+      <div class="question no-break">
+        <span class="question-number">4</span>
+        <span class="question-text"
+          >أي تقرير يثبت مطابقة المواد الواردة للمواصفات غالباً؟</span
+        >
+        <div class="options">
+          <span class="option"><span class="option-letter">A</span> RFI</span>
+          <span class="option"
+            ><span class="option-letter">B</span> MIR/Material Approval</span
+          >
+          <span class="option"><span class="option-letter">C</span> NCR</span>
+          <span class="option"
+            ><span class="option-letter">D</span> Method Statement</span
+          >
+        </div>
+      </div>
+
+      <div class="question no-break">
+        <span class="question-number">5</span>
+        <span class="question-text">وحدة الـ kN/m² تساوي:</span>
+        <div class="options">
+          <span class="option"><span class="option-letter">A</span> MPa</span>
+          <span class="option"><span class="option-letter">B</span> kPa</span>
+          <span class="option"><span class="option-letter">C</span> N/mm²</span>
+          <span class="option"
+            ><span class="option-letter">D</span> kg/cm²</span
+          >
+        </div>
+      </div>
+
+      <div class="question no-break">
+        <span class="question-number">6</span>
+        <span class="question-text"
+          >في فحص مكعبات الخرسانة، العمر الأكثر اعتماداً للتحقق هو:</span
+        >
+        <div class="options">
+          <span class="option"
+            ><span class="option-letter">A</span> 3 أيام</span
+          >
+          <span class="option"
+            ><span class="option-letter">B</span> 7 أيام</span
+          >
+          <span class="option"
+            ><span class="option-letter">C</span> 28 يوم</span
+          >
+          <span class="option"
+            ><span class="option-letter">D</span> 56 يوم</span
+          >
+        </div>
+      </div>
+
+      <div class="question no-break">
+        <span class="question-number">7</span>
+        <span class="question-text">"الـ RFI" يستخدم عادةً لـ:</span>
+        <div class="options">
+          <span class="option"
+            ><span class="option-letter">A</span> طلب معلومات/توضيح</span
+          >
+          <span class="option"
+            ><span class="option-letter">B</span> رفض مادة</span
+          >
+          <span class="option"
+            ><span class="option-letter">C</span> استلام نهائي</span
+          >
+          <span class="option"
+            ><span class="option-letter">D</span> أمر تغيير</span
+          >
+        </div>
+      </div>
+
+      <div class="question no-break">
+        <span class="question-number">8</span>
+        <span class="question-text"
+          >في المشاريع، الـ Baseline Schedule هو:</span
+        >
+        <div class="options">
+          <span class="option"
+            ><span class="option-letter">A</span> جدول يومي</span
+          >
+          <span class="option"
+            ><span class="option-letter">B</span> الجدول المعتمد للمقارنة</span
+          >
+          <span class="option"
+            ><span class="option-letter">C</span> جدول المواد</span
+          >
+          <span class="option"
+            ><span class="option-letter">D</span> جدول الرواتب</span
+          >
+        </div>
+      </div>
+
+      <div class="question no-break">
+        <span class="question-number">9</span>
+        <span class="question-text"
+          >أعلى مصدر للمخاطر في موقع العمل عادةً:</span
+        >
+        <div class="options">
+          <span class="option"
+            ><span class="option-letter">A</span> الأعمال الترابية</span
+          >
+          <span class="option"
+            ><span class="option-letter">B</span> العمل على الارتفاعات</span
+          >
+          <span class="option"
+            ><span class="option-letter">C</span> الدهان</span
+          >
+          <span class="option"
+            ><span class="option-letter">D</span> التنظيف</span
+          >
+        </div>
+      </div>
+
+      <div class="question no-break">
+        <span class="question-number">10</span>
+        <span class="question-text">اختبار Proctor يرتبط بـ:</span>
+        <div class="options">
+          <span class="option"
+            ><span class="option-letter">A</span> مقاومة الخرسانة</span
+          >
+          <span class="option"
+            ><span class="option-letter">B</span> دمك التربة</span
+          >
+          <span class="option"
+            ><span class="option-letter">C</span> تآكل الحديد</span
+          >
+          <span class="option"
+            ><span class="option-letter">D</span> لزوجة الإسفلت</span
+          >
+        </div>
+      </div>
+
+      <div class="question no-break">
+        <span class="question-number">11</span>
+        <span class="question-text"
+          >في الـ BOQ، قياس أعمال الحفر غالباً يكون بـ:</span
+        >
+        <div class="options">
+          <span class="option"><span class="option-letter">A</span> m²</span>
+          <span class="option"><span class="option-letter">B</span> m³</span>
+          <span class="option"><span class="option-letter">C</span> ton</span>
+          <span class="option"><span class="option-letter">D</span> m</span>
+        </div>
+      </div>
+
+      <div class="question no-break">
+        <span class="question-number">12</span>
+        <span class="question-text">الفرق بين ITP و Method Statement:</span>
+        <div class="options">
+          <span class="option"
+            ><span class="option-letter">A</span> نفس الشيء</span
+          >
+          <span class="option"
+            ><span class="option-letter">B</span> ITP نقاط فحص، Method Statement
+            خطوات تنفيذ</span
+          >
+          <span class="option"><span class="option-letter">C</span> العكس</span>
+          <span class="option"
+            ><span class="option-letter">D</span> لا فرق</span
+          >
+        </div>
+      </div>
+
+      <div class="question no-break">
+        <span class="question-number">13</span>
+        <span class="question-text"
+          >أي مما يلي وثيقة تعالج "التغيير" رسمياً؟</span
+        >
+        <div class="options">
+          <span class="option"
+            ><span class="option-letter">A</span> Variation/Change Order</span
+          >
+          <span class="option"
+            ><span class="option-letter">B</span> Daily Report</span
+          >
+          <span class="option"
+            ><span class="option-letter">C</span> Submittal</span
+          >
+          <span class="option"
+            ><span class="option-letter">D</span> Punch List</span
+          >
+        </div>
+      </div>
+
+      <div class="question no-break">
+        <span class="question-number">14</span>
+        <span class="question-text">الهدف من Curing هو:</span>
+        <div class="options">
+          <span class="option"
+            ><span class="option-letter">A</span> تسريع الجفاف</span
+          >
+          <span class="option"
+            ><span class="option-letter">B</span> تقليل الانكماش وتحسين
+            المقاومة</span
+          >
+          <span class="option"
+            ><span class="option-letter">C</span> تلوين السطح</span
+          >
+          <span class="option"
+            ><span class="option-letter">D</span> تقليل وزن الخرسانة</span
+          >
+        </div>
+      </div>
+
+      <div class="question no-break">
+        <span class="question-number">15</span>
+        <span class="question-text"
+          >أكثر سبب شائع لظهور شقوق انكماش بلاستيكي:</span
+        >
+        <div class="options">
+          <span class="option"
+            ><span class="option-letter">A</span> حرارة/رياح + تبخر سريع</span
+          >
+          <span class="option"
+            ><span class="option-letter">B</span> زيادة الحديد</span
+          >
+          <span class="option"
+            ><span class="option-letter">C</span> زيادة الغطاء</span
+          >
+          <span class="option"
+            ><span class="option-letter">D</span> انخفاض slump</span
+          >
+        </div>
+      </div>
+
+      <div class="question no-break">
+        <span class="question-number">16</span>
+        <span class="question-text">اختبار FDT (أو DCP) غالباً يستخدم لـ:</span>
+        <div class="options">
+          <span class="option"
+            ><span class="option-letter">A</span> الخرسانة</span
+          >
+          <span class="option"
+            ><span class="option-letter">B</span> طبقات الطرق/التربة</span
+          >
+          <span class="option"
+            ><span class="option-letter">C</span> الحديد</span
+          >
+          <span class="option"><span class="option-letter">D</span> الماء</span>
+        </div>
+      </div>
+
+      <div class="question no-break">
+        <span class="question-number">17</span>
+        <span class="question-text">"As-Built" يعني:</span>
+        <div class="options">
+          <span class="option"
+            ><span class="option-letter">A</span> تصميم أولي</span
+          >
+          <span class="option"
+            ><span class="option-letter">B</span> منفذ فعلياً</span
+          >
+          <span class="option"><span class="option-letter">C</span> مقترح</span>
+          <span class="option"><span class="option-letter">D</span> مختبر</span>
+        </div>
+      </div>
+
+      <div class="question no-break">
+        <span class="question-number">18</span>
+        <span class="question-text">أي مما يلي يعتبر "وثيقة استلام"؟</span>
+        <div class="options">
+          <span class="option"><span class="option-letter">A</span> WIR</span>
+          <span class="option"><span class="option-letter">B</span> NCR</span>
+          <span class="option"><span class="option-letter">C</span> RFI</span>
+          <span class="option"
+            ><span class="option-letter">D</span> Shop Drawing</span
+          >
+        </div>
+      </div>
+
+      <div class="question no-break">
+        <span class="question-number">19</span>
+        <span class="question-text"
+          >عندما تكون نتائج الخرسانة أقل من المطلوب، أول إجراء إداري صحيح
+          غالباً:</span
+        >
+        <div class="options">
+          <span class="option"
+            ><span class="option-letter">A</span> كسر العنصر فوراً</span
+          >
+          <span class="option"
+            ><span class="option-letter">B</span> إصدار NCR وطلب تقييم/اختبارات
+            إضافية</span
+          >
+          <span class="option"><span class="option-letter">C</span> تجاهل</span>
+          <span class="option"
+            ><span class="option-letter">D</span> صب طبقة جديدة مباشرة</span
+          >
+        </div>
+      </div>
+
+      <div class="question no-break">
+        <span class="question-number">20</span>
+        <span class="question-text">KPI شائع للسلامة:</span>
+        <div class="options">
+          <span class="option"
+            ><span class="option-letter">A</span> نسبة الحديد</span
+          >
+          <span class="option"
+            ><span class="option-letter">B</span> عدد الحوادث/المخالفات</span
+          >
+          <span class="option"
+            ><span class="option-letter">C</span> نسبة الإسمنت</span
+          >
+          <span class="option"
+            ><span class="option-letter">D</span> عدد المخططات</span
+          >
+        </div>
+      </div>
+    </div>
+
+    <!-- القسم B: المسائل الحسابية -->
+    <div class="section page-break">
+      <div class="section-title">
+        القسم (B): مسائل حسابية وتحليل هندسي
+        <span class="section-subtitle">(3 مسائل × 10 درجات = 30 درجة)</span>
+      </div>
+
+      <!-- المسألة B1 -->
+      <div class="problem no-break">
+        <div class="problem-title">
+          المسألة (B1): خرسانة مسلحة – فحص مبدئي لكمرة
+          <span class="points">10 درجات</span>
+        </div>
+
+        <div class="problem-data">
+          <strong>المعطيات:</strong><br />
+          كمرة بسيطة الارتكاز، البحر = 4.0 m<br />
+          حمل منتظم خدمي (Dead + Live) = 22 kN/m<br />
+          أبعاد المقطع: b = 250 mm, h = 450 mm<br />
+          غطاء = 40 mm، قطر كانات = 8 mm<br />
+          تسليح سفلي = 4Ø16
+        </div>
+
+        <div class="requirements">
+          <strong>المطلوب:</strong>
+          <ol>
+            <li>
+              احسب العزم الأقصى الخدمي (M<sub>max</sub>)
+              <span class="points">2 درجات</span>
+            </li>
+            <li>
+              احسب العمق الفعال (d) تقريبياً <span class="points">2 درجات</span>
+            </li>
+            <li>
+              احسب نسبة التسليح (ρ) تقريبياً <span class="points">2 درجات</span>
+            </li>
+            <li>
+              أعطِ قرار مبدئي: المقطع "مقبول مبدئياً / يحتاج إعادة تصميم" واذكر
+              سببين <span class="points">4 درجات</span>
+            </li>
+          </ol>
+        </div>
+
+        <div class="answer-space" style="min-height: 200px"></div>
+      </div>
+
+      <!-- المسألة B2 -->
+      <div class="problem no-break">
+        <div class="problem-title">
+          المسألة (B2): تربة وأساسات – قدرة تحمل وإجهاد تماس
+          <span class="points">10 درجات</span>
+        </div>
+
+        <div class="problem-data">
+          <strong>المعطيات:</strong><br />
+          قاعدة منفصلة: 2.0 m × 2.0 m<br />
+          حمل العمود = 1200 kN (خدمي)<br />
+          وزن القاعدة والردم فوقها = 200 kN
+        </div>
+
+        <div class="requirements">
+          <strong>المطلوب:</strong>
+          <ol>
+            <li>
+              احسب الضغط أسفل القاعدة (q) <span class="points">3 درجات</span>
+            </li>
+            <li>
+              إذا كانت قدرة التحمل المسموحة للتربة 250 kPa، هل التصميم مقبول
+              مبدئياً؟ <span class="points">3 درجات</span>
+            </li>
+            <li>
+              اذكر فحصين لازم تراجعهما غير قدرة التحمل
+              <span class="points">4 درجات</span>
+            </li>
+          </ol>
+        </div>
+
+        <div class="answer-space" style="min-height: 180px"></div>
+      </div>
+
+      <!-- المسألة B3 -->
+      <div class="problem no-break">
+        <div class="problem-title">
+          المسألة (B3): طرق / مياه – تصريف بسيط أو طبقات
+          <span class="points">10 درجات</span>
+        </div>
+
+        <div class="choice-box">
+          <strong>⚠️ اختر خياراً واحداً فقط من الخيارين التاليين:</strong>
+        </div>
+
+        <div style="margin-bottom: 25px; padding: 15px; border: 1px solid #ddd">
+          <strong style="color: #2980b9">الخيار 1 (مياه):</strong><br /><br />
+          <div class="problem-data">
+            مجرى أنبوب قطره = 200 mm<br />
+            سرعة التصميم = 1.2 m/s
+          </div>
+          <div class="requirements">
+            <ol>
+              <li>احسب التصريف (Q) <span class="points">6 درجات</span></li>
+              <li>
+                علّق: هل السرعة مناسبة لتقليل الترسب؟ اذكر حدود منطقية عامة
+                <span class="points">4 درجات</span>
+              </li>
+            </ol>
+          </div>
+        </div>
+
+        <div style="padding: 15px; border: 1px solid #ddd">
+          <strong style="color: #27ae60">الخيار 2 (طرق):</strong><br /><br />
+          <div class="problem-data">
+            طبقة Subbase سماكة = 20 cm<br />
+            المنطقة = 1500 m²<br />
+            نسبة الهدر = 7%
+          </div>
+          <div class="requirements">
+            <ol>
+              <li>
+                احسب الحجم الكلي المطلوب بالمتر المكعب
+                <span class="points">6 درجات</span>
+              </li>
+              <li>
+                اذكر اختبارين لضبط جودة الطبقة بالموقع
+                <span class="points">4 درجات</span>
+              </li>
+            </ol>
+          </div>
+        </div>
+
+        <div class="answer-space" style="min-height: 180px"></div>
+      </div>
+    </div>
+
+    <!-- القسم C: تنفيذ موقع -->
+    <div class="section page-break">
+      <div class="section-title">
+        القسم (C): تنفيذ موقع + QA/QC + سلامة
+        <span class="section-subtitle">(6 أسئلة × 5 درجات = 30 درجة)</span>
+      </div>
+
+      <div class="scenario-question no-break">
+        <h4>
+          <span class="question-number">1</span> قبل صب سقف/جسر:
+          <span class="points">5 درجات</span>
+        </h4>
+        <p>
+          اكتب Checklist مختصر من <strong>10 نقاط</strong> للاستلام (حديد، شدات،
+          فتحات، تعشيق، تربيط، نظافة... إلخ)
+        </p>
+        <div class="answer-lines">
+          <div class="answer-line"></div>
+          <div class="answer-line"></div>
+          <div class="answer-line"></div>
+          <div class="answer-line"></div>
+          <div class="answer-line"></div>
+        </div>
+      </div>
+
+      <div class="scenario-question no-break">
+        <h4>
+          <span class="question-number">2</span> ظهور تعشيش بعد الفك:
+          <span class="points">5 درجات</span>
+        </h4>
+        <p>
+          اذكر <strong>5 أسباب محتملة</strong> +
+          <strong>3 خطوات معالجة صحيحة</strong> مع توثيق
+        </p>
+        <div class="answer-lines">
+          <div class="answer-line"></div>
+          <div class="answer-line"></div>
+          <div class="answer-line"></div>
+          <div class="answer-line"></div>
+          <div class="answer-line"></div>
+        </div>
+      </div>
+
+      <div class="scenario-question no-break">
+        <h4>
+          <span class="question-number">3</span> نتائج مكعبات 28 يوم أقل من
+          المطلوب: <span class="points">5 درجات</span>
+        </h4>
+        <p>ما التسلسل الصحيح للإجراءات (تقنياً وإدارياً)؟</p>
+        <div class="answer-lines">
+          <div class="answer-line"></div>
+          <div class="answer-line"></div>
+          <div class="answer-line"></div>
+          <div class="answer-line"></div>
+        </div>
+      </div>
+
+      <div class="scenario-question no-break">
+        <h4>
+          <span class="question-number">4</span> استلام حديد تسليح بالموقع:
+          <span class="points">5 درجات</span>
+        </h4>
+        <p>
+          كيف تتحقق من المطابقة؟ اذكر الوثائق والفحوصات والعلامات على الحديد
+        </p>
+        <div class="answer-lines">
+          <div class="answer-line"></div>
+          <div class="answer-line"></div>
+          <div class="answer-line"></div>
+          <div class="answer-line"></div>
+        </div>
+      </div>
+
+      <div class="scenario-question no-break">
+        <h4>
+          <span class="question-number">5</span> ردم طبقات:
+          <span class="points">5 درجات</span>
+        </h4>
+        <p>
+          اشرح طريقة ضبط السماكات والدمك وفحص الكثافة الميداني وكيف توثق النتائج
+        </p>
+        <div class="answer-lines">
+          <div class="answer-line"></div>
+          <div class="answer-line"></div>
+          <div class="answer-line"></div>
+          <div class="answer-line"></div>
+        </div>
+      </div>
+
+      <div class="scenario-question no-break">
+        <h4>
+          <span class="question-number">6</span> سلامة - العمل في حفريات عميقة:
+          <span class="points">5 درجات</span>
+        </h4>
+        <p>اذكر <strong>6 متطلبات سلامة أساسية</strong> قبل النزول للحفرة</p>
+        <div class="answer-lines">
+          <div class="answer-line"></div>
+          <div class="answer-line"></div>
+          <div class="answer-line"></div>
+          <div class="answer-line"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- القسم D: إدارة مشاريع -->
+    <div class="section page-break">
+      <div class="section-title">
+        القسم (D): مادة إدارية وإدارة مشاريع
+        <span class="section-subtitle">(4 أسئلة × 5 درجات = 20 درجة)</span>
+      </div>
+
+      <div class="scenario-question no-break">
+        <h4>
+          <span class="question-number">1</span> قراءة مخططات وتعارضات:
+          <span class="points">5 درجات</span>
+        </h4>
+        <p>
+          وصلت مخططات إنشائية تختلف عن المعماري بموقع فتحة خدمات. ما الخطوات
+          التي تتخذها؟<br />
+          <em>(RFI، إشعار، تثبيت موقع، حل تعارض)</em>
+        </p>
+        <div class="answer-lines">
+          <div class="answer-line"></div>
+          <div class="answer-line"></div>
+          <div class="answer-line"></div>
+          <div class="answer-line"></div>
+        </div>
+      </div>
+
+      <div class="scenario-question no-break">
+        <h4>
+          <span class="question-number">2</span> تخطيط وتنظيم:
+          <span class="points">5 درجات</span>
+        </h4>
+        <p>
+          أعطِ نموذج أسبوعي مختصر لتقسيم العمل (عمالة / مكائن / مواد / فحوصات /
+          استلامات) لمقطع عمل واحد
+        </p>
+        <div class="answer-lines">
+          <div class="answer-line"></div>
+          <div class="answer-line"></div>
+          <div class="answer-line"></div>
+          <div class="answer-line"></div>
+        </div>
+      </div>
+
+      <div class="scenario-question no-break">
+        <h4>
+          <span class="question-number">3</span> عقود وتغييرات:
+          <span class="points">5 درجات</span>
+        </h4>
+        <p>
+          اشرح الفرق بين (Variation) و (Claim) ومتى تستخدم كل واحد، وكيف تحمي حق
+          الجهة مالياً
+        </p>
+        <div class="answer-lines">
+          <div class="answer-line"></div>
+          <div class="answer-line"></div>
+          <div class="answer-line"></div>
+          <div class="answer-line"></div>
+        </div>
+      </div>
+
+      <div class="scenario-question no-break">
+        <h4>
+          <span class="question-number">4</span> تقارير الموقع:
+          <span class="points">5 درجات</span>
+        </h4>
+        <p>
+          اكتب Daily Report مختصر (حقول أساسية) + 5 مؤشرات أداء تهم قسم المشاريع
+        </p>
+        <div class="answer-lines">
+          <div class="answer-line"></div>
+          <div class="answer-line"></div>
+          <div class="answer-line"></div>
+          <div class="answer-line"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- القسم E: شخصية المهندس -->
+    <div class="section page-break">
+      <div class="section-title">
+        القسم (E): شخصية المهندس بسياق مهني
+        <span class="section-subtitle">(سؤالان × 5 درجات = 10 درجات)</span>
+      </div>
+
+      <div class="scenario-question no-break">
+        <h4>
+          <span class="question-number">1</span> كتابة رسمية:
+          <span class="points">5 درجات</span>
+        </h4>
+        <p>
+          اكتب رسالة قصيرة (150-200 كلمة) لرفع مشكلة تأخير مادة أساسية وتأثيرها
+          على البرنامج، مع طلب إجراء واضح ومحترم
+        </p>
+        <div class="answer-space" style="min-height: 200px"></div>
+      </div>
+
+      <div class="scenario-question no-break">
+        <h4>
+          <span class="question-number">2</span> قرار مهني وأمانة:
+          <span class="points">5 درجات</span>
+        </h4>
+        <p>
+          اكتشفت خطأ بسيط بالحصر (Quantity) قد يسبب دفع زائد للمقاول. اكتب ماذا
+          تفعل ولماذا، ومن تُبلغ
+        </p>
+        <div class="answer-space" style="min-height: 150px"></div>
+      </div>
+    </div>
+
+    <!-- ملخص الدرجات -->
+    <div class="total-box">
+      <table style="width: 100%; color: #fff; text-align: center">
+        <tr>
+          <td>القسم A</td>
+          <td>القسم B</td>
+          <td>القسم C</td>
+          <td>القسم D</td>
+          <td>القسم E</td>
+          <td style="background: #27ae60; padding: 10px">
+            <strong>المجموع</strong>
+          </td>
+        </tr>
+        <tr style="font-size: 18px">
+          <td>___/20</td>
+          <td>___/30</td>
+          <td>___/30</td>
+          <td>___/20</td>
+          <td>___/10</td>
+          <td style="background: #27ae60"><strong>___/110</strong></td>
+        </tr>
+      </table>
+    </div>
+
+    <div class="footer">
+      <p>نهاية الاختبار التحريري - بالتوفيق</p>
+      <p style="margin-top: 10px">
+        توقيع المراقب: _________________ | التاريخ: ___ / ___ / ___
+      </p>
+    </div>
+  </body>
+</html>

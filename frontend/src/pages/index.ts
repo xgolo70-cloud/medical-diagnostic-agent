@@ -4,3 +4,7 @@ export { HistoryPage } from './HistoryPage';
 export { SettingsPage } from './SettingsPage';
 export { LandingPage } from './LandingPage';
 export { MedAIPage } from './MedAIPage';
+export { AdminUsersPage } from './AdminUsersPage';
+export { VerifyEmailPage } from './VerifyEmailPage';
+export { ForgotPasswordPage } from './ForgotPasswordPage';
+export { ResetPasswordPage } from './ResetPasswordPage';

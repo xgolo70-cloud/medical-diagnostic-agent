@@ -211,8 +211,8 @@ export const SettingsPage: React.FC = () => {
             toast.error('Please enter your current password');
             return;
         }
-        if (newPassword.length < 6) {
-            toast.error('New password must be at least 6 characters');
+        if (newPassword.length < 8) {
+            toast.error('New password must be at least 8 characters');
             return;
         }
         if (newPassword !== confirmPassword) {
@@ -222,15 +222,38 @@ export const SettingsPage: React.FC = () => {
         
         setIsUpdatingPassword(true);
         
-        // Simulate API call (replace with real API when backend is ready)
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+        const accessToken = localStorage.getItem('access_token');
         
-        // For demo: just show success
-        toast.success('Password updated successfully!');
-        setCurrentPassword('');
-        setNewPassword('');
-        setConfirmPassword('');
-        setIsUpdatingPassword(false);
+        try {
+            const response = await fetch(`${API_BASE_URL}/api/auth/me/password`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${accessToken}`,
+                },
+                body: JSON.stringify({
+                    current_password: currentPassword,
+                    new_password: newPassword,
+                    confirm_password: confirmPassword,
+                }),
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.detail || 'Failed to update password');
+            }
+            
+            toast.success('Password updated successfully!');
+            setCurrentPassword('');
+            setNewPassword('');
+            setConfirmPassword('');
+        } catch (err) {
+            toast.error(err instanceof Error ? err.message : 'Failed to update password');
+        } finally {
+            setIsUpdatingPassword(false);
+        }
     };
 
     const handleAccentColorChange = (color: string) => {

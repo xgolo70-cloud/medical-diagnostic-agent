@@ -10,7 +10,8 @@ import {
     X,
     Brain,
     Home,
-    ChevronRight
+    ChevronRight,
+    Users
 } from 'lucide-react';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { logout } from '../../store/authSlice';
@@ -30,6 +31,11 @@ const navItems: NavItem[] = [
     { path: '/medai', label: 'MedGemma AI', icon: <Brain size={20} strokeWidth={1.5} /> },
     { path: '/history', label: 'History', icon: <History size={20} strokeWidth={1.5} /> },
     { path: '/settings', label: 'Settings', icon: <Settings size={20} strokeWidth={1.5} /> },
+];
+
+// Admin-only nav items
+const adminNavItems: NavItem[] = [
+    { path: '/admin/users', label: 'User Management', icon: <Users size={20} strokeWidth={1.5} /> },
 ];
 
 interface SidebarProps {
@@ -234,6 +240,76 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileOpen = false, onMobileCl
                             </Link>
                         );
                     })}
+
+                    {/* Admin-only Navigation */}
+                    {user?.role === 'admin' && (
+                        <>
+                            <div className="my-4 px-4">
+                                <div className="h-px bg-gradient-to-r from-transparent via-zinc-200 to-transparent" />
+                                {!isCollapsed && (
+                                    <span className="block mt-3 text-[10px] font-bold uppercase tracking-widest text-zinc-400">
+                                        Admin
+                                    </span>
+                                )}
+                            </div>
+                            {adminNavItems.map((item) => {
+                                const isActive = location.pathname === item.path;
+                                return (
+                                    <Link
+                                        key={item.path}
+                                        to={item.path}
+                                        onClick={onMobileClose}
+                                        className={`
+                                            relative flex items-center gap-4 px-4 py-3.5 rounded-2xl transition-all duration-300 group outline-none
+                                            ${isCollapsed ? 'justify-center' : ''}
+                                        `}
+                                    >
+                                        {isActive && (
+                                            <motion.div
+                                                layoutId="activeTabBackground"
+                                                className="absolute inset-0 bg-red-500/10 rounded-2xl border border-red-500/20"
+                                                initial={false}
+                                                transition={{ type: "spring", stiffness: 400, damping: 35 }}
+                                            />
+                                        )}
+                                        {!isActive && (
+                                            <div className="absolute inset-0 bg-black/0 group-hover:bg-red-500/5 rounded-2xl transition-colors duration-300" />
+                                        )}
+                                        <span className={`
+                                            relative z-10 transition-all duration-300 shrink-0
+                                            ${isActive ? 'text-red-600 scale-105' : 'text-zinc-500 group-hover:text-red-600 group-hover:scale-105'}
+                                        `}>
+                                            {isActive 
+                                                ? React.cloneElement(item.icon as React.ReactElement, { strokeWidth: 2 } as React.SVGAttributes<SVGElement>) 
+                                                : item.icon}
+                                        </span>
+                                        <AnimatePresence>
+                                            {!isCollapsed && (
+                                                <motion.span 
+                                                    initial={{ opacity: 0, x: -10 }}
+                                                    animate={{ opacity: 1, x: 0 }}
+                                                    exit={{ opacity: 0, x: -10 }}
+                                                    transition={{ duration: 0.2 }}
+                                                    className={`
+                                                        relative z-10 font-medium text-[14px] transition-colors duration-300 whitespace-nowrap
+                                                        ${isActive ? 'text-red-600 font-semibold' : 'text-zinc-600 group-hover:text-red-600'}
+                                                    `}
+                                                >
+                                                    {item.label}
+                                                </motion.span>
+                                            )}
+                                        </AnimatePresence>
+                                        {isCollapsed && (
+                                            <div className="absolute left-full ml-5 px-3 py-2 bg-red-600/90 backdrop-blur text-white text-[13px] font-medium rounded-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 shadow-xl translate-x-[-8px] group-hover:translate-x-0 z-50 whitespace-nowrap pointer-events-none">
+                                                {item.label}
+                                                <div className="absolute left-0 top-1/2 -translate-x-1 -translate-y-1/2 w-2 h-2 bg-red-600/90 transform rotate-45" />
+                                            </div>
+                                        )}
+                                    </Link>
+                                );
+                            })}
+                        </>
+                    )}
                 </nav>
 
                 {/* Footer Section */}
