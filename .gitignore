@@ -5,3 +5,7 @@ __pycache__/
 venv/
 .env
 .pytest_cache/
+
+# Logs and DB
+*.log
+*.db
