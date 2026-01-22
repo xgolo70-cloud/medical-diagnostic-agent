@@ -150,7 +150,7 @@ export const LoginForm: React.FC = () => {
     });
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-[#fafafa] relative overflow-hidden font-['Inter',sans-serif] p-4 sm:p-6 lg:p-8">
+        <div className="min-h-screen w-full flex items-center justify-center bg-[#fafafa] relative overflow-hidden font-['Inter',sans-serif] p-4">
             {/* Subtle Background Grid - Clean Light Mode */}
             <div className="absolute inset-0 bg-[#fafafa]">
                 <div 
