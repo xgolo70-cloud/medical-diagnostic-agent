@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { Brain, Menu, X, ArrowRight, LayoutDashboard } from 'lucide-react';
@@ -10,11 +10,45 @@ export const SiteHeader = () => {
     const { isAuthenticated, user } = useAppSelector((state) => state.auth);
     const [isScrolled, setIsScrolled] = useState(false);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+    const [activeSection, setActiveSection] = useState<string>('');
 
     useEffect(() => {
         const handleScroll = () => setIsScrolled(window.scrollY > 20);
         window.addEventListener('scroll', handleScroll);
         return () => window.removeEventListener('scroll', handleScroll);
+    }, []);
+
+    // ScrollSpy: Track which section is currently visible
+    useEffect(() => {
+        const sectionIds = ['features', 'workflow', 'testimonials', 'pricing'];
+        
+        const observerCallback = (entries: IntersectionObserverEntry[]) => {
+            entries.forEach((entry) => {
+                if (entry.isIntersecting) {
+                    setActiveSection(`#${entry.target.id}`);
+                }
+            });
+        };
+
+        const observer = new IntersectionObserver(observerCallback, {
+            rootMargin: '-20% 0px -70% 0px', // Trigger when section is in upper third of viewport
+            threshold: 0
+        });
+
+        sectionIds.forEach((id) => {
+            const element = document.getElementById(id);
+            if (element) observer.observe(element);
+        });
+
+        return () => observer.disconnect();
+    }, []);
+
+    const handleNavClick = useCallback((href: string) => {
+        setActiveSection(href);
+        const element = document.querySelector(href);
+        if (element) {
+            element.scrollIntoView({ behavior: 'smooth' });
+        }
     }, []);
 
     const navLinks = [
@@ -75,13 +109,24 @@ export const SiteHeader = () => {
                     {/* Desktop Navigation - Centered in Scrolled Mode */}
                     <div className="hidden md:flex items-center gap-1">
                         {navLinks.map((link) => (
-                            <a 
+                            <button 
                                 key={link.label}
-                                href={link.href} 
-                                className="relative px-4 py-2 text-sm font-medium text-gray-500 hover:text-black transition-colors rounded-full hover:bg-black/5"
+                                onClick={() => handleNavClick(link.href)}
+                                className={`relative px-4 py-2 text-sm font-medium transition-colors rounded-full ${
+                                    activeSection === link.href 
+                                        ? 'text-black bg-black/5' 
+                                        : 'text-gray-500 hover:text-black hover:bg-black/5'
+                                }`}
                             >
                                 {link.label}
-                            </a>
+                                {activeSection === link.href && (
+                                    <motion.span
+                                        layoutId="activeNav"
+                                        className="absolute bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-black"
+                                        transition={{ type: "spring", stiffness: 380, damping: 30 }}
+                                    />
+                                )}
+                            </button>
                         ))}
                     </div>
 

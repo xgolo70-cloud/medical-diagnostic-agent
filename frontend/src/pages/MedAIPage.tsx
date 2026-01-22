@@ -1,4 +1,5 @@
 import React, { useState, useRef, useCallback, useLayoutEffect } from 'react';
+import { authFetch } from '../utils/authFetch';
 import { AnimatePresence, motion } from 'framer-motion';
 import {
     Image as ImageIcon,
@@ -47,7 +48,7 @@ const API_BASE = 'http://localhost:8000/api/medgemma';
 
 const medgemmaApi = {
     checkStatus: async (): Promise<ApiStatus> => {
-        const res = await fetch(`${API_BASE}/status`);
+        const res = await authFetch(`${API_BASE}/status`);
         if (!res.ok) throw new Error('Failed to check API status');
         return res.json();
     },
@@ -56,7 +57,11 @@ const medgemmaApi = {
         formData.append('file', file);
         formData.append('modality', modality);
         formData.append('prompt', prompt);
-        const res = await fetch(`${API_BASE}/analyze-image-upload`, { method: 'POST', body: formData });
+        
+        const res = await authFetch(`${API_BASE}/analyze-image-upload`, { 
+            method: 'POST', 
+            body: formData
+        });
         if (!res.ok) {
             const error = await res.json();
             throw new Error(error.detail || 'Analysis failed');

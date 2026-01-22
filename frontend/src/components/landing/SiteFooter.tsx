@@ -51,10 +51,10 @@ const footerLinks: Record<string, { title: string; links: FooterLink[] }> = {
 };
 
 const socialLinks = [
-    { icon: Github, href: "#", label: "GitHub" },
-    { icon: Twitter, href: "#", label: "Twitter" },
-    { icon: Linkedin, href: "#", label: "LinkedIn" },
-    { icon: Mail, href: "#", label: "Email" },
+    { icon: Github, href: "https://github.com/ai-and-things", label: "GitHub" },
+    { icon: Twitter, href: "https://twitter.com/aiandthings", label: "Twitter" },
+    { icon: Linkedin, href: "https://linkedin.com/company/ai-and-things", label: "LinkedIn" },
+    { icon: Mail, href: "mailto:contact@aiandthings.com", label: "Email" },
 ];
 
 const trustBadges = [
@@ -184,6 +184,8 @@ export const SiteFooter = () => {
                                         <motion.a 
                                             key={i}
                                             href={social.href}
+                                            target={social.href.startsWith('mailto:') ? undefined : '_blank'}
+                                            rel={social.href.startsWith('mailto:') ? undefined : 'noopener noreferrer'}
                                             whileHover={{ y: -4, scale: 1.05 }}
                                             whileTap={{ scale: 0.95 }}
                                             className="w-10 h-10 rounded-xl bg-white border border-gray-200 flex items-center justify-center text-gray-400 hover:text-gray-900 hover:border-gray-300 hover:shadow-md transition-all duration-200"

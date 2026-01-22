@@ -1,4 +1,5 @@
 import React, { useState, useRef } from 'react';
+import { authFetch } from '../utils/authFetch';
 import { motion } from 'framer-motion';
 import {
     User,
@@ -223,14 +224,12 @@ export const SettingsPage: React.FC = () => {
         setIsUpdatingPassword(true);
         
         const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
-        const accessToken = localStorage.getItem('access_token');
         
         try {
-            const response = await fetch(`${API_BASE_URL}/api/auth/me/password`, {
+            const response = await authFetch(`${API_BASE_URL}/auth/me/password`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${accessToken}`,
                 },
                 body: JSON.stringify({
                     current_password: currentPassword,
@@ -459,6 +458,24 @@ export const SettingsPage: React.FC = () => {
                             description="Receive a weekly digest of all activities" 
                             checked={settings.weeklyReport} 
                             onChange={(val) => dispatch(setWeeklyReport(val))} 
+                        />
+                        
+                        {/* Divider */}
+                        <div className="border-t border-gray-100 pt-3 mt-3">
+                            <p className="text-xs font-medium text-gray-500 mb-3 uppercase tracking-wider">Alert Types</p>
+                        </div>
+                        
+                        <ToggleSetting 
+                            title="System Alerts" 
+                            description="Notifications about maintenance and updates" 
+                            checked={settings.pushNotifications} 
+                            onChange={(val) => dispatch(setPushNotifications(val))} 
+                        />
+                        <ToggleSetting 
+                            title="Analysis Results" 
+                            description="Get notified when analyses are complete" 
+                            checked={settings.emailNotifications} 
+                            onChange={(val) => dispatch(setEmailNotifications(val))} 
                         />
                     </div>
                 </SettingsSection>

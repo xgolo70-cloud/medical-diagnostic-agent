@@ -25,7 +25,7 @@ export const VerifyEmailPage: React.FC = () => {
             }
 
             try {
-                const response = await fetch(`${API_BASE_URL}/api/auth/verify-email?token=${token}`);
+                const response = await fetch(`${API_BASE_URL}/auth/verify-email?token=${token}`);
                 const data = await response.json();
 
                 if (response.ok) {

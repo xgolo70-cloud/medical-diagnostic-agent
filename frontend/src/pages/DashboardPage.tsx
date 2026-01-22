@@ -7,7 +7,7 @@ import {
     RecentActivityTable,
     AnalyticsSummary 
 } from '../components/dashboard';
-import { useNotifications, useAppointments, useDashboardStats } from '../hooks';
+import { useNotifications, useAppointments, useDashboardStats, useSearch } from '../hooks';
 import {
     Stethoscope,
     TrendingUp,
@@ -34,13 +34,7 @@ import {
     Mic
 } from 'lucide-react';
 
-// Data
-const statsData = [
-    { label: 'Total Analyses', value: '1,284', icon: Activity, trend: '+12%', color: 'emerald' },
-    { label: 'Pending Review', value: '8', icon: FileText, trend: '2 urgent', color: 'amber' },
-    { label: 'Model Accuracy', value: '98.2%', icon: TrendingUp, trend: '+0.4%', color: 'blue' },
-    { label: 'System Load', value: '24%', icon: Cpu, trend: 'Optimal', color: 'purple' },
-];
+// Quick actions config
 
 const quickActions = [
     {
@@ -90,7 +84,16 @@ export const DashboardPage: React.FC = () => {
     // Use custom hooks for real data
     const { notifications, markAsRead, markAllRead, unreadCount } = useNotifications();
     const { todayAppointments, updateStatus } = useAppointments();
-    const { diagnosisBreakdown, recentPatients } = useDashboardStats();
+    const { diagnosisBreakdown, recentPatients, stats } = useDashboardStats();
+    const { results: searchResults } = useSearch(searchQuery);
+
+    // Computed stats data - now dynamic!
+    const statsData = [
+        { label: 'Total Analyses', value: stats.totalAnalyses.toLocaleString(), icon: Activity, trend: '+12%', color: 'emerald' },
+        { label: 'Pending Review', value: String(stats.pendingReview), icon: FileText, trend: '2 urgent', color: 'amber' },
+        { label: 'Model Accuracy', value: `${stats.modelAccuracy}%`, icon: TrendingUp, trend: '+0.4%', color: 'blue' },
+        { label: 'System Load', value: `${stats.systemLoad}%`, icon: Cpu, trend: 'Optimal', color: 'purple' },
+    ];
 
     // Handle keyboard shortcut for search
     React.useEffect(() => {
@@ -140,23 +143,56 @@ export const DashboardPage: React.FC = () => {
                                 <kbd className="px-2 py-1 text-xs font-medium text-gray-400 bg-gray-100 rounded">ESC</kbd>
                             </div>
                             <div className="p-4">
-                                <p className="text-xs text-gray-400 uppercase tracking-wider mb-3">Quick Actions</p>
-                                <div className="space-y-1">
-                                    {[
-                                        { icon: Stethoscope, label: 'New Diagnosis', shortcut: '⌘N' },
-                                        { icon: Users, label: 'View Patients', shortcut: '⌘P' },
-                                        { icon: FileText, label: 'Recent Reports', shortcut: '⌘R' },
-                                    ].map((item) => (
-                                        <button
-                                            key={item.label}
-                                            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-50 transition-colors text-left group"
-                                        >
-                                            <item.icon size={16} className="text-gray-400 group-hover:text-gray-600" />
-                                            <span className="flex-1 text-sm text-gray-700">{item.label}</span>
-                                            <kbd className="px-1.5 py-0.5 text-[10px] font-medium text-gray-400 bg-gray-100 rounded">{item.shortcut}</kbd>
-                                        </button>
-                                    ))}
-                                </div>
+                                {searchQuery.trim() && searchResults.length > 0 ? (
+                                    <>
+                                        <p className="text-xs text-gray-400 uppercase tracking-wider mb-3">Search Results</p>
+                                        <div className="space-y-1">
+                                            {searchResults.map((result, idx) => (
+                                                <button
+                                                    key={idx}
+                                                    onClick={() => {
+                                                        navigate('/history');
+                                                        setShowSearch(false);
+                                                    }}
+                                                    className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-50 transition-colors text-left group"
+                                                >
+                                                    <FileText size={16} className="text-gray-400 group-hover:text-gray-600" />
+                                                    <div className="flex-1 min-w-0">
+                                                        <span className="text-sm text-gray-700 block truncate">{result.action}</span>
+                                                        <span className="text-xs text-gray-400">
+                                                            {result.details?.patient_id && `Patient: ${result.details.patient_id}`}
+                                                        </span>
+                                                    </div>
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </>
+                                ) : searchQuery.trim() ? (
+                                    <div className="text-center py-6">
+                                        <Search size={24} className="mx-auto text-gray-300 mb-2" />
+                                        <p className="text-sm text-gray-500">No results found</p>
+                                    </div>
+                                ) : (
+                                    <>
+                                        <p className="text-xs text-gray-400 uppercase tracking-wider mb-3">Quick Actions</p>
+                                        <div className="space-y-1">
+                                            {[
+                                                { icon: Stethoscope, label: 'New Diagnosis', shortcut: '⌘N' },
+                                                { icon: Users, label: 'View Patients', shortcut: '⌘P' },
+                                                { icon: FileText, label: 'Recent Reports', shortcut: '⌘R' },
+                                            ].map((item) => (
+                                                <button
+                                                    key={item.label}
+                                                    className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-50 transition-colors text-left group"
+                                                >
+                                                    <item.icon size={16} className="text-gray-400 group-hover:text-gray-600" />
+                                                    <span className="flex-1 text-sm text-gray-700">{item.label}</span>
+                                                    <kbd className="px-1.5 py-0.5 text-[10px] font-medium text-gray-400 bg-gray-100 rounded">{item.shortcut}</kbd>
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </>
+                                )}
                             </div>
                         </motion.div>
                     </motion.div>
@@ -582,34 +618,44 @@ export const DashboardPage: React.FC = () => {
                                 </button>
                             </div>
                             <div className="p-3 space-y-1">
-                                {recentPatients.map((patient, index) => (
-                                    <motion.div
-                                        key={patient.id}
-                                        initial={{ opacity: 0 }}
-                                        animate={{ opacity: 1 }}
-                                        transition={{ delay: 0.1 * index }}
-                                        className="flex items-center gap-3 p-2.5 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer group"
-                                    >
-                                        <div className={`w-9 h-9 rounded-full flex items-center justify-center text-xs font-bold text-white ${
-                                            patient.condition === 'Critical' ? 'bg-red-500' :
-                                            patient.condition === 'Monitoring' ? 'bg-amber-500' :
-                                            patient.condition === 'Improving' ? 'bg-blue-500' : 'bg-green-500'
-                                        }`}>
-                                            {patient.avatar}
+                                {recentPatients.length === 0 ? (
+                                    <div className="py-8 text-center">
+                                        <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-gray-100 flex items-center justify-center">
+                                            <Users size={20} className="text-gray-400" />
                                         </div>
-                                        <div className="flex-1 min-w-0">
-                                            <p className="text-sm font-medium text-gray-900 truncate">{patient.name}</p>
-                                            <p className="text-xs text-gray-500">{patient.lastVisit}</p>
-                                        </div>
-                                        <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${
-                                            patient.condition === 'Critical' ? 'bg-red-50 text-red-700' :
-                                            patient.condition === 'Monitoring' ? 'bg-amber-50 text-amber-700' :
-                                            patient.condition === 'Improving' ? 'bg-blue-50 text-blue-700' : 'bg-green-50 text-green-700'
-                                        }`}>
-                                            {patient.condition}
-                                        </span>
-                                    </motion.div>
-                                ))}
+                                        <p className="text-sm text-gray-500 font-medium">No recent patients</p>
+                                        <p className="text-xs text-gray-400 mt-1">Patient records will appear here</p>
+                                    </div>
+                                ) : (
+                                    recentPatients.map((patient, index) => (
+                                        <motion.div
+                                            key={patient.id}
+                                            initial={{ opacity: 0 }}
+                                            animate={{ opacity: 1 }}
+                                            transition={{ delay: 0.1 * index }}
+                                            className="flex items-center gap-3 p-2.5 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer group"
+                                        >
+                                            <div className={`w-9 h-9 rounded-full flex items-center justify-center text-xs font-bold text-white ${
+                                                patient.condition === 'Critical' ? 'bg-red-500' :
+                                                patient.condition === 'Monitoring' ? 'bg-amber-500' :
+                                                patient.condition === 'Improving' ? 'bg-blue-500' : 'bg-green-500'
+                                            }`}>
+                                                {patient.avatar}
+                                            </div>
+                                            <div className="flex-1 min-w-0">
+                                                <p className="text-sm font-medium text-gray-900 truncate">{patient.name}</p>
+                                                <p className="text-xs text-gray-500">{patient.lastVisit}</p>
+                                            </div>
+                                            <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${
+                                                patient.condition === 'Critical' ? 'bg-red-50 text-red-700' :
+                                                patient.condition === 'Monitoring' ? 'bg-amber-50 text-amber-700' :
+                                                patient.condition === 'Improving' ? 'bg-blue-50 text-blue-700' : 'bg-green-50 text-green-700'
+                                            }`}>
+                                                {patient.condition}
+                                            </span>
+                                        </motion.div>
+                                    ))
+                                )}
                             </div>
                         </motion.div>
 

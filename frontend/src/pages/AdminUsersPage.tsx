@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
     Users,
@@ -21,6 +21,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAppSelector } from '../store/hooks';
 import { Button } from '../components/ui/Button';
 import { toast } from '../components/ui/Toast';
+import { authFetch } from '../utils/authFetch';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
@@ -81,10 +82,9 @@ export const AdminUsersPage: React.FC = () => {
 
     const getAuthHeaders = () => ({
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
     });
 
-    const fetchUsers = async () => {
+    const fetchUsers = useCallback(async () => {
         setIsLoading(true);
         try {
             const params = new URLSearchParams({
@@ -95,7 +95,7 @@ export const AdminUsersPage: React.FC = () => {
             if (roleFilter) params.append('role', roleFilter);
             if (activeFilter) params.append('is_active', activeFilter);
 
-            const response = await fetch(`${API_BASE_URL}/api/admin/users?${params}`, {
+            const response = await authFetch(`${API_BASE_URL}/admin/users?${params}`, {
                 headers: getAuthHeaders(),
             });
 
@@ -104,16 +104,16 @@ export const AdminUsersPage: React.FC = () => {
             const data = await response.json();
             setUsers(data.users);
             setTotalPages(Math.ceil(data.total / data.page_size) || 1);
-        } catch (err) {
+        } catch {
             toast.error('Failed to load users');
         } finally {
             setIsLoading(false);
         }
-    };
+    }, [page, searchTerm, roleFilter, activeFilter]);
 
-    const fetchStats = async () => {
+    const fetchStats = useCallback(async () => {
         try {
-            const response = await fetch(`${API_BASE_URL}/api/admin/users/stats`, {
+            const response = await authFetch(`${API_BASE_URL}/admin/users/stats`, {
                 headers: getAuthHeaders(),
             });
             if (response.ok) {
@@ -122,17 +122,17 @@ export const AdminUsersPage: React.FC = () => {
         } catch {
             // Stats are optional
         }
-    };
+    }, []);
 
     useEffect(() => {
         fetchUsers();
         fetchStats();
-    }, [page, searchTerm, roleFilter, activeFilter]);
+    }, [fetchUsers, fetchStats]);
 
     const handleActivate = async (user: User) => {
         setActionInProgress(user.id);
         try {
-            const response = await fetch(`${API_BASE_URL}/api/admin/users/${user.id}/activate`, {
+            const response = await authFetch(`${API_BASE_URL}/admin/users/${user.id}/activate`, {
                 method: 'POST',
                 headers: getAuthHeaders(),
             });
@@ -149,7 +149,7 @@ export const AdminUsersPage: React.FC = () => {
     const handleDeactivate = async (user: User) => {
         setActionInProgress(user.id);
         try {
-            const response = await fetch(`${API_BASE_URL}/api/admin/users/${user.id}/deactivate`, {
+            const response = await authFetch(`${API_BASE_URL}/admin/users/${user.id}/deactivate`, {
                 method: 'POST',
                 headers: getAuthHeaders(),
             });
@@ -170,7 +170,7 @@ export const AdminUsersPage: React.FC = () => {
         if (!selectedUser) return;
         setActionInProgress(selectedUser.id);
         try {
-            const response = await fetch(`${API_BASE_URL}/api/admin/users/${selectedUser.id}`, {
+            const response = await authFetch(`${API_BASE_URL}/admin/users/${selectedUser.id}`, {
                 method: 'DELETE',
                 headers: getAuthHeaders(),
             });
@@ -194,7 +194,7 @@ export const AdminUsersPage: React.FC = () => {
         if (!selectedUser) return;
         setActionInProgress(selectedUser.id);
         try {
-            const response = await fetch(`${API_BASE_URL}/api/admin/users/${selectedUser.id}`, {
+            const response = await authFetch(`${API_BASE_URL}/admin/users/${selectedUser.id}`, {
                 method: 'PUT',
                 headers: getAuthHeaders(),
                 body: JSON.stringify({ role: newRole }),

@@ -55,7 +55,7 @@ export const LoginForm: React.FC = () => {
         dispatch(loginStart());
 
         try {
-            const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
+            const response = await fetch(`${API_BASE_URL}/auth/login`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -76,7 +76,7 @@ export const LoginForm: React.FC = () => {
             tokenManager.setTokens(data.access_token, data.refresh_token);
             
             // Fetch user info to get full profile
-            const userResponse = await fetch(`${API_BASE_URL}/api/auth/me`, {
+            const userResponse = await fetch(`${API_BASE_URL}/auth/me`, {
                 headers: {
                     'Authorization': `Bearer ${data.access_token}`,
                 },
@@ -106,7 +106,7 @@ export const LoginForm: React.FC = () => {
                 dispatch(loginStart());
                 
                 // Send Google token to our backend for verification and user creation
-                const response = await fetch(`${API_BASE_URL}/api/auth/google`, {
+                const response = await fetch(`${API_BASE_URL}/auth/google`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ access_token: tokenResponse.access_token }),
@@ -122,7 +122,7 @@ export const LoginForm: React.FC = () => {
                 tokenManager.setTokens(data.access_token, data.refresh_token);
                 
                 // Fetch user info with our JWT
-                const userResponse = await fetch(`${API_BASE_URL}/api/auth/me`, {
+                const userResponse = await fetch(`${API_BASE_URL}/auth/me`, {
                     headers: { 'Authorization': `Bearer ${data.access_token}` },
                 });
                 
