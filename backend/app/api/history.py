@@ -1,41 +1,27 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Query, HTTPException
 from typing import List, Dict, Any
-import json
-import os
+from app.core.audit import get_audit_logs
 
 router = APIRouter()
 
 @router.get("", response_model=List[Dict[str, Any]])
-async def get_history(limit: int = 100):
+async def get_history(
+    page: int = Query(1, ge=1, description="Page number"),
+    limit: int = Query(20, ge=1, le=100, description="Items per page")
+):
     """
-    Retrieve the audit history from the audit log file.
+    Retrieve the audit history with pagination.
     
     Args:
-        limit: Maximum number of entries to return (default: 100)
+        page: Page number (starts at 1)
+        limit: Number of items per page (max 100)
     
     Returns:
         List of audit log entries, most recent first.
     """
-    log_file_path = "audit.log"
-    
-    if not os.path.exists(log_file_path):
-        return []
-    
+    offset = (page - 1) * limit
     try:
-        entries = []
-        with open(log_file_path, "r") as f:
-            for line in f:
-                line = line.strip()
-                if line:
-                    try:
-                        entry = json.loads(line)
-                        entries.append(entry)
-                    except json.JSONDecodeError:
-                        # Skip malformed lines
-                        continue
-        
-        # Return most recent first, limited
-        return entries[::-1][:limit]
-    
+        return get_audit_logs(limit=limit, offset=offset)
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to read audit log: {str(e)}")
+        # In a real app, log the error internally
+        raise HTTPException(status_code=500, detail="Failed to retrieve audit logs")

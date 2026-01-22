@@ -13,4 +13,4 @@ accelerate
 sqlalchemy>=2.0
 aiosqlite
 pydantic[email]
-python-dotenv
+python-dotenvredis>=5.0.0

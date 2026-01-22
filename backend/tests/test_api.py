@@ -159,12 +159,28 @@ class TestProtectedEndpoints:
         assert response.status_code in [200, 401, 422]
     
     def test_history_endpoint(self, client):
-        """Test history endpoint returns list"""
-        response = client.get("/api/history")
+        """Test history endpoint returns list with pagination"""
+        from unittest.mock import patch
         
-        assert response.status_code == 200
-        data = response.json()
-        assert isinstance(data, list)
+        mock_logs = [{"action": "test", "id": 1}]
+        
+        with patch("app.api.history.get_audit_logs", return_value=mock_logs) as mock_get:
+            # Test default params
+            response = client.get("/api/history")
+            assert response.status_code == 200
+            data = response.json()
+            assert isinstance(data, list)
+            assert data == mock_logs
+            mock_get.assert_called_with(limit=20, offset=0)
+            
+            # Test custom pagination
+            response = client.get("/api/history?page=2&limit=10")
+            assert response.status_code == 200
+            mock_get.assert_called_with(limit=10, offset=10)
+            
+            # Test validation
+            response = client.get("/api/history?page=0") # Invalid page
+            assert response.status_code == 422
 
 
 class TestRateLimiting:
