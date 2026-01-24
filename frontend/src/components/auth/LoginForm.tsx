@@ -15,7 +15,7 @@ const DEMO_CREDENTIALS = [
 ];
 
 // API base URL
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
 
 export const LoginForm: React.FC = () => {
     const dispatch = useAppDispatch();

@@ -27,29 +27,24 @@ def seed_initial_users():
     In production, you would only create an admin user.
     """
     with get_db_context() as db:
-        # Check if any users exist
-        existing_users = db.query(User).first()
-        if existing_users:
-            print("ℹ️ Database already has users, skipping seed")
-            return
-        
         print("🌱 Seeding initial users...")
         
-        # Create default admin user
-        admin_user = User(
-            email="admin@medai.local",
-            username="admin",
-            password_hash=hash_password("Admin123!"),
-            role=UserRole.ADMIN,
-            full_name="System Administrator",
-            is_verified=True,
-            is_active=True,
-        )
-        db.add(admin_user)
-        
-        # Create demo users for development/testing
+        # Define all required users (Admin + Demo)
+        required_users = [
+            User(
+                email="admin@medai.local",
+                username="admin",
+                password_hash=hash_password("Admin123!"),
+                role=UserRole.ADMIN,
+                full_name="System Administrator",
+                is_verified=True,
+                is_active=True,
+            )
+        ]
+
+        # Add demo users if not in production
         if os.getenv("ENVIRONMENT", "development") != "production":
-            demo_users = [
+            required_users.extend([
                 User(
                     email="doctor@medai.local",
                     username="dr.smith",
@@ -87,12 +82,22 @@ def seed_initial_users():
                     is_verified=True,
                     is_active=True,
                 ),
-            ]
-            for user in demo_users:
+            ])
+
+        # Check and create each user
+        for user in required_users:
+            existing_user = db.query(User).filter(
+                (User.email == user.email) | (User.username == user.username)
+            ).first()
+            
+            if not existing_user:
+                print(f"Creating user: {user.username} ({user.role})")
                 db.add(user)
+            else:
+                print(f"User already exists: {user.username}")
         
         db.commit()
-        print("✅ Initial users seeded successfully")
+        print("✅ User seeding check complete")
         
         # Print demo credentials in development
         if os.getenv("ENVIRONMENT", "development") != "production":
