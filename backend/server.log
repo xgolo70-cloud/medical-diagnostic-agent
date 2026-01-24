@@ -19,3 +19,15 @@ INFO:     127.0.0.1:51871 - "POST /api/auth/login HTTP/1.1" 200 OK
 INFO:     127.0.0.1:52224 - "POST /auth/login HTTP/1.1" 404 Not Found
 INFO:     127.0.0.1:52226 - "GET /docs HTTP/1.1" 404 Not Found
 INFO:     127.0.0.1:52229 - "POST /api/auth/login HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52319 - "OPTIONS /api/history HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52319 - "GET /api/history HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52319 - "OPTIONS /api/auth/login HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52319 - "POST /api/auth/login HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52319 - "OPTIONS /api/auth/me HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52319 - "GET /api/auth/me HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52319 - "POST /api/auth/login HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52319 - "GET /api/auth/me HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52325 - "POST /api/auth/login HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52325 - "GET /api/auth/me HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52325 - "POST /api/auth/login HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52325 - "GET /api/auth/me HTTP/1.1" 200 OK

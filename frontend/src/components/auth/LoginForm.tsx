@@ -7,15 +7,32 @@ import { loginStart, loginSuccess, loginFailure } from '../../store/authSlice';
 import { tokenManager } from '../../services/api';
 import { Link } from 'react-router-dom';
 
-// Demo credentials for quick login (still connect to real API)
+// Demo credentials for quick login
 const DEMO_CREDENTIALS = [
-    { username: 'admin', password: 'Admin123!', role: 'admin' as const },
-    { username: 'dr.smith', password: 'Doctor123!', role: 'specialist' as const },
-    { username: 'auditor', password: 'Auditor123!', role: 'auditor' as const },
+    { username: 'admin', password: 'Admin123!', role: 'admin' as const, displayName: 'System Administrator', email: 'admin@medai.local' },
+    { username: 'dr.smith', password: 'Doctor123!', role: 'specialist' as const, displayName: 'Dr. Sarah Smith', email: 'doctor@medai.local' },
+    { username: 'auditor', password: 'Auditor123!', role: 'auditor' as const, displayName: 'System Auditor', email: 'auditor@medai.local' },
 ];
+
+// Demo mode - set to true for frontend-only demo without backend
+const DEMO_MODE = import.meta.env.VITE_DEMO_MODE === 'true' || !import.meta.env.VITE_API_URL;
 
 // API base URL
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
+
+// Generate mock JWT token for demo mode
+const generateMockToken = (username: string, role: string): string => {
+    const header = btoa(JSON.stringify({ alg: 'HS256', typ: 'JWT' }));
+    const payload = btoa(JSON.stringify({
+        username,
+        role,
+        exp: Math.floor(Date.now() / 1000) + 3600,
+        iat: Math.floor(Date.now() / 1000),
+        jti: Math.random().toString(36).substring(7)
+    }));
+    const signature = btoa('demo-signature');
+    return `${header}.${payload}.${signature}`;
+};
 
 export const LoginForm: React.FC = () => {
     const dispatch = useAppDispatch();
@@ -53,6 +70,27 @@ export const LoginForm: React.FC = () => {
         if (!validateForm()) return;
 
         dispatch(loginStart());
+
+        // Demo mode - validate locally without backend
+        if (DEMO_MODE) {
+            const demoUser = DEMO_CREDENTIALS.find(
+                cred => cred.username === username && cred.password === password
+            );
+            
+            if (demoUser) {
+                const mockToken = generateMockToken(demoUser.username, demoUser.role);
+                tokenManager.setTokens(mockToken, mockToken);
+                dispatch(loginSuccess({
+                    username: demoUser.username,
+                    role: demoUser.role,
+                    email: demoUser.email,
+                    displayName: demoUser.displayName,
+                }));
+            } else {
+                dispatch(loginFailure('Invalid credentials. Try demo accounts below.'));
+            }
+            return;
+        }
 
         try {
             const response = await fetch(`${API_BASE_URL}/auth/login`, {
@@ -456,8 +494,22 @@ export const LoginForm: React.FC = () => {
                                         onClick={async () => { 
                                             setUsername(cred.username); 
                                             setPassword(cred.password);
-                                            // Auto-submit the login form
                                             dispatch(loginStart());
+                                            
+                                            // Demo mode - instant login without backend
+                                            if (DEMO_MODE) {
+                                                const mockToken = generateMockToken(cred.username, cred.role);
+                                                tokenManager.setTokens(mockToken, mockToken);
+                                                dispatch(loginSuccess({
+                                                    username: cred.username,
+                                                    role: cred.role,
+                                                    email: cred.email,
+                                                    displayName: cred.displayName,
+                                                }));
+                                                return;
+                                            }
+                                            
+                                            // Real API login
                                             try {
                                                 const response = await fetch(`${API_BASE_URL}/auth/login`, {
                                                     method: 'POST',
