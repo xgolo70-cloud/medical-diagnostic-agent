@@ -23,7 +23,7 @@ import { Button } from '../components/ui/Button';
 import { toast } from '../components/ui/Toast';
 import { authFetch } from '../utils/authFetch';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
 
 interface User {
     id: string;

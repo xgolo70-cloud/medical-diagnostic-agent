@@ -4,7 +4,7 @@ import { useSearchParams, Link, useNavigate } from 'react-router-dom';
 import { Lock, CheckCircle, XCircle, Loader2, Eye, EyeOff, ArrowRight } from 'lucide-react';
 import { Button } from '../components/ui/Button';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
 
 type ResetStatus = 'form' | 'loading' | 'success' | 'error';
 
