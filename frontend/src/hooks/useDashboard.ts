@@ -1,7 +1,15 @@
 import { useState, useCallback, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { api } from '../services';
-
+import { 
+    DEMO_NOTIFICATIONS, 
+    DEMO_APPOINTMENTS, 
+    DEMO_RECENT_PATIENTS, 
+    DEMO_DIAGNOSIS_STATS, 
+    DEMO_STATS,
+    DEMO_HISTORY,
+    isDemoMode 
+} from '../data/demoData';
 // ================== Types ==================
 
 export interface Notification {
@@ -75,6 +83,14 @@ function getRelativeTime(timestamp: string): string {
 function getStoredNotifications(): Notification[] {
     const stored = localStorage.getItem(NOTIFICATIONS_KEY);
     if (stored) return JSON.parse(stored);
+    
+    // In demo mode, return rich demo data
+    if (isDemoMode()) {
+        localStorage.setItem(NOTIFICATIONS_KEY, JSON.stringify(DEMO_NOTIFICATIONS));
+        return DEMO_NOTIFICATIONS;
+    }
+    
+    // Default fallback
     const defaults: Notification[] = [
         { id: '1', title: 'Critical Result', message: 'Patient requires immediate attention', time: '5m ago', type: 'urgent', read: false, createdAt: Date.now() - 300000 },
         { id: '2', title: 'Report Ready', message: 'Lab results available for review', time: '1h ago', type: 'info', read: false, createdAt: Date.now() - 3600000 },
@@ -87,6 +103,13 @@ function getStoredNotifications(): Notification[] {
 function getStoredAppointments(): Appointment[] {
     const stored = localStorage.getItem(APPOINTMENTS_KEY);
     if (stored) return JSON.parse(stored);
+    
+    // In demo mode, return rich demo data
+    if (isDemoMode()) {
+        localStorage.setItem(APPOINTMENTS_KEY, JSON.stringify(DEMO_APPOINTMENTS));
+        return DEMO_APPOINTMENTS;
+    }
+
     const today = new Date().toISOString().split('T')[0];
     const defaults: Appointment[] = [
         { id: '1', patient: 'Ahmed Al-Rashid', time: '09:30 AM', type: 'Follow-up', status: 'confirmed', date: today },
@@ -179,21 +202,36 @@ export function useAppointments() {
 
 // ================== Dashboard Stats Hook ==================
 
+// ================== Dashboard Stats Hook ==================
+
 export function useDashboardStats() {
-    const { data: history, isLoading } = useQuery<HistoryEntry[]>({
+    // In demo mode, bypass API call
+    const isDemo = isDemoMode();
+    
+    const { data: historyData, isLoading } = useQuery<HistoryEntry[]>({
         queryKey: ['history'],
-        queryFn: () => api.getHistory() as Promise<HistoryEntry[]>,
+        queryFn: () => isDemo ? Promise.resolve(DEMO_HISTORY) : api.getHistory() as Promise<HistoryEntry[]>,
         staleTime: 30000,
+        // Don't refetch in demo mode
+        enabled: !isDemo,
     });
 
-    const stats = useMemo(() => ({
-        totalAnalyses: history?.length || 0,
-        pendingReview: 8,
-        modelAccuracy: 98.2,
-        systemLoad: 24,
-    }), [history?.length]);
+    const history = isDemo ? DEMO_HISTORY : historyData;
+
+    const stats = useMemo(() => {
+         if (isDemo) return DEMO_STATS;
+         
+         return {
+            totalAnalyses: history?.length || 0,
+            pendingReview: 8,
+            modelAccuracy: 98.2,
+            systemLoad: 24,
+        };
+    }, [history?.length, isDemo]);
 
     const diagnosisBreakdown = useMemo((): DiagnosisStats[] => {
+        if (isDemo) return DEMO_DIAGNOSIS_STATS;
+
         const total = history?.length || 100;
         return [
             { type: 'Cardiology', count: Math.floor(total * 0.35), percentage: 35, color: 'bg-rose-500' },
@@ -201,9 +239,11 @@ export function useDashboardStats() {
             { type: 'Pathology', count: Math.floor(total * 0.22), percentage: 22, color: 'bg-amber-500' },
             { type: 'Others', count: Math.floor(total * 0.16), percentage: 16, color: 'bg-gray-400' },
         ];
-    }, [history?.length]);
+    }, [history?.length, isDemo]);
 
     const recentPatients = useMemo((): RecentPatient[] => {
+        if (isDemo) return DEMO_RECENT_PATIENTS;
+
         const conditions: RecentPatient['condition'][] = ['Stable', 'Monitoring', 'Improving', 'Critical'];
         return (history || []).slice(0, 4).map((entry, i) => ({
             id: String(i + 1),
@@ -213,7 +253,7 @@ export function useDashboardStats() {
             avatar: `P${i + 1}`,
             patientId: entry.details?.patient_id,
         }));
-    }, [history]);
+    }, [history, isDemo]);
 
     return { stats, diagnosisBreakdown, recentPatients, isLoading, history };
 }
