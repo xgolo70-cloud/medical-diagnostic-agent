@@ -119,13 +119,7 @@ export const SiteHeader = () => {
                                 }`}
                             >
                                 {link.label}
-                                {activeSection === link.href && (
-                                    <motion.span
-                                        layoutId="activeNav"
-                                        className="absolute bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-black"
-                                        transition={{ type: "spring", stiffness: 380, damping: 30 }}
-                                    />
-                                )}
+
                             </button>
                         ))}
                     </div>
