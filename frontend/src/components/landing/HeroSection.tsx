@@ -5,19 +5,19 @@ import { useNavigate } from 'react-router-dom';
 
 // Waterfall Images - Medical Diagnostic AI Theme
 const leftColumnImages = [
-    'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=400&auto=format&fit=crop', // Abstract User / Health Profile
-    'https://images.unsplash.com/photo-1584982751601-97dcc096659c?q=80&w=400&auto=format&fit=crop', // Health Analytics Graph
-    'https://images.unsplash.com/photo-1527613426441-4da17471b66d?q=80&w=400&auto=format&fit=crop', // Modern Nurse with Tablet
-    'https://images.unsplash.com/photo-1516110833967-0b5716ca1387?q=80&w=400&auto=format&fit=crop', // AI Finger Touch / Spark
-    'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?q=80&w=400&auto=format&fit=crop', // Cyberpunk / High Tech Lab
+    'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&q=80&w=400', // Doctors/Blue
+    'https://images.unsplash.com/photo-1581093458791-9f302e6d8659?auto=format&fit=crop&q=80&w=400', // Lab/Tech
+    'https://images.unsplash.com/photo-1516110833967-0b5716ca1387?auto=format&fit=crop&q=80&w=400', // AI Hand
+    'https://images.unsplash.com/photo-1579684385127-1ef15d508118?auto=format&fit=crop&q=80&w=400', // Stethoscope
+    'https://images.unsplash.com/photo-1530482054429-cc491f61333b?auto=format&fit=crop&q=80&w=400', // Doctor using tablet
 ];
 
 const rightColumnImages = [
-    'https://images.unsplash.com/photo-1590212151175-e58f96772659?q=80&w=400&auto=format&fit=crop', // Virus / Molecule 3D
-    'https://images.unsplash.com/photo-1581093458791-9f302e6d8659?q=80&w=400&auto=format&fit=crop', // Lab Science / Robotics
-    'https://images.unsplash.com/photo-1555949963-ff9fe0c870eb?q=80&w=400&auto=format&fit=crop', // Code / Diagnostics Screen
-    'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?q=80&w=400&auto=format&fit=crop', // Dark Lab Equipment
-    'https://images.unsplash.com/photo-1579684385127-1ef15d508118?q=80&w=400&auto=format&fit=crop', // Medical Stethoscope (Classic but nice)
+    'https://images.unsplash.com/photo-1532187863486-abf9dbad1b69?auto=format&fit=crop&q=80&w=400', // DNA/Science
+    'https://images.unsplash.com/photo-1551076805-e1869033e561?auto=format&fit=crop&q=80&w=400', // Robotics/Darker
+    'https://images.unsplash.com/photo-1582213782179-e0d53f98f2ca?auto=format&fit=crop&q=80&w=400', // Structure/Molecule
+    'https://images.unsplash.com/photo-1581090700227-1e37b190418e?auto=format&fit=crop&q=80&w=400', // Man in lab
+    'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&q=80&w=400', // Cyberpunk lab
 ];
 
 export const HeroSection = () => {
