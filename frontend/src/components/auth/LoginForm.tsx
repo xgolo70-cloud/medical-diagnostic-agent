@@ -15,7 +15,7 @@ const DEMO_CREDENTIALS = [
 ];
 
 // API base URL
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
 export const LoginForm: React.FC = () => {
     const dispatch = useAppDispatch();
@@ -164,8 +164,8 @@ export const LoginForm: React.FC = () => {
 
             {/* Minimal Accent Orbs */}
             <div className="absolute inset-0 overflow-hidden pointer-events-none">
-                <div className="absolute top-[-10%] left-[-5%] w-[400px] h-[400px] bg-linear-to-br from-blue-100/40 to-transparent rounded-full blur-3xl" />
-                <div className="absolute bottom-[-10%] right-[-5%] w-[400px] h-[400px] bg-linear-to-tl from-purple-100/40 to-transparent rounded-full blur-3xl" />
+                <div className="absolute top-[-10%] left-[-5%] w-[400px] h-[400px] bg-gradient-to-br from-blue-100/40 to-transparent rounded-full blur-3xl" />
+                <div className="absolute bottom-[-10%] right-[-5%] w-[400px] h-[400px] bg-gradient-to-tl from-purple-100/40 to-transparent rounded-full blur-3xl" />
             </div>
             
             <div className="w-full max-w-4xl relative z-10">
@@ -212,9 +212,9 @@ export const LoginForm: React.FC = () => {
                                         'https://images.unsplash.com/photo-1559757175-5700dde675bc?q=80&w=2070&auto=format&fit=crop',
                                         'https://images.unsplash.com/photo-1585435557343-3b092031a831?q=80&w=2070&auto=format&fit=crop',
                                     ].map((img, i) => (
-                                        <div key={i} className="relative w-full aspect-2/3 rounded-2xl overflow-hidden shadow-2xl border border-white/10 group">
+                                        <div key={i} className="relative w-full aspect-[2/3] rounded-2xl overflow-hidden shadow-2xl border border-white/10 group">
                                             <div className="absolute inset-0 bg-indigo-500/20 mix-blend-overlay z-10" />
-                                            <div className="absolute inset-0 bg-linear-to-b from-transparent via-transparent to-black/60 z-10" />
+                                            <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/60 z-10" />
                                             <img src={img} alt="" className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-1000 ease-out" />
                                         </div>
                                     ))}
@@ -233,9 +233,9 @@ export const LoginForm: React.FC = () => {
                                         'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2564&auto=format&fit=crop',
                                         'https://images.unsplash.com/photo-1551076805-e1869033e561?q=80&w=2070&auto=format&fit=crop',
                                     ].map((img, i) => (
-                                        <div key={i} className="relative w-full aspect-2/3 rounded-2xl overflow-hidden shadow-2xl border border-white/10 group">
+                                        <div key={i} className="relative w-full aspect-[2/3] rounded-2xl overflow-hidden shadow-2xl border border-white/10 group">
                                             <div className="absolute inset-0 bg-blue-500/20 mix-blend-overlay z-10" />
-                                            <div className="absolute inset-0 bg-linear-to-b from-transparent via-transparent to-black/60 z-10" />
+                                            <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/60 z-10" />
                                             <img src={img} alt="" className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-1000 ease-out" />
                                         </div>
                                     ))}
@@ -254,9 +254,9 @@ export const LoginForm: React.FC = () => {
                                         'https://images.unsplash.com/photo-1532094349884-543bc11b234d?q=80&w=2070&auto=format&fit=crop',
                                         'https://images.unsplash.com/photo-1518770660439-4636190af475?q=80&w=2070&auto=format&fit=crop',
                                     ].map((img, i) => (
-                                        <div key={i} className="relative w-full aspect-2/3 rounded-2xl overflow-hidden shadow-2xl border border-white/10 group">
+                                        <div key={i} className="relative w-full aspect-[2/3] rounded-2xl overflow-hidden shadow-2xl border border-white/10 group">
                                             <div className="absolute inset-0 bg-purple-500/20 mix-blend-overlay z-10" />
-                                            <div className="absolute inset-0 bg-linear-to-b from-transparent via-transparent to-black/60 z-10" />
+                                            <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/60 z-10" />
                                             <img src={img} alt="" className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-1000 ease-out" />
                                         </div>
                                     ))}
@@ -264,7 +264,7 @@ export const LoginForm: React.FC = () => {
                             </div>
 
                             {/* Unifying global overlay - Minimal gradient for text contrast only */}
-                            <div className="absolute inset-0 bg-linear-to-t from-black/90 via-black/20 to-black/30 pointer-events-none z-10" />
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-black/30 pointer-events-none z-10" />
 
                          </div>
                          
@@ -282,7 +282,7 @@ export const LoginForm: React.FC = () => {
                          </div>
 
                          <div className="relative z-20 max-w-xs mt-12 lg:mt-0">
-                            <h2 className="text-4xl lg:text-5xl font-serif leading-none mb-12 text-white! drop-shadow-lg flex flex-col items-start" style={{ color: '#ffffff' }}>
+                            <h2 className="text-4xl lg:text-5xl font-serif leading-none mb-12 !text-white drop-shadow-lg flex flex-col items-start" style={{ color: '#ffffff' }}>
                                 Beyond <br/>
                                 <div className="relative inline-flex flex-col mt-2">
                                     <span className="relative inline-flex h-[1.2em] overflow-hidden min-w-[200px]">
@@ -293,21 +293,21 @@ export const LoginForm: React.FC = () => {
                                                 animate={{ y: "0%", opacity: 1 }}
                                                 exit={{ y: "-100%", opacity: 0 }}
                                                 transition={{ duration: 0.5, ease: "circOut" }}
-                                                className="block italic font-light text-blue-100! whitespace-nowrap"
+                                                className="block italic font-light !text-blue-100 whitespace-nowrap"
                                             >
                                                 {words[wordIndex]}
                                             </motion.span>
                                         </AnimatePresence>
                                     </span>
-                                    <div className="absolute -bottom-1 left-0 right-0 h-[3px] bg-linear-to-r from-blue-400/60 via-purple-400/80 to-blue-400/60 rounded-full" />
+                                    <div className="absolute -bottom-1 left-0 right-0 h-[3px] bg-gradient-to-r from-blue-400/60 via-purple-400/80 to-blue-400/60 rounded-full" />
                                 </div>
                             </h2>
                          </div>
 
                          <div className="relative z-20 flex items-center gap-3 pt-6 mt-8 lg:mt-auto opacity-60">
-                            <div className="h-px flex-1 bg-linear-to-r from-transparent via-white/30 to-transparent" />
+                            <div className="h-px flex-1 bg-gradient-to-r from-transparent via-white/30 to-transparent" />
                             <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-white/80 drop-shadow-sm">V.2.0.26</span>
-                            <div className="h-px flex-1 bg-linear-to-r from-transparent via-white/30 to-transparent" />
+                            <div className="h-px flex-1 bg-gradient-to-r from-transparent via-white/30 to-transparent" />
                          </div>
                     </div>
 
@@ -416,9 +416,9 @@ export const LoginForm: React.FC = () => {
                                 
                                 {/* Divider */}
                                 <div className="relative flex py-2 items-center">
-                                    <div className="grow border-t border-[#eaeaea]"></div>
-                                    <span className="shrink-0 mx-3 text-[#888888] text-xs font-medium">Or</span>
-                                    <div className="grow border-t border-[#eaeaea]"></div>
+                                    <div className="flex-grow border-t border-[#eaeaea]"></div>
+                                    <span className="flex-shrink-0 mx-3 text-[#888888] text-xs font-medium">Or</span>
+                                    <div className="flex-grow border-t border-[#eaeaea]"></div>
                                 </div>
 
                                 {/* Google Button */}
@@ -453,8 +453,41 @@ export const LoginForm: React.FC = () => {
                                     <button
                                         key={cred.role}
                                         type="button"
-                                        onClick={() => { setUsername(cred.username); setPassword(cred.password); }}
-                                        className="group flex items-center justify-center gap-1.5 h-9 px-2 rounded-md border border-[#eaeaea] bg-white hover:bg-[#171717] hover:border-[#171717] hover:text-white active:scale-[0.98] transition-all duration-150"
+                                        onClick={async () => { 
+                                            setUsername(cred.username); 
+                                            setPassword(cred.password);
+                                            // Auto-submit the login form
+                                            dispatch(loginStart());
+                                            try {
+                                                const response = await fetch(`${API_BASE_URL}/auth/login`, {
+                                                    method: 'POST',
+                                                    headers: { 'Content-Type': 'application/json' },
+                                                    body: JSON.stringify({ username: cred.username, password: cred.password }),
+                                                });
+                                                const data = await response.json();
+                                                if (!response.ok) throw new Error(data.detail || 'Invalid credentials');
+                                                tokenManager.setTokens(data.access_token, data.refresh_token);
+                                                const userResponse = await fetch(`${API_BASE_URL}/auth/me`, {
+                                                    headers: { 'Authorization': `Bearer ${data.access_token}` },
+                                                });
+                                                if (userResponse.ok) {
+                                                    const userData = await userResponse.json();
+                                                    dispatch(loginSuccess({ 
+                                                        username: userData.username, 
+                                                        role: userData.role,
+                                                        email: userData.email,
+                                                        displayName: userData.full_name,
+                                                        avatar: userData.avatar_url,
+                                                    }));
+                                                } else {
+                                                    dispatch(loginSuccess({ username: cred.username, role: cred.role }));
+                                                }
+                                            } catch (err) {
+                                                dispatch(loginFailure(err instanceof Error ? err.message : 'Login failed'));
+                                            }
+                                        }}
+                                        disabled={isLoading}
+                                        className="group flex items-center justify-center gap-1.5 h-9 px-2 rounded-md border border-[#eaeaea] bg-white hover:bg-[#171717] hover:border-[#171717] hover:text-white active:scale-[0.98] transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed"
                                     >
                                         <div className={`w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-semibold transition-colors ${
                                             cred.role === 'admin' ? 'bg-blue-100 text-blue-600 group-hover:bg-white group-hover:text-blue-600' : 
