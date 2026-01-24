@@ -5,19 +5,19 @@ import { useNavigate } from 'react-router-dom';
 
 // Waterfall Images - Medical Diagnostic AI Theme
 const leftColumnImages = [
-    'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?q=80&w=400&auto=format&fit=crop', // Medical research
-    'https://images.unsplash.com/photo-1526256262350-7da7584cf5eb?q=80&w=400&auto=format&fit=crop', // Bio-tech interface
-    'https://images.unsplash.com/photo-1584036561566-b93a50208c1c?q=80&w=400&auto=format&fit=crop', // Microscopic analysis
-    'https://images.unsplash.com/photo-1532187863486-abf9dbad1b69?q=80&w=400&auto=format&fit=crop', // Lab science
-    'https://images.unsplash.com/photo-1516549655169-df83a0774514?q=80&w=400&auto=format&fit=crop', // Vital signs monitor
+    'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=400&auto=format&fit=crop', // Abstract User / Health Profile
+    'https://images.unsplash.com/photo-1584982751601-97dcc096659c?q=80&w=400&auto=format&fit=crop', // Health Analytics Graph
+    'https://images.unsplash.com/photo-1527613426441-4da17471b66d?q=80&w=400&auto=format&fit=crop', // Modern Nurse with Tablet
+    'https://images.unsplash.com/photo-1516110833967-0b5716ca1387?q=80&w=400&auto=format&fit=crop', // AI Finger Touch / Spark
+    'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?q=80&w=400&auto=format&fit=crop', // Cyberpunk / High Tech Lab
 ];
 
 const rightColumnImages = [
-    'https://images.unsplash.com/photo-1582719508461-905c673771fd?q=80&w=400&auto=format&fit=crop', // VR/AR Medicine
-    'https://images.unsplash.com/photo-1581090464777-f3220bbe1b8b?q=80&w=400&auto=format&fit=crop', // Tech lab lighting
-    'https://images.unsplash.com/photo-1511174511562-5f7f18b874f8?q=80&w=400&auto=format&fit=crop', // DNA Helix
-    'https://images.unsplash.com/photo-1579154204601-01588f351e67?q=80&w=400&auto=format&fit=crop', // Data analytics
-    'https://images.unsplash.com/photo-1631549916768-4119b2e5f926?q=80&w=400&auto=format&fit=crop', // Digital health tablet
+    'https://images.unsplash.com/photo-1590212151175-e58f96772659?q=80&w=400&auto=format&fit=crop', // Virus / Molecule 3D
+    'https://images.unsplash.com/photo-1581093458791-9f302e6d8659?q=80&w=400&auto=format&fit=crop', // Lab Science / Robotics
+    'https://images.unsplash.com/photo-1555949963-ff9fe0c870eb?q=80&w=400&auto=format&fit=crop', // Code / Diagnostics Screen
+    'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?q=80&w=400&auto=format&fit=crop', // Dark Lab Equipment
+    'https://images.unsplash.com/photo-1579684385127-1ef15d508118?q=80&w=400&auto=format&fit=crop', // Medical Stethoscope (Classic but nice)
 ];
 
 export const HeroSection = () => {
