@@ -5,19 +5,19 @@ import { useNavigate } from 'react-router-dom';
 
 // Waterfall Images - Medical Diagnostic AI Theme
 const leftColumnImages = [
-    'https://images.unsplash.com/photo-1559757148-5c350d0d3c56?q=80&w=400&auto=format&fit=crop', // Doctor analyzing
-    'https://images.unsplash.com/photo-1516549655169-df83a0774514?q=80&w=400&auto=format&fit=crop', // X-Ray scan
-    'https://images.unsplash.com/photo-1530497610245-94d3c16cda28?q=80&w=400&auto=format&fit=crop', // Medical tablet
-    'https://images.unsplash.com/photo-1576091160550-2173dba999ef?q=80&w=400&auto=format&fit=crop', // Doctor with tech
-    'https://images.unsplash.com/photo-1551076805-e1869033e561?q=80&w=400&auto=format&fit=crop', // Surgery room
+    'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?q=80&w=400&auto=format&fit=crop', // Medical research
+    'https://images.unsplash.com/photo-1526256262350-7da7584cf5eb?q=80&w=400&auto=format&fit=crop', // Bio-tech interface
+    'https://images.unsplash.com/photo-1584036561566-b93a50208c1c?q=80&w=400&auto=format&fit=crop', // Microscopic analysis
+    'https://images.unsplash.com/photo-1532187863486-abf9dbad1b69?q=80&w=400&auto=format&fit=crop', // Lab science
+    'https://images.unsplash.com/photo-1516549655169-df83a0774514?q=80&w=400&auto=format&fit=crop', // Vital signs monitor
 ];
 
 const rightColumnImages = [
-    'https://images.unsplash.com/photo-1579684385127-1ef15d508118?q=80&w=400&auto=format&fit=crop', // Stethoscope
-    'https://images.unsplash.com/photo-1551190822-a9333d879b1f?q=80&w=400&auto=format&fit=crop', // Doctor team
-    'https://images.unsplash.com/photo-1584982751601-97dcc096659c?q=80&w=400&auto=format&fit=crop', // Health data
-    'https://images.unsplash.com/photo-1638202993928-7267aad84c31?q=80&w=400&auto=format&fit=crop', // Medical AI screen
-    'https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?q=80&w=400&auto=format&fit=crop', // Doctor portrait
+    'https://images.unsplash.com/photo-1582719508461-905c673771fd?q=80&w=400&auto=format&fit=crop', // VR/AR Medicine
+    'https://images.unsplash.com/photo-1581090464777-f3220bbe1b8b?q=80&w=400&auto=format&fit=crop', // Tech lab lighting
+    'https://images.unsplash.com/photo-1511174511562-5f7f18b874f8?q=80&w=400&auto=format&fit=crop', // DNA Helix
+    'https://images.unsplash.com/photo-1579154204601-01588f351e67?q=80&w=400&auto=format&fit=crop', // Data analytics
+    'https://images.unsplash.com/photo-1631549916768-4119b2e5f926?q=80&w=400&auto=format&fit=crop', // Digital health tablet
 ];
 
 export const HeroSection = () => {
