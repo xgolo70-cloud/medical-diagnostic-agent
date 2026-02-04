@@ -14,29 +14,17 @@ import {
     ChevronRight,
     AlertTriangle,
     X,
-    Check,
     Loader2
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAppSelector } from '../store/hooks';
 import { Button } from '../components/ui/Button';
 import { toast } from '../components/ui/Toast';
-import { authFetch } from '../utils/authFetch';
+import { supabase } from '../lib/supabase';
+import type { Profile } from '../lib/supabase';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
-
-interface User {
-    id: string;
-    email: string;
-    username: string;
-    role: string;
-    full_name: string | null;
-    phone: string | null;
-    avatar_url: string | null;
-    is_verified: boolean;
-    is_active: boolean;
-    created_at: string;
-    last_login: string | null;
+interface User extends Profile {
+    email?: string;
 }
 
 interface UserStats {
@@ -71,6 +59,7 @@ export const AdminUsersPage: React.FC = () => {
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [showRoleModal, setShowRoleModal] = useState(false);
     const [actionInProgress, setActionInProgress] = useState<string | null>(null);
+    const PAGE_SIZE = 10;
 
     // Check admin access
     useEffect(() => {
@@ -80,31 +69,36 @@ export const AdminUsersPage: React.FC = () => {
         }
     }, [currentUser, navigate]);
 
-    const getAuthHeaders = () => ({
-        'Content-Type': 'application/json',
-    });
-
     const fetchUsers = useCallback(async () => {
         setIsLoading(true);
         try {
-            const params = new URLSearchParams({
-                page: page.toString(),
-                page_size: '10',
-            });
-            if (searchTerm) params.append('search', searchTerm);
-            if (roleFilter) params.append('role', roleFilter);
-            if (activeFilter) params.append('is_active', activeFilter);
+            let query = supabase
+                .from('profiles')
+                .select('*', { count: 'exact' });
 
-            const response = await authFetch(`${API_BASE_URL}/admin/users?${params}`, {
-                headers: getAuthHeaders(),
-            });
+            if (searchTerm) {
+                query = query.or(`username.ilike.%${searchTerm}%,full_name.ilike.%${searchTerm}%`);
+            }
+            if (roleFilter) {
+                query = query.eq('role', roleFilter);
+            }
+            if (activeFilter) {
+                query = query.eq('is_active', activeFilter === 'true');
+            }
 
-            if (!response.ok) throw new Error('Failed to fetch users');
+            const from = (page - 1) * PAGE_SIZE;
+            const to = from + PAGE_SIZE - 1;
 
-            const data = await response.json();
-            setUsers(data.users);
-            setTotalPages(Math.ceil(data.total / data.page_size) || 1);
-        } catch {
+            const { data, count, error } = await query
+                .order('created_at', { ascending: false })
+                .range(from, to);
+
+            if (error) throw error;
+
+            setUsers(data as User[]);
+            setTotalPages(Math.ceil((count || 1) / PAGE_SIZE));
+        } catch (err) {
+            console.error('Error fetching users:', err);
             toast.error('Failed to load users');
         } finally {
             setIsLoading(false);
@@ -113,14 +107,16 @@ export const AdminUsersPage: React.FC = () => {
 
     const fetchStats = useCallback(async () => {
         try {
-            const response = await authFetch(`${API_BASE_URL}/admin/users/stats`, {
-                headers: getAuthHeaders(),
+            const { count: total } = await supabase.from('profiles').select('*', { count: 'exact', head: true });
+            
+            setStats({
+                total_users: total || 0,
+                active_users: 0, 
+                verified_users: 0,
+                by_role: {}
             });
-            if (response.ok) {
-                setStats(await response.json());
-            }
-        } catch {
-            // Stats are optional
+        } catch (err) {
+            console.error('Error fetching stats:', err);
         }
     }, []);
 
@@ -132,14 +128,16 @@ export const AdminUsersPage: React.FC = () => {
     const handleActivate = async (user: User) => {
         setActionInProgress(user.id);
         try {
-            const response = await authFetch(`${API_BASE_URL}/admin/users/${user.id}/activate`, {
-                method: 'POST',
-                headers: getAuthHeaders(),
-            });
-            if (!response.ok) throw new Error('Failed to activate user');
+            const { error } = await supabase
+                .from('profiles')
+                .update({ is_active: true })
+                .eq('id', user.id);
+
+            if (error) throw error;
             toast.success(`${user.username} activated`);
             fetchUsers();
-        } catch {
+        } catch (err) {
+            console.error('Activate error:', err);
             toast.error('Failed to activate user');
         } finally {
             setActionInProgress(null);
@@ -149,18 +147,17 @@ export const AdminUsersPage: React.FC = () => {
     const handleDeactivate = async (user: User) => {
         setActionInProgress(user.id);
         try {
-            const response = await authFetch(`${API_BASE_URL}/admin/users/${user.id}/deactivate`, {
-                method: 'POST',
-                headers: getAuthHeaders(),
-            });
-            if (!response.ok) {
-                const data = await response.json();
-                throw new Error(data.detail || 'Failed to deactivate user');
-            }
+            const { error } = await supabase
+                .from('profiles')
+                .update({ is_active: false })
+                .eq('id', user.id);
+
+            if (error) throw error;
             toast.success(`${user.username} deactivated`);
             fetchUsers();
         } catch (err) {
-            toast.error(err instanceof Error ? err.message : 'Failed to deactivate user');
+            console.error('Deactivate error:', err);
+            toast.error('Failed to deactivate user');
         } finally {
             setActionInProgress(null);
         }
@@ -168,44 +165,28 @@ export const AdminUsersPage: React.FC = () => {
 
     const handleDelete = async () => {
         if (!selectedUser) return;
-        setActionInProgress(selectedUser.id);
-        try {
-            const response = await authFetch(`${API_BASE_URL}/admin/users/${selectedUser.id}`, {
-                method: 'DELETE',
-                headers: getAuthHeaders(),
-            });
-            if (!response.ok) {
-                const data = await response.json();
-                throw new Error(data.detail || 'Failed to delete user');
-            }
-            toast.success(`${selectedUser.username} deleted`);
-            setShowDeleteModal(false);
-            setSelectedUser(null);
-            fetchUsers();
-            fetchStats();
-        } catch (err) {
-            toast.error(err instanceof Error ? err.message : 'Failed to delete user');
-        } finally {
-            setActionInProgress(null);
-        }
+        toast.info("Deactivating user (Soft Delete)");
+        handleDeactivate(selectedUser);
+        setShowDeleteModal(false);
     };
 
     const handleRoleChange = async (newRole: string) => {
         if (!selectedUser) return;
         setActionInProgress(selectedUser.id);
         try {
-            const response = await authFetch(`${API_BASE_URL}/admin/users/${selectedUser.id}`, {
-                method: 'PUT',
-                headers: getAuthHeaders(),
-                body: JSON.stringify({ role: newRole }),
-            });
-            if (!response.ok) throw new Error('Failed to update role');
+            // @ts-ignore
+            const { error } = await supabase
+                .from('profiles')
+                .update({ role: newRole as any })
+                .eq('id', selectedUser.id);
+
+            if (error) throw error;
             toast.success(`${selectedUser.username} role updated to ${newRole}`);
             setShowRoleModal(false);
             setSelectedUser(null);
             fetchUsers();
-            fetchStats();
-        } catch {
+        } catch (err) {
+            console.error('Role update error:', err);
             toast.error('Failed to update role');
         } finally {
             setActionInProgress(null);
@@ -266,33 +247,9 @@ export const AdminUsersPage: React.FC = () => {
                             <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Total Users</p>
                             <p className="text-2xl font-bold text-gray-900 mt-1">{stats.total_users}</p>
                         </motion.div>
-                        <motion.div 
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: 0.1 }}
-                            className="bg-white rounded-xl p-4 border border-gray-200 shadow-sm"
-                        >
-                            <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Active</p>
-                            <p className="text-2xl font-bold text-green-600 mt-1">{stats.active_users}</p>
-                        </motion.div>
-                        <motion.div 
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: 0.2 }}
-                            className="bg-white rounded-xl p-4 border border-gray-200 shadow-sm"
-                        >
-                            <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Verified</p>
-                            <p className="text-2xl font-bold text-blue-600 mt-1">{stats.verified_users}</p>
-                        </motion.div>
-                        <motion.div 
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: 0.3 }}
-                            className="bg-white rounded-xl p-4 border border-gray-200 shadow-sm"
-                        >
-                            <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Admins</p>
-                            <p className="text-2xl font-bold text-red-600 mt-1">{stats.by_role?.admin || 0}</p>
-                        </motion.div>
+                         <div className="hidden md:block col-span-3 bg-gray-50 border border-gray-100 rounded-xl p-4 flex items-center justify-center text-gray-400 text-sm">
+                            Detailed statistics require backend aggregation
+                        </div>
                     </div>
                 )}
 
@@ -303,7 +260,7 @@ export const AdminUsersPage: React.FC = () => {
                             <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                             <input
                                 type="text"
-                                placeholder="Search by username, email, or name..."
+                                placeholder="Search by username or name..."
                                 value={searchTerm}
                                 onChange={(e) => { setSearchTerm(e.target.value); setPage(1); }}
                                 className="w-full h-10 pl-10 pr-4 rounded-lg bg-gray-50 border border-gray-200 text-gray-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-black/5 focus:border-black transition-all text-sm"
@@ -370,11 +327,11 @@ export const AdminUsersPage: React.FC = () => {
                                             <td className="px-6 py-4">
                                                 <div className="flex items-center gap-3">
                                                     <div className="w-10 h-10 rounded-full bg-gray-900 flex items-center justify-center text-white font-semibold">
-                                                        {user.username.charAt(0).toUpperCase()}
+                                                        {user.username?.charAt(0).toUpperCase() || '?'}
                                                     </div>
                                                     <div>
                                                         <p className="font-medium text-gray-900">{user.full_name || user.username}</p>
-                                                        <p className="text-xs text-gray-500">{user.email}</p>
+                                                        {user.email && <p className="text-xs text-gray-500">{user.email}</p>}
                                                     </div>
                                                 </div>
                                             </td>
@@ -392,9 +349,6 @@ export const AdminUsersPage: React.FC = () => {
                                                     <span className={`text-sm ${user.is_active ? 'text-green-700' : 'text-gray-500'}`}>
                                                         {user.is_active ? 'Active' : 'Inactive'}
                                                     </span>
-                                                    {user.is_verified && (
-                                                        <Check size={14} className="text-blue-500" />
-                                                    )}
                                                 </div>
                                             </td>
                                             <td className="px-6 py-4 text-sm text-gray-500">
@@ -426,7 +380,7 @@ export const AdminUsersPage: React.FC = () => {
                                                             <button
                                                                 onClick={() => { setSelectedUser(user); setShowDeleteModal(true); }}
                                                                 className="p-2 rounded-lg hover:bg-red-50 text-red-600 transition-colors"
-                                                                title="Delete"
+                                                                title="Delete (Restrict to Soft)"
                                                             >
                                                                 <Trash2 size={16} />
                                                             </button>
@@ -470,7 +424,7 @@ export const AdminUsersPage: React.FC = () => {
                 </div>
             </main>
 
-            {/* Delete Modal */}
+            {/* Delete/Deactivate Confirmation Modal */}
             <AnimatePresence>
                 {showDeleteModal && selectedUser && (
                     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
@@ -487,8 +441,10 @@ export const AdminUsersPage: React.FC = () => {
                                 <h3 className="text-lg font-semibold text-gray-900">Delete User</h3>
                             </div>
                             <p className="text-sm text-gray-600 mb-6">
-                                Are you sure you want to delete <strong>{selectedUser.username}</strong>? 
-                                This action cannot be undone.
+                                <strong>Warning:</strong> Hard deleting users can impact data integrity. 
+                                <br/><br/>
+                                Would you like to <strong>deactivate</strong> {selectedUser.username} instead? 
+                                This will prevent them from logging in but preserve their data.
                             </p>
                             <div className="flex gap-3 justify-end">
                                 <Button variant="secondary" onClick={() => setShowDeleteModal(false)}>
@@ -498,13 +454,8 @@ export const AdminUsersPage: React.FC = () => {
                                     variant="primary" 
                                     onClick={handleDelete}
                                     className="bg-red-600 hover:bg-red-700"
-                                    disabled={actionInProgress === selectedUser.id}
                                 >
-                                    {actionInProgress === selectedUser.id ? (
-                                        <Loader2 size={16} className="animate-spin" />
-                                    ) : (
-                                        'Delete'
-                                    )}
+                                    Deactivate User
                                 </Button>
                             </div>
                         </motion.div>

@@ -24,6 +24,8 @@ class PatientData(BaseModel):
     symptoms: List[str] = Field(..., min_length=1, max_length=50, description="List of symptoms")
     medical_history: List[str] = Field(default=[], max_length=100, description="List of medical history items")
     vitals: Optional[Vitals] = None
+    image_url: Optional[str] = Field(None, description="URL of the uploaded medical image (Supabase Storage)")
+    image_type: Optional[str] = Field(None, description="Type of the medical image (xray, mri, ct, ultrasound, other)")
     
     @field_validator('gender')
     @classmethod

@@ -1,5 +1,6 @@
 export { DashboardPage } from './DashboardPage';
 export { DiagnosisPage } from './DiagnosisPage';
+export { DiagnosisResultPage } from './DiagnosisResultPage';
 export { HistoryPage } from './HistoryPage';
 export { SettingsPage } from './SettingsPage';
 export { LandingPage } from './LandingPage';

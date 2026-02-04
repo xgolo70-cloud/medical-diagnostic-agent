@@ -283,6 +283,42 @@ export const api = {
             return handleApiError(error);
         }
     },
+
+    /**
+     * Get dashboard statistics
+     */
+    async getDashboardStats(): Promise<any> {
+        try {
+            const response = await apiClient.get('/dashboard/stats');
+            return response.data;
+        } catch (error) {
+            return handleApiError(error);
+        }
+    },
+
+    /**
+     * Get recent patients
+     */
+    async getRecentPatients(): Promise<any[]> {
+        try {
+            const response = await apiClient.get('/dashboard/recent-patients');
+            return response.data;
+        } catch (error) {
+            return handleApiError(error);
+        }
+    },
+
+    /**
+     * Get today's appointments
+     */
+    async getAppointments(): Promise<any[]> {
+        try {
+            const response = await apiClient.get('/dashboard/appointments');
+            return response.data;
+        } catch (error) {
+            return handleApiError(error);
+        }
+    },
 };
 
 export default api;

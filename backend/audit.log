@@ -20,3 +20,18 @@
 {"timestamp": "2026-01-22T12:26:30.820229+00:00", "action": "generate_diagnosis", "user_id": "anonymous", "details": {"patient_id": "PT-001"}}
 {"timestamp": "2026-01-22T12:26:52.341965+00:00", "action": "generate_diagnosis", "user_id": "anonymous", "details": {"patient_id": "PT-001"}}
 {"timestamp": "2026-01-22T12:30:11.393094+00:00", "action": "generate_diagnosis", "user_id": "anonymous", "details": {"patient_id": "PT-001"}}
+{"timestamp": "2026-02-04T13:17:57.969182+00:00", "action": "generate_diagnosis", "user_id": "anonymous", "details": {"patient_id": "TEST-E2E"}}
+{"timestamp": "2026-02-04T13:23:25.542657+00:00", "action": "generate_diagnosis", "user_id": "anonymous", "details": {"patient_id": "TEST-E2E"}}
+{"timestamp": "2026-02-04T13:25:45.790374+00:00", "action": "generate_diagnosis", "user_id": "anonymous", "details": {"patient_id": "TEST-E2E"}}
+{"timestamp": "2026-02-04T13:28:39.078750+00:00", "action": "generate_diagnosis", "user_id": "anonymous", "details": {"patient_id": "TEST-UI-POLISH"}}
+{"timestamp": "2026-02-04T13:34:32.950257+00:00", "action": "generate_diagnosis", "user_id": "anonymous", "details": {"patient_id": "TEST-UI-POLISH"}}
+{"timestamp": "2026-02-04T13:34:53.418166+00:00", "action": "generate_diagnosis", "user_id": "anonymous", "details": {"patient_id": "TEST-UI-POLISH"}}
+{"timestamp": "2026-02-04T13:36:28.115155+00:00", "action": "generate_diagnosis", "user_id": "anonymous", "details": {"patient_id": "TEST-E2E"}}
+{"timestamp": "2026-02-04T14:37:23.392190+00:00", "action": "generate_diagnosis", "user_id": "anonymous", "details": {"patient_id": "TEST-E2E"}}
+{"timestamp": "2026-02-04T14:44:01.476125+00:00", "action": "generate_diagnosis", "user_id": "anonymous", "details": {"patient_id": "TEST-E2E"}}
+{"timestamp": "2026-02-04T17:15:58.305628+00:00", "action": "generate_diagnosis", "user_id": "anonymous", "details": {"patient_id": "PT-001", "diagnosis_id": "455b2813-0c69-4c21-b641-d05c76e77c57"}}
+{"timestamp": "2026-02-04T17:30:33.234749+00:00", "action": "generate_diagnosis", "user_id": "anonymous", "details": {"patient_id": "test-patient", "diagnosis_id": "3cab4486-3146-42d7-85ea-5bd19dfbee9f"}}
+{"timestamp": "2026-02-04T17:42:09.877842+00:00", "action": "generate_diagnosis", "user_id": "anonymous", "details": {"patient_id": "PT-001", "diagnosis_id": "eb0cd465-5f8a-47aa-ae09-e31fe0699d25"}}
+{"timestamp": "2026-02-04T17:42:25.072139+00:00", "action": "generate_diagnosis", "user_id": "anonymous", "details": {"patient_id": "PT-001", "diagnosis_id": "9a7a3724-ff2e-4a9b-b6c3-04596ef9ef5a"}}
+{"timestamp": "2026-02-04T17:44:36.488678+00:00", "action": "generate_diagnosis", "user_id": "anonymous", "details": {"patient_id": "PT-001", "diagnosis_id": "201a9ab4-3caf-45e3-96d0-2bf7edd0cebd"}}
+{"timestamp": "2026-02-04T17:45:35.757045+00:00", "action": "generate_diagnosis", "user_id": "anonymous", "details": {"patient_id": "PT-001", "diagnosis_id": "f527d020-bf7a-444c-a152-cfbfee27890d"}}

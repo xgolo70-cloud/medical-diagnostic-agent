@@ -486,14 +486,36 @@ async def update_profile(
     """
     Update current user's profile information.
     Only provided fields will be updated.
+    If the user does not exist in the database (e.g. Supabase user), create them.
     """
     user = db.query(User).filter(User.username == current_user.username).first()
     
     if not user:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="User not found"
-        )
+        # User not found in local DB, but authenticated via valid token (likely Supabase)
+        # Create the user from the token information
+        if not current_user.email:
+             raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="User email is required for initial profile creation"
+            )
+            
+        # Check if user exists by email just in case of username mismatch
+        user = db.query(User).filter(User.email == current_user.email).first()
+        
+        if not user:
+            # Create new user
+            user = User(
+                username=current_user.username,
+                email=current_user.email,
+                role=UserRole(current_user.role) if current_user.role in [r.value for r in UserRole] else UserRole.PATIENT,
+                password_hash="", # External auth
+                is_verified=True,
+                is_active=True,
+                oauth_provider="supabase"
+            )
+            db.add(user)
+            db.commit()
+            db.refresh(user)
     
     # Update only provided fields
     if full_name is not None:

@@ -7,7 +7,7 @@ import {
     RecentActivityTable,
     AnalyticsSummary 
 } from '../components/dashboard';
-import { useNotifications, useAppointments, useDashboardStats, useSearch } from '../hooks';
+import { useNotifications, useAppointments, useDashboardStats, useSearch, type DiagnosisStats } from '../hooks';
 import {
     Stethoscope,
     TrendingUp,
@@ -120,7 +120,7 @@ export const DashboardPage: React.FC = () => {
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[100] flex items-start justify-center pt-[20vh]"
+                        className="fixed inset-0 bg-black/50 backdrop-blur-sm z-100 flex items-start justify-center pt-[20vh]"
                         onClick={() => setShowSearch(false)}
                     >
                         <motion.div
@@ -451,7 +451,7 @@ export const DashboardPage: React.FC = () => {
                                 </div>
                                 <div className="p-5">
                                     <div className="space-y-4">
-                                        {diagnosisBreakdown.map((item, index) => (
+                                        {diagnosisBreakdown.map((item: DiagnosisStats, index: number) => (
                                             <motion.div 
                                                 key={item.type}
                                                 initial={{ opacity: 0, x: -20 }}
@@ -689,7 +689,7 @@ export const DashboardPage: React.FC = () => {
                                             initial={{ width: 0 }}
                                             animate={{ width: "52%" }}
                                             transition={{ duration: 1, delay: 0.5, ease: "easeOut" }}
-                                            className="bg-gradient-to-r from-gray-800 to-black h-full rounded-full shadow-sm" 
+                                            className="bg-linear-to-r from-gray-800 to-black h-full rounded-full shadow-sm" 
                                         />
                                     </div>
                                 </div>
@@ -707,7 +707,7 @@ export const DashboardPage: React.FC = () => {
                                             initial={{ width: 0 }}
                                             animate={{ width: "15%" }}
                                             transition={{ duration: 1, delay: 0.7, ease: "easeOut" }}
-                                            className="bg-gradient-to-r from-green-400 to-green-500 h-full rounded-full shadow-sm" 
+                                            className="bg-linear-to-r from-green-400 to-green-500 h-full rounded-full shadow-sm" 
                                         />
                                     </div>
                                 </div>
@@ -725,7 +725,7 @@ export const DashboardPage: React.FC = () => {
                                             initial={{ width: 0 }}
                                             animate={{ width: "68%" }}
                                             transition={{ duration: 1, delay: 0.9, ease: "easeOut" }}
-                                            className="bg-gradient-to-r from-blue-400 to-blue-500 h-full rounded-full shadow-sm" 
+                                            className="bg-linear-to-r from-blue-400 to-blue-500 h-full rounded-full shadow-sm" 
                                         />
                                     </div>
                                 </div>
@@ -788,7 +788,7 @@ export const DashboardPage: React.FC = () => {
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ duration: 0.6, delay: 0.6 }}
                             whileHover={{ scale: 1.02, y: -4 }}
-                            className="bg-gradient-to-br from-blue-600 to-indigo-700 rounded-xl shadow-xl overflow-hidden relative group cursor-pointer"
+                            className="bg-linear-to-br from-blue-600 to-indigo-700 rounded-xl shadow-xl overflow-hidden relative group cursor-pointer"
                             onClick={() => navigate('/medai')}
                         >
                             <div className="absolute top-0 right-0 p-6 opacity-20 pointer-events-none">

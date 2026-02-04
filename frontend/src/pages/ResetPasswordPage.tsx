@@ -164,9 +164,16 @@ export const ResetPasswordPage: React.FC = () => {
                                     type={showPassword ? 'text' : 'password'}
                                     required
                                     value={password}
-                                    onChange={(e) => setPassword(e.target.value)}
+                                    onChange={(e) => {
+                                        setPassword(e.target.value);
+                                        if (error) setError('');
+                                    }}
+                                    onBlur={() => {
+                                        const validationError = validatePassword(password);
+                                        if (validationError) setError(validationError);
+                                    }}
                                     placeholder="••••••••"
-                                    className="w-full h-12 px-4 pr-11 rounded-xl bg-gray-50 border border-gray-200 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-black/5 focus:border-black focus:bg-white transition-all"
+                                    className={`w-full h-12 px-4 pr-11 rounded-xl bg-gray-50 border ${error && error.includes('Password') ? 'border-red-300 focus:border-red-400' : 'border-gray-200 focus:border-black'} text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-black/5 focus:bg-white transition-all`}
                                     disabled={status === 'loading'}
                                 />
                                 <button
@@ -191,9 +198,15 @@ export const ResetPasswordPage: React.FC = () => {
                                     type={showConfirmPassword ? 'text' : 'password'}
                                     required
                                     value={confirmPassword}
-                                    onChange={(e) => setConfirmPassword(e.target.value)}
+                                    onChange={(e) => {
+                                        setConfirmPassword(e.target.value);
+                                        if (error === 'Passwords do not match') setError('');
+                                    }}
+                                    onBlur={() => {
+                                        if (confirmPassword && password !== confirmPassword) setError('Passwords do not match');
+                                    }}
                                     placeholder="••••••••"
-                                    className="w-full h-12 px-4 pr-11 rounded-xl bg-gray-50 border border-gray-200 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-black/5 focus:border-black focus:bg-white transition-all"
+                                    className={`w-full h-12 px-4 pr-11 rounded-xl bg-gray-50 border ${error === 'Passwords do not match' ? 'border-red-300 focus:border-red-400' : 'border-gray-200 focus:border-black'} text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-black/5 focus:bg-white transition-all`}
                                     disabled={status === 'loading'}
                                 />
                                 <button

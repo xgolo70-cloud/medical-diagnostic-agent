@@ -1,5 +1,4 @@
-import React, { useState, useRef } from 'react';
-import { authFetch } from '../utils/authFetch';
+import React, { useState, useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import {
     User,
@@ -39,6 +38,8 @@ import { Button } from '../components/ui/Button';
 import { useNavigate } from 'react-router-dom';
 import { useTour } from '../components/ui/TourProvider';
 import { resetTour, DASHBOARD_TOUR_STEPS } from '../components/ui/tourConfig';
+import { supabaseAuth, db, storage } from '../lib/supabase';
+import { api } from '../lib/api';
 
 // Animation variants
 const containerVariants = {
@@ -184,36 +185,104 @@ export const SettingsPage: React.FC = () => {
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     // Local state for profile editing
-    const [localDisplayName, setLocalDisplayName] = useState(settings.displayName || user?.username || '');
-    const [localEmail, setLocalEmail] = useState(settings.email || '');
+    const [localDisplayName, setLocalDisplayName] = useState(settings.displayName || user?.displayName || user?.username || '');
+    const [localEmail, setLocalEmail] = useState(settings.email || user?.email || '');
+    const [isSavingProfile, setIsSavingProfile] = useState(false);
     
     // Password state
-    const [currentPassword, setCurrentPassword] = useState('');
     const [newPassword, setNewPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
     
     // Dialog state
     const [showDeactivateDialog, setShowDeactivateDialog] = useState(false);
+    const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
     
     // Selected accent color (local for visual feedback)
     const [selectedAccent, setSelectedAccent] = useState(settings.accentColor);
 
-    const handleSave = () => {
-        // Save profile to Redux/localStorage
-        dispatch(setDisplayName(localDisplayName));
-        dispatch(setEmail(localEmail));
-        toast.success('Settings saved successfully!');
+    useEffect(() => {
+        // Sync local state if redux state changes (e.g. initial load)
+        if (user) {
+             setLocalDisplayName(settings.displayName || user.displayName || user.username || '');
+             setLocalEmail(settings.email || user.email || '');
+        }
+    }, [user, settings.displayName, settings.email]);
+
+    const handleAvatarUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+        if (!file) return;
+
+        if (file.size > 2 * 1024 * 1024) {
+            toast.error('Image must be less than 2MB');
+            return;
+        }
+
+        setIsUploadingAvatar(true);
+        try {
+            const { user: authUser } = await supabaseAuth.getUser();
+            if (!authUser) {
+                toast.error('You must be logged in to upload an avatar');
+                return;
+            }
+
+            // Upload to Supabase Storage
+            const { path, error: uploadError } = await storage.uploadImage(file, authUser.id);
+            if (uploadError) throw new Error(uploadError.message);
+
+            if (path) {
+                // Get public or signed URL
+                const { signedUrl, error: urlError } = await storage.getSignedUrl(path, 3600 * 24 * 365); // 1 year URL for avatar
+                if (urlError) throw new Error(urlError.message);
+
+                if (signedUrl) {
+                    // Update Profile via Backend API
+                    await api.updateUserProfile({ avatar_url: signedUrl });
+
+                    // Update Redux
+                    dispatch(setAvatar(signedUrl));
+                    toast.success('Avatar updated successfully!');
+                }
+            }
+        } catch (err) {
+            console.error('Avatar upload error:', err);
+            toast.error('Failed to upload avatar');
+        } finally {
+            setIsUploadingAvatar(false);
+        }
+    };
+
+    const handleSave = async () => {
+        setIsSavingProfile(true);
+        try {
+             const { user: authUser } = await supabaseAuth.getUser();
+             if (!authUser) {
+                 toast.error('User not authenticated');
+                 return;
+             }
+
+             // Update Profile via Backend API
+             await api.updateUserProfile({
+                 full_name: localDisplayName
+             });
+
+             // Update Redux
+             dispatch(setDisplayName(localDisplayName));
+             dispatch(setEmail(localEmail)); // Ideally this comes from Auth user source of truth
+             
+             toast.success('Profile settings saved successfully!');
+        } catch (err) {
+            console.error('Profile save error:', err);
+            toast.error('Failed to save profile settings');
+        } finally {
+            setIsSavingProfile(false);
+        }
     };
 
     const handlePasswordUpdate = async () => {
         // Validation
-        if (!currentPassword) {
-            toast.error('Please enter your current password');
-            return;
-        }
-        if (newPassword.length < 8) {
-            toast.error('New password must be at least 8 characters');
+        if (newPassword.length < 6) {
+            toast.error('New password must be at least 6 characters');
             return;
         }
         if (newPassword !== confirmPassword) {
@@ -223,32 +292,16 @@ export const SettingsPage: React.FC = () => {
         
         setIsUpdatingPassword(true);
         
-        const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
-        
         try {
-            const response = await authFetch(`${API_BASE_URL}/auth/me/password`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    current_password: currentPassword,
-                    new_password: newPassword,
-                    confirm_password: confirmPassword,
-                }),
-            });
+            const { error } = await supabaseAuth.updatePassword(newPassword);
 
-            const data = await response.json();
-
-            if (!response.ok) {
-                throw new Error(data.detail || 'Failed to update password');
-            }
+            if (error) throw new Error(error.message);
             
             toast.success('Password updated successfully!');
-            setCurrentPassword('');
             setNewPassword('');
             setConfirmPassword('');
         } catch (err) {
+            console.error('Password update error:', err);
             toast.error(err instanceof Error ? err.message : 'Failed to update password');
         } finally {
             setIsUpdatingPassword(false);
@@ -261,9 +314,23 @@ export const SettingsPage: React.FC = () => {
         toast.success('Accent color updated!');
     };
 
-    const handleDeactivateAccount = () => {
-        setShowDeactivateDialog(false);
-        toast.info('Account deactivation requested. You would be logged out if this were a real action.');
+    const handleDeactivateAccount = async () => {
+        try {
+            const { user: authUser } = await supabaseAuth.getUser();
+            if (authUser) {
+                // Soft delete / deactivate in profile
+                await db.updateProfile(authUser.id, { is_active: false });
+                
+                // Sign out
+                await supabaseAuth.signOut();
+                navigate('/login');
+                toast.info('Account deactivated.');
+            }
+        } catch {
+            toast.error('Failed to deactivate account');
+        } finally {
+            setShowDeactivateDialog(false);
+        }
     };
 
     const getRoleLabel = (role?: string) => {
@@ -322,8 +389,21 @@ export const SettingsPage: React.FC = () => {
                         <h1 className="text-xl font-semibold text-gray-900 tracking-tight">Settings</h1>
                     </div>
                     <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                        <Button variant="primary" size="sm" onClick={handleSave} className="bg-black text-white hover:bg-gray-800 shadow-md">
-                            Save Changes
+                        <Button 
+                            variant="primary" 
+                            size="sm" 
+                            onClick={handleSave} 
+                            disabled={isSavingProfile}
+                            className="bg-black text-white hover:bg-gray-800 shadow-md"
+                        >
+                            {isSavingProfile ? (
+                                <>
+                                    <Loader2 size={14} className="animate-spin mr-2" />
+                                    Saving...
+                                </>
+                            ) : (
+                                'Save Changes'
+                            )}
                         </Button>
                     </motion.div>
                 </div>
@@ -352,22 +432,7 @@ export const SettingsPage: React.FC = () => {
                                 type="file"
                                 accept="image/*"
                                 className="hidden"
-                                onChange={(e) => {
-                                    const file = e.target.files?.[0];
-                                    if (file) {
-                                        if (file.size > 2 * 1024 * 1024) {
-                                            toast.error('Image must be less than 2MB');
-                                            return;
-                                        }
-                                        const reader = new FileReader();
-                                        reader.onload = (event) => {
-                                            const base64 = event.target?.result as string;
-                                            dispatch(setAvatar(base64));
-                                            toast.success('Avatar updated!');
-                                        };
-                                        reader.readAsDataURL(file);
-                                    }
-                                }}
+                                onChange={handleAvatarUpload}
                             />
                             
                             {/* Avatar display */}
@@ -379,7 +444,7 @@ export const SettingsPage: React.FC = () => {
                                 />
                             ) : (
                                 <div className="w-20 h-20 rounded-full bg-black flex items-center justify-center text-white text-2xl font-semibold shadow-md ring-4 ring-white">
-                                    {user?.username?.charAt(0).toUpperCase() || 'U'}
+                                    {(user?.username || localDisplayName || 'U').charAt(0).toUpperCase()}
                                 </div>
                             )}
                             
@@ -390,16 +455,21 @@ export const SettingsPage: React.FC = () => {
                                 <Camera size={20} className="text-white" />
                             </div>
                             <motion.button 
-                                whileHover={{ scale: 1.2 }}
-                                whileTap={{ scale: 0.9 }}
-                                className="absolute -bottom-1 -right-1 p-2 rounded-full bg-white border border-gray-200 hover:bg-gray-50 transition-colors shadow-sm"
+                                whileHover={{ scale: isUploadingAvatar ? 1 : 1.2 }}
+                                whileTap={{ scale: isUploadingAvatar ? 1 : 0.9 }}
+                                className="absolute -bottom-1 -right-1 p-2 rounded-full bg-white border border-gray-200 hover:bg-gray-50 transition-colors shadow-sm disabled:opacity-50"
                                 onClick={() => fileInputRef.current?.click()}
+                                disabled={isUploadingAvatar}
                             >
-                                <Edit3 size={12} className="text-gray-600" />
+                                {isUploadingAvatar ? (
+                                    <Loader2 size={12} className="text-gray-600 animate-spin" />
+                                ) : (
+                                    <Edit3 size={12} className="text-gray-600" />
+                                )}
                             </motion.button>
                         </motion.div>
                         <div>
-                            <h2 className="text-lg font-bold text-gray-900">{user?.username || 'User'}</h2>
+                            <h2 className="text-lg font-bold text-gray-900">{localDisplayName || user?.username || 'User'}</h2>
                             <span className="inline-flex items-center mt-1 px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-100 text-xs font-medium">
                                 {getRoleLabel(user?.role)}
                             </span>
@@ -426,7 +496,8 @@ export const SettingsPage: React.FC = () => {
                                     value={localEmail}
                                     onChange={(e) => setLocalEmail(e.target.value)}
                                     placeholder="your@email.com"
-                                    className="w-full h-10 px-3 pr-10 rounded-lg bg-gray-50 border border-gray-200 text-gray-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-black/5 focus:border-black transition-all text-sm"
+                                    disabled
+                                    className="w-full h-10 px-3 pr-10 rounded-lg bg-gray-50 border border-gray-200 text-gray-500 cursor-not-allowed bg-gray-100 transition-all text-sm"
                                 />
                                 <div className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs">@</div>
                             </div>
@@ -652,17 +723,7 @@ export const SettingsPage: React.FC = () => {
                         </div>
                     }
                 >
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div>
-                            <label className="block text-xs font-semibold text-gray-700 mb-1.5">Current Password</label>
-                            <input 
-                                type="password" 
-                                value={currentPassword}
-                                onChange={(e) => setCurrentPassword(e.target.value)}
-                                placeholder="••••••••" 
-                                className="w-full h-10 px-3 rounded-lg bg-gray-50 border border-gray-200 text-gray-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-black/5 focus:border-black transition-all text-sm" 
-                            />
-                        </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <label className="block text-xs font-semibold text-gray-700 mb-1.5">New Password</label>
                             <input 

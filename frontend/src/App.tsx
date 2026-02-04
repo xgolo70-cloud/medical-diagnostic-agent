@@ -2,6 +2,7 @@ import { Suspense, lazy } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { Layout } from './components/layout';
 import { LoginForm, RegisterForm } from './components/auth';
+import { SupabaseListener } from './components/auth/SupabaseListener';
 import { LandingPage } from './pages'; // Keep LandingPage eager for fast LCP
 import { useAppSelector } from './store/hooks';
 import { Activity } from 'lucide-react';
@@ -11,6 +12,7 @@ import { TourProvider } from './components/ui/TourProvider';
 // Lazy load heavy dashboard pages
 const DashboardPage = lazy(() => import('./pages').then(module => ({ default: module.DashboardPage })));
 const DiagnosisPage = lazy(() => import('./pages').then(module => ({ default: module.DiagnosisPage })));
+const DiagnosisResultPage = lazy(() => import('./pages').then(module => ({ default: module.DiagnosisResultPage })));
 const HistoryPage = lazy(() => import('./pages').then(module => ({ default: module.HistoryPage })));
 const SettingsPage = lazy(() => import('./pages').then(module => ({ default: module.SettingsPage })));
 const MedAIPage = lazy(() => import('./pages').then(module => ({ default: module.MedAIPage })));
@@ -42,6 +44,7 @@ function App() {
 
   return (
     <TourProvider>
+      <SupabaseListener />
       <ToastProvider />
       <Suspense fallback={<LoadingFallback />}>
         <Routes>
@@ -71,6 +74,7 @@ function App() {
           >
             <Route path="/dashboard" element={<DashboardPage />} />
             <Route path="/diagnosis" element={<DiagnosisPage />} />
+            <Route path="/diagnosis/result" element={<DiagnosisResultPage />} />
             <Route path="/medai" element={<MedAIPage />} />
             <Route path="/history" element={<HistoryPage />} />
             <Route path="/settings" element={<SettingsPage />} />

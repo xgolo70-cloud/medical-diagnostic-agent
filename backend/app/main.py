@@ -95,6 +95,8 @@ app.include_router(google_auth.router, prefix="/api", tags=["Google OAuth"])
 app.include_router(ingest.router, prefix="/api/ingest")
 app.include_router(diagnose.router, prefix="/api/diagnose")
 app.include_router(history.router, prefix="/api/history")
+from app.api import dashboard
+app.include_router(dashboard.router, prefix="/api/dashboard", tags=["Dashboard"])
 app.include_router(medgemma_router, prefix="/api", tags=["MedGemma AI"])
 app.include_router(admin.router, prefix="/api", tags=["Admin"])
 

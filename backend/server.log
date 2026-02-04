@@ -33,3 +33,15 @@ INFO:     127.0.0.1:52325 - "POST /api/auth/login HTTP/1.1" 200 OK
 INFO:     127.0.0.1:52325 - "GET /api/auth/me HTTP/1.1" 200 OK
 INFO:     127.0.0.1:52444 - "GET /api/history HTTP/1.1" 200 OK
 INFO:     127.0.0.1:52471 - "GET /api/history HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53967 - "OPTIONS /api/history HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53967 - "GET /api/history HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55690 - "OPTIONS /api/history HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55690 - "GET /api/history HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56564 - "OPTIONS /api/diagnose HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56564 - "POST /api/diagnose HTTP/1.1" 422 Unprocessable Content
+INFO:     127.0.0.1:52550 - "OPTIONS /api/history HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52550 - "GET /api/history HTTP/1.1" 200 OK
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [68860]

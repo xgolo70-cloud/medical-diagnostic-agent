@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useGoogleLogin } from '@react-oauth/google';
 import { Eye, EyeOff, ArrowLeft, Brain, ArrowRight, AlertCircle, Lock } from 'lucide-react';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { loginStart, loginSuccess, loginFailure } from '../../store/authSlice';
 import { tokenManager } from '../../services/api';
 import { Link } from 'react-router-dom';
+import { supabaseAuth, db } from '../../lib/supabase';
 
-// Demo credentials for quick login
+// Demo credentials for quick login (still works in demo mode)
 const DEMO_CREDENTIALS = [
     { username: 'admin', password: 'Admin123!', role: 'admin' as const, displayName: 'System Administrator', email: 'admin@medai.local' },
     { username: 'dr.smith', password: 'Doctor123!', role: 'specialist' as const, displayName: 'Dr. Sarah Smith', email: 'doctor@medai.local' },
@@ -15,10 +15,7 @@ const DEMO_CREDENTIALS = [
 ];
 
 // Demo mode - set to true for frontend-only demo without backend
-const DEMO_MODE = import.meta.env.VITE_DEMO_MODE === 'true' || !import.meta.env.VITE_API_URL;
-
-// API base URL
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
+const DEMO_MODE = import.meta.env.VITE_DEMO_MODE === 'true';
 
 // Generate mock JWT token for demo mode
 const generateMockToken = (username: string, role: string): string => {
@@ -38,10 +35,10 @@ export const LoginForm: React.FC = () => {
     const dispatch = useAppDispatch();
     const { isLoading, error } = useAppSelector((state) => state.auth);
 
-    const [username, setUsername] = useState('');
+    const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
-    const [formErrors, setFormErrors] = useState<{ username?: string; password?: string }>({});
+    const [formErrors, setFormErrors] = useState<{ email?: string; password?: string }>({});
 
     // Rotating text state
     const words = ["Thinking.", "Limits.", "Logic.", "Future."];
@@ -54,12 +51,10 @@ export const LoginForm: React.FC = () => {
         return () => clearInterval(timer);
     }, [words.length]);
 
-
-
-
     const validateForm = (): boolean => {
-        const errors: { username?: string; password?: string } = {};
-        if (!username.trim()) errors.username = 'Username is required';
+        const errors: { email?: string; password?: string } = {};
+        if (!email.trim()) errors.email = 'Email is required';
+        else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) errors.email = 'Invalid email format';
         if (!password) errors.password = 'Password is required';
         setFormErrors(errors);
         return Object.keys(errors).length === 0;
@@ -74,7 +69,7 @@ export const LoginForm: React.FC = () => {
         // Demo mode - validate locally without backend
         if (DEMO_MODE) {
             const demoUser = DEMO_CREDENTIALS.find(
-                cred => cred.username === username && cred.password === password
+                cred => cred.email === email && cred.password === password
             );
             
             if (demoUser) {
@@ -92,100 +87,97 @@ export const LoginForm: React.FC = () => {
             return;
         }
 
+        // Use Supabase Auth
         try {
-            const response = await fetch(`${API_BASE_URL}/auth/login`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    username: username,
-                    password: password,
-                }),
-            });
+            const { data, error: authError } = await supabaseAuth.signIn(email, password);
 
-            const data = await response.json();
-
-            if (!response.ok) {
-                throw new Error(data.detail || 'Invalid credentials');
+            if (authError) {
+                throw new Error(authError.message);
             }
 
-            // Save tokens from API response
-            tokenManager.setTokens(data.access_token, data.refresh_token);
-            
-            // Fetch user info to get full profile
-            const userResponse = await fetch(`${API_BASE_URL}/auth/me`, {
-                headers: {
-                    'Authorization': `Bearer ${data.access_token}`,
-                },
-            });
+            if (data.user) {
+                // Fetch user profile from Supabase
+                const { profile, error: profileError } = await db.getProfile(data.user.id);
+                
+                if (profileError) {
+                    console.warn('Profile not found, using default values');
+                }
 
-            if (userResponse.ok) {
-                const userData = await userResponse.json();
-                dispatch(loginSuccess({ 
-                    username: userData.username, 
-                    role: userData.role,
-                    email: userData.email,
-                    displayName: userData.full_name,
-                    avatar: userData.avatar_url,
+                dispatch(loginSuccess({
+                    username: profile?.username || email.split('@')[0],
+                    role: profile?.role || 'patient',
+                    email: data.user.email,
+                    avatar: profile?.avatar_url || undefined,
+                    displayName: profile?.full_name || undefined,
                 }));
-            } else {
-                // Fallback: use basic info from token claims
-                dispatch(loginSuccess({ username: username, role: 'specialist' }));
             }
         } catch (err) {
             dispatch(loginFailure(err instanceof Error ? err.message : 'Login failed'));
         }
     };
 
-    const handleGoogleLogin = useGoogleLogin({
-        onSuccess: async (tokenResponse) => {
-            try {
-                dispatch(loginStart());
-                
-                // Send Google token to our backend for verification and user creation
-                const response = await fetch(`${API_BASE_URL}/auth/google`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ access_token: tokenResponse.access_token }),
-                });
-                
-                const data = await response.json();
-                
-                if (!response.ok) {
-                    throw new Error(data.detail || 'Google sign-in failed');
-                }
-                
-                // Store our app's JWT tokens
-                tokenManager.setTokens(data.access_token, data.refresh_token);
-                
-                // Fetch user info with our JWT
-                const userResponse = await fetch(`${API_BASE_URL}/auth/me`, {
-                    headers: { 'Authorization': `Bearer ${data.access_token}` },
-                });
-                
-                if (userResponse.ok) {
-                    const userData = await userResponse.json();
-                    dispatch(loginSuccess({
-                        username: userData.username,
-                        role: userData.role,
-                        email: userData.email,
-                        avatar: userData.avatar_url,
-                        displayName: userData.full_name,
-                    }));
-                } else {
-                    throw new Error('Failed to fetch user profile');
-                }
-                
-            } catch (err) {
-                console.error('Google login error:', err);
-                dispatch(loginFailure(err instanceof Error ? err.message : 'Google sign-in failed'));
+    const handleGoogleLogin = async () => {
+        try {
+            dispatch(loginStart());
+            const { error } = await supabaseAuth.signInWithGoogle();
+            
+            if (error) {
+                dispatch(loginFailure(error.message));
             }
-        },
-        onError: () => {
-             dispatch(loginFailure('Google sign-in failed.'));
+            // Note: Google OAuth will redirect, so we don't need to handle success here
+            // The auth state change listener will handle the redirect callback
+        } catch (err) {
+            console.error('Google login error:', err);
+            dispatch(loginFailure(err instanceof Error ? err.message : 'Google sign-in failed'));
         }
-    });
+    };
+
+    const handleDemoLogin = async (cred: typeof DEMO_CREDENTIALS[0]) => {
+        dispatch(loginStart());
+        
+        // Demo mode - instant login
+        if (DEMO_MODE) {
+            const mockToken = generateMockToken(cred.username, cred.role);
+            tokenManager.setTokens(mockToken, mockToken);
+            dispatch(loginSuccess({
+                username: cred.username,
+                role: cred.role,
+                email: cred.email,
+                displayName: cred.displayName,
+            }));
+            return;
+        }
+
+        // Try Supabase login with demo credentials
+        try {
+            const { data, error: authError } = await supabaseAuth.signIn(cred.email, cred.password);
+
+            if (authError) {
+                // If demo user doesn't exist in Supabase, use mock mode
+                const mockToken = generateMockToken(cred.username, cred.role);
+                tokenManager.setTokens(mockToken, mockToken);
+                dispatch(loginSuccess({
+                    username: cred.username,
+                    role: cred.role,
+                    email: cred.email,
+                    displayName: cred.displayName,
+                }));
+                return;
+            }
+
+            if (data.user) {
+                const { profile } = await db.getProfile(data.user.id);
+                dispatch(loginSuccess({
+                    username: profile?.username || cred.username,
+                    role: profile?.role || cred.role,
+                    email: data.user.email,
+                    displayName: profile?.full_name || cred.displayName,
+                }));
+            }
+        } catch (err) {
+            dispatch(loginFailure(err instanceof Error ? err.message : 'Login failed'));
+        }
+    };
 
     return (
         <div className="min-h-screen w-full flex items-center justify-center bg-[#fafafa] relative overflow-hidden font-['Inter',sans-serif] p-4">
@@ -381,22 +373,26 @@ export const LoginForm: React.FC = () => {
                             </div>
 
                             <form onSubmit={handleSubmit} className="space-y-4">
-                                {/* Username */}
+                                {/* Email */}
                                 <div className="space-y-1.5">
                                     <div className="flex justify-between items-center">
-                                        <label className="text-xs font-medium text-[#666666]">Username</label>
-                                        {formErrors.username && (
+                                        <label className="text-xs font-medium text-[#666666]">Email</label>
+                                        {formErrors.email && (
                                             <span className="text-[11px] font-medium text-red-500 flex items-center gap-1">
-                                                <AlertCircle size={10} /> {formErrors.username}
+                                                <AlertCircle size={10} /> {formErrors.email}
                                             </span>
                                         )}
                                     </div>
                                     <input
-                                        type="text"
-                                        value={username}
-                                        onChange={(e) => { setUsername(e.target.value); if (formErrors.username) setFormErrors({ ...formErrors, username: undefined }); }}
-                                        className={`w-full h-10 px-3.5 rounded-md bg-white border ${formErrors.username ? 'border-red-300 focus:border-red-400' : 'border-[#eaeaea] focus:border-[#171717]'} text-[#171717] placeholder-[#a3a3a3] focus:outline-none focus:ring-2 focus:ring-[#eaeaea] transition-all duration-150 text-sm`}
-                                        placeholder="e.g. dr.smith"
+                                        type="email"
+                                        value={email}
+                                        onChange={(e) => { setEmail(e.target.value); if (formErrors.email) setFormErrors({ ...formErrors, email: undefined }); }}
+                                        onBlur={() => {
+                                            if (!email.trim()) setFormErrors(prev => ({ ...prev, email: 'Email is required' }));
+                                            else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) setFormErrors(prev => ({ ...prev, email: 'Invalid email format' }));
+                                        }}
+                                        className={`w-full h-10 px-3.5 rounded-md bg-white border ${formErrors.email ? 'border-red-300 focus:border-red-400' : 'border-[#eaeaea] focus:border-[#171717]'} text-[#171717] placeholder-[#a3a3a3] focus:outline-none focus:ring-2 focus:ring-[#eaeaea] transition-all duration-150 text-sm`}
+                                        placeholder="you@example.com"
                                         disabled={isLoading}
                                     />
                                 </div>
@@ -421,6 +417,9 @@ export const LoginForm: React.FC = () => {
                                             onChange={(e) => { 
                                                 setPassword(e.target.value); 
                                                 if (formErrors.password) setFormErrors({ ...formErrors, password: undefined }); 
+                                            }}
+                                            onBlur={() => {
+                                                if (!password) setFormErrors(prev => ({ ...prev, password: 'Password is required' }));
                                             }}
                                             className={`w-full h-10 px-3.5 pr-10 rounded-md bg-white border ${formErrors.password ? 'border-red-300 focus:border-red-400' : 'border-[#eaeaea] focus:border-[#171717]'} text-[#171717] placeholder-[#a3a3a3] focus:outline-none focus:ring-2 focus:ring-[#eaeaea] transition-all duration-150 text-sm`}
                                             placeholder="••••••••"
@@ -491,53 +490,7 @@ export const LoginForm: React.FC = () => {
                                     <button
                                         key={cred.role}
                                         type="button"
-                                        onClick={async () => { 
-                                            setUsername(cred.username); 
-                                            setPassword(cred.password);
-                                            dispatch(loginStart());
-                                            
-                                            // Demo mode - instant login without backend
-                                            if (DEMO_MODE) {
-                                                const mockToken = generateMockToken(cred.username, cred.role);
-                                                tokenManager.setTokens(mockToken, mockToken);
-                                                dispatch(loginSuccess({
-                                                    username: cred.username,
-                                                    role: cred.role,
-                                                    email: cred.email,
-                                                    displayName: cred.displayName,
-                                                }));
-                                                return;
-                                            }
-                                            
-                                            // Real API login
-                                            try {
-                                                const response = await fetch(`${API_BASE_URL}/auth/login`, {
-                                                    method: 'POST',
-                                                    headers: { 'Content-Type': 'application/json' },
-                                                    body: JSON.stringify({ username: cred.username, password: cred.password }),
-                                                });
-                                                const data = await response.json();
-                                                if (!response.ok) throw new Error(data.detail || 'Invalid credentials');
-                                                tokenManager.setTokens(data.access_token, data.refresh_token);
-                                                const userResponse = await fetch(`${API_BASE_URL}/auth/me`, {
-                                                    headers: { 'Authorization': `Bearer ${data.access_token}` },
-                                                });
-                                                if (userResponse.ok) {
-                                                    const userData = await userResponse.json();
-                                                    dispatch(loginSuccess({ 
-                                                        username: userData.username, 
-                                                        role: userData.role,
-                                                        email: userData.email,
-                                                        displayName: userData.full_name,
-                                                        avatar: userData.avatar_url,
-                                                    }));
-                                                } else {
-                                                    dispatch(loginSuccess({ username: cred.username, role: cred.role }));
-                                                }
-                                            } catch (err) {
-                                                dispatch(loginFailure(err instanceof Error ? err.message : 'Login failed'));
-                                            }
-                                        }}
+                                        onClick={() => handleDemoLogin(cred)}
                                         disabled={isLoading}
                                         className="group flex items-center justify-center gap-1.5 h-9 px-2 rounded-md border border-[#eaeaea] bg-white hover:bg-[#171717] hover:border-[#171717] hover:text-white active:scale-[0.98] transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed"
                                     >

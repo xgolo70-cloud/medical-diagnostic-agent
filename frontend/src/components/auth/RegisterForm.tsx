@@ -1,11 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useGoogleLogin } from '@react-oauth/google';
 import { Eye, EyeOff, ArrowLeft, Brain, ArrowRight, AlertCircle, Lock, CheckCircle, User, Mail, Phone, Shield } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
-
-// API base URL
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
+import { supabaseAuth, db } from '../../lib/supabase';
 
 interface FormErrors {
     fullName?: string;
@@ -125,26 +122,31 @@ export const RegisterForm: React.FC = () => {
         setFormErrors({});
 
         try {
-            const response = await fetch(`${API_BASE_URL}/auth/register`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    email: formData.email,
+            // Sign up with Supabase Auth
+            const { data, error } = await supabaseAuth.signUp(
+                formData.email,
+                formData.password,
+                {
                     username: formData.username,
-                    password: formData.password,
-                    confirm_password: formData.confirmPassword,
                     full_name: formData.fullName,
+                }
+            );
+
+            if (error) {
+                throw new Error(error.message);
+            }
+
+            // Update profile with additional data if user was created
+            if (data.user) {
+                // Wait a moment for the trigger to create the profile
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                
+                // Update profile with role and phone
+                await db.updateProfile(data.user.id, {
+                    role: formData.role as 'patient' | 'doctor' | 'specialist' | 'admin' | 'auditor' | 'gp',
                     phone: formData.phone || null,
-                    role: formData.role,
-                }),
-            });
-
-            const data = await response.json();
-
-            if (!response.ok) {
-                throw new Error(data.detail || 'Registration failed');
+                    full_name: formData.fullName,
+                });
             }
 
             setSuccess(true);
@@ -161,41 +163,22 @@ export const RegisterForm: React.FC = () => {
         }
     };
 
-    const handleGoogleSignup = useGoogleLogin({
-        onSuccess: async (tokenResponse) => {
-            try {
-                setIsLoading(true);
-                
-                // Fetch user info from Google
-                const userInfoResponse = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
-                    headers: { Authorization: `Bearer ${tokenResponse.access_token}` },
-                });
-                
-                if (!userInfoResponse.ok) {
-                    throw new Error('Failed to fetch user info');
-                }
-                
-                const userInfo = await userInfoResponse.json();
-                
-                // Pre-fill form with Google data
-                setFormData(prev => ({
-                    ...prev,
-                    email: userInfo.email || '',
-                    fullName: userInfo.name || '',
-                    username: userInfo.email?.split('@')[0] || '',
-                }));
-                
-            } catch (err) {
-                console.error('Google signup error:', err);
-                setFormErrors({ general: 'Google sign-up failed. Please try again.' });
-            } finally {
-                setIsLoading(false);
+    const handleGoogleSignup = async () => {
+        try {
+            setIsLoading(true);
+            const { error } = await supabaseAuth.signInWithGoogle();
+            
+            if (error) {
+                setFormErrors({ general: error.message });
             }
-        },
-        onError: () => {
-            setFormErrors({ general: 'Google sign-up failed.' });
+            // Note: Google OAuth will redirect, so we don't need to handle success here
+        } catch (err) {
+            console.error('Google signup error:', err);
+            setFormErrors({ general: 'Google sign-up failed. Please try again.' });
+        } finally {
+            setIsLoading(false);
         }
-    });
+    };
 
     const updateField = (field: keyof FormData, value: string) => {
         setFormData(prev => ({ ...prev, [field]: value }));
@@ -433,6 +416,9 @@ export const RegisterForm: React.FC = () => {
                                             type="text"
                                             value={formData.fullName}
                                             onChange={(e) => updateField('fullName', e.target.value)}
+                                            onBlur={() => {
+                                                if (!formData.fullName.trim()) setFormErrors(prev => ({ ...prev, fullName: 'Full name is required' }));
+                                            }}
                                             className={`w-full h-10 pl-9 pr-3.5 rounded-md bg-white border ${formErrors.fullName ? 'border-red-300 focus:border-red-400' : 'border-[#eaeaea] focus:border-[#171717]'} text-[#171717] placeholder-[#a3a3a3] focus:outline-none focus:ring-2 focus:ring-[#eaeaea] transition-all duration-150 text-sm`}
                                             placeholder="Dr. John Smith"
                                             disabled={isLoading}
@@ -456,6 +442,10 @@ export const RegisterForm: React.FC = () => {
                                             type="email"
                                             value={formData.email}
                                             onChange={(e) => updateField('email', e.target.value)}
+                                            onBlur={() => {
+                                                if (!formData.email.trim()) setFormErrors(prev => ({ ...prev, email: 'Email is required' }));
+                                                else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) setFormErrors(prev => ({ ...prev, email: 'Invalid email format' }));
+                                            }}
                                             className={`w-full h-10 pl-9 pr-3.5 rounded-md bg-white border ${formErrors.email ? 'border-red-300 focus:border-red-400' : 'border-[#eaeaea] focus:border-[#171717]'} text-[#171717] placeholder-[#a3a3a3] focus:outline-none focus:ring-2 focus:ring-[#eaeaea] transition-all duration-150 text-sm`}
                                             placeholder="doctor@hospital.com"
                                             disabled={isLoading}
@@ -477,6 +467,10 @@ export const RegisterForm: React.FC = () => {
                                         type="text"
                                         value={formData.username}
                                         onChange={(e) => updateField('username', e.target.value)}
+                                        onBlur={() => {
+                                            if (!formData.username.trim()) setFormErrors(prev => ({ ...prev, username: 'Username is required' }));
+                                            else if (formData.username.length < 3) setFormErrors(prev => ({ ...prev, username: 'Min 3 chars' }));
+                                        }}
                                         className={`w-full h-10 px-3.5 rounded-md bg-white border ${formErrors.username ? 'border-red-300 focus:border-red-400' : 'border-[#eaeaea] focus:border-[#171717]'} text-[#171717] placeholder-[#a3a3a3] focus:outline-none focus:ring-2 focus:ring-[#eaeaea] transition-all duration-150 text-sm`}
                                         placeholder="dr.smith"
                                         disabled={isLoading}
@@ -500,6 +494,10 @@ export const RegisterForm: React.FC = () => {
                                                 type={showPassword ? 'text' : 'password'}
                                                 value={formData.password}
                                                 onChange={(e) => updateField('password', e.target.value)}
+                                                onBlur={() => {
+                                                    if (!formData.password) setFormErrors(prev => ({ ...prev, password: 'Required' }));
+                                                    else if (formData.password.length < 8) setFormErrors(prev => ({ ...prev, password: 'Min 8 chars' }));
+                                                }}
                                                 className={`w-full h-10 px-3.5 pr-9 rounded-md bg-white border ${formErrors.password ? 'border-red-300 focus:border-red-400' : 'border-[#eaeaea] focus:border-[#171717]'} text-[#171717] placeholder-[#a3a3a3] focus:outline-none focus:ring-2 focus:ring-[#eaeaea] transition-all duration-150 text-sm`}
                                                 placeholder="••••••••"
                                                 disabled={isLoading}
@@ -552,6 +550,9 @@ export const RegisterForm: React.FC = () => {
                                                 type={showConfirmPassword ? 'text' : 'password'}
                                                 value={formData.confirmPassword}
                                                 onChange={(e) => updateField('confirmPassword', e.target.value)}
+                                                onBlur={() => {
+                                                    if (formData.confirmPassword !== formData.password) setFormErrors(prev => ({ ...prev, confirmPassword: 'Mismatch' }));
+                                                }}
                                                 className={`w-full h-10 px-3.5 pr-9 rounded-md bg-white border ${formErrors.confirmPassword ? 'border-red-300 focus:border-red-400' : 'border-[#eaeaea] focus:border-[#171717]'} text-[#171717] placeholder-[#a3a3a3] focus:outline-none focus:ring-2 focus:ring-[#eaeaea] transition-all duration-150 text-sm`}
                                                 placeholder="••••••••"
                                                 disabled={isLoading}

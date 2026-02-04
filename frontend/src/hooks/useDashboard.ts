@@ -60,11 +60,11 @@ interface HistoryEntry {
 // ================== Storage Keys ==================
 
 const NOTIFICATIONS_KEY = 'dashboard_notifications';
-const APPOINTMENTS_KEY = 'dashboard_appointments';
 
 // ================== Helper Functions ==================
 
-function getRelativeTime(timestamp: string): string {
+// Helper function - exported for potential use in other components
+export function getRelativeTime(timestamp: string): string {
     const now = Date.now();
     const time = new Date(timestamp).getTime();
     const diff = now - time;
@@ -100,25 +100,6 @@ function getStoredNotifications(): Notification[] {
     return defaults;
 }
 
-function getStoredAppointments(): Appointment[] {
-    const stored = localStorage.getItem(APPOINTMENTS_KEY);
-    if (stored) return JSON.parse(stored);
-    
-    // In demo mode, return rich demo data
-    if (isDemoMode()) {
-        localStorage.setItem(APPOINTMENTS_KEY, JSON.stringify(DEMO_APPOINTMENTS));
-        return DEMO_APPOINTMENTS;
-    }
-
-    const today = new Date().toISOString().split('T')[0];
-    const defaults: Appointment[] = [
-        { id: '1', patient: 'Ahmed Al-Rashid', time: '09:30 AM', type: 'Follow-up', status: 'confirmed', date: today },
-        { id: '2', patient: 'Sarah Johnson', time: '11:00 AM', type: 'New Patient', status: 'pending', date: today },
-        { id: '3', patient: 'Mohammed Hassan', time: '02:30 PM', type: 'Lab Review', status: 'confirmed', date: today },
-    ];
-    localStorage.setItem(APPOINTMENTS_KEY, JSON.stringify(defaults));
-    return defaults;
-}
 
 // ================== Notifications Hook ==================
 
@@ -165,42 +146,46 @@ export function useNotifications() {
 
 // ================== Appointments Hook ==================
 
+// ================== Appointments Hook ==================
+
 export function useAppointments() {
-    const [appointments, setAppointments] = useState<Appointment[]>(getStoredAppointments);
+    const isDemo = isDemoMode();
+
+    const { data: appointmentsData } = useQuery({
+        queryKey: ['appointments'],
+        queryFn: () => isDemo ? Promise.resolve(DEMO_APPOINTMENTS) : api.getAppointments(),
+        staleTime: 60000,
+    });
+
+    const [localAppointments, setLocalAppointments] = useState<Appointment[]>([]);
+
+    // Merge server data with local state if needed, or just use server data
+    const appointments = useMemo(() => {
+        return appointmentsData || localAppointments;
+    }, [appointmentsData, localAppointments]);
 
     const addAppointment = useCallback((apt: Omit<Appointment, 'id'>) => {
+        // For now, just update local state to reflect UI changes immediately
+        // In a full implementation, this should call an API
         const newApt: Appointment = { ...apt, id: Date.now().toString() };
-        setAppointments(prev => {
-            const updated = [...prev, newApt];
-            localStorage.setItem(APPOINTMENTS_KEY, JSON.stringify(updated));
-            return updated;
-        });
+        setLocalAppointments(prev => [...prev, newApt]);
     }, []);
 
     const updateStatus = useCallback((id: string, status: Appointment['status']) => {
-        setAppointments(prev => {
-            const updated = prev.map(a => a.id === id ? { ...a, status } : a);
-            localStorage.setItem(APPOINTMENTS_KEY, JSON.stringify(updated));
-            return updated;
-        });
+        // Mock update
+         setLocalAppointments(prev => prev.map(a => a.id === id ? { ...a, status } : a));
     }, []);
 
     const removeAppointment = useCallback((id: string) => {
-        setAppointments(prev => {
-            const updated = prev.filter(a => a.id !== id);
-            localStorage.setItem(APPOINTMENTS_KEY, JSON.stringify(updated));
-            return updated;
-        });
+        setLocalAppointments(prev => prev.filter(a => a.id !== id));
     }, []);
 
     const todayAppointments = useMemo(() => 
-        appointments.filter(a => a.date === new Date().toISOString().split('T')[0]),
+        (appointments || []).filter((a: Appointment) => a.date === new Date().toISOString().split('T')[0]),
     [appointments]);
 
-    return { appointments, todayAppointments, addAppointment, updateStatus, removeAppointment };
+    return { appointments: appointments || [], todayAppointments, addAppointment, updateStatus, removeAppointment };
 }
-
-// ================== Dashboard Stats Hook ==================
 
 // ================== Dashboard Stats Hook ==================
 
@@ -208,54 +193,48 @@ export function useDashboardStats() {
     // In demo mode, bypass API call
     const isDemo = isDemoMode();
     
-    const { data: historyData, isLoading } = useQuery<HistoryEntry[]>({
+    // Fetch stats
+    const { data: statsData, isLoading: statsLoading } = useQuery({
+        queryKey: ['dashboard-stats'],
+        queryFn: () => isDemo ? Promise.resolve({ stats: DEMO_STATS, diagnosisBreakdown: DEMO_DIAGNOSIS_STATS }) : api.getDashboardStats(),
+        staleTime: 30000,
+    });
+
+    // Fetch recent patients
+    const { data: patientsData, isLoading: patientsLoading } = useQuery({
+        queryKey: ['recent-patients'],
+        queryFn: () => isDemo ? Promise.resolve(DEMO_RECENT_PATIENTS) : api.getRecentPatients(),
+        staleTime: 30000,
+    });
+
+    const { data: historyData, isLoading: historyLoading } = useQuery<HistoryEntry[]>({
         queryKey: ['history'],
         queryFn: () => isDemo ? Promise.resolve(DEMO_HISTORY) : api.getHistory() as Promise<HistoryEntry[]>,
         staleTime: 30000,
-        // Don't refetch in demo mode
-        enabled: !isDemo,
     });
 
-    const history = isDemo ? DEMO_HISTORY : historyData;
-
     const stats = useMemo(() => {
-         if (isDemo) return DEMO_STATS;
-         
-         return {
-            totalAnalyses: history?.length || 0,
-            pendingReview: 8,
-            modelAccuracy: 98.2,
-            systemLoad: 24,
-        };
-    }, [history?.length, isDemo]);
+         if (statsData?.stats) return statsData.stats;
+         return DEMO_STATS;
+    }, [statsData]);
 
-    const diagnosisBreakdown = useMemo((): DiagnosisStats[] => {
-        if (isDemo) return DEMO_DIAGNOSIS_STATS;
+    const diagnosisBreakdown = useMemo(() => {
+        if (statsData?.diagnosisBreakdown) return statsData.diagnosisBreakdown;
+        return DEMO_DIAGNOSIS_STATS;
+    }, [statsData]);
 
-        const total = history?.length || 100;
-        return [
-            { type: 'Cardiology', count: Math.floor(total * 0.35), percentage: 35, color: 'bg-rose-500' },
-            { type: 'Radiology', count: Math.floor(total * 0.27), percentage: 27, color: 'bg-blue-500' },
-            { type: 'Pathology', count: Math.floor(total * 0.22), percentage: 22, color: 'bg-amber-500' },
-            { type: 'Others', count: Math.floor(total * 0.16), percentage: 16, color: 'bg-gray-400' },
-        ];
-    }, [history?.length, isDemo]);
+    const recentPatients = useMemo(() => {
+        if (patientsData) return patientsData;
+        return DEMO_RECENT_PATIENTS;
+    }, [patientsData]);
 
-    const recentPatients = useMemo((): RecentPatient[] => {
-        if (isDemo) return DEMO_RECENT_PATIENTS;
-
-        const conditions: RecentPatient['condition'][] = ['Stable', 'Monitoring', 'Improving', 'Critical'];
-        return (history || []).slice(0, 4).map((entry, i) => ({
-            id: String(i + 1),
-            name: entry.details?.patient_id ? `Patient #${entry.details.patient_id}` : `Patient ${i + 1}`,
-            lastVisit: getRelativeTime(entry.timestamp),
-            condition: conditions[i % 4],
-            avatar: `P${i + 1}`,
-            patientId: entry.details?.patient_id,
-        }));
-    }, [history, isDemo]);
-
-    return { stats, diagnosisBreakdown, recentPatients, isLoading, history };
+    return { 
+        stats, 
+        diagnosisBreakdown, 
+        recentPatients, 
+        isLoading: statsLoading || patientsLoading || historyLoading, 
+        history: historyData 
+    };
 }
 
 // ================== Search Hook ==================

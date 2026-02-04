@@ -2,8 +2,15 @@
 Pytest configuration and fixtures for API testing.
 Sets up test database with sample users for authentication tests.
 """
+# CRITICAL: Set environment variables BEFORE any other imports
+# This ensures rate limiting is disabled when modules are loaded
+import os
+os.environ["RATE_LIMIT_ENABLED"] = "false"
+os.environ["DEMO_MODE"] = "true"
+os.environ["TESTING"] = "true"
+
 import pytest
-from unittest.mock import patch
+from unittest.mock import patch, MagicMock
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
@@ -34,6 +41,20 @@ def override_get_db():
         yield db
     finally:
         db.close()
+
+
+@pytest.fixture(scope="function", autouse=True)
+def reset_rate_limiter():
+    """Reset rate limiter before each test to prevent 429 errors"""
+    try:
+        from app.core.rate_limit import limiter
+        if hasattr(limiter, '_backend') and hasattr(limiter._backend, '_requests'):
+            limiter._backend._requests.clear()
+        if hasattr(limiter, '_backend') and hasattr(limiter._backend, '_blocked'):
+            limiter._backend._blocked.clear()
+    except Exception:
+        pass  # Rate limiter may not be available in all contexts
+    yield
 
 
 @pytest.fixture(scope="function")
@@ -110,6 +131,22 @@ def mock_gemini():
 
 
 @pytest.fixture
+def mock_supabase_storage():
+    """Mock Supabase storage for tests"""
+    with patch('app.core.storage.get_storage_client') as mock:
+        storage_mock = MagicMock()
+        storage_mock.from_.return_value.upload.return_value = {"path": "test/file.jpg"}
+        storage_mock.from_.return_value.create_signed_url.return_value = {"signedURL": "https://example.com/signed"}
+        storage_mock.from_.return_value.get_public_url.return_value = "https://example.com/public"
+        storage_mock.from_.return_value.remove.return_value = None
+        storage_mock.from_.return_value.list.return_value = []
+        storage_mock.get_bucket.return_value = {"name": "medical-images"}
+        storage_mock.create_bucket.return_value = {"name": "medical-images"}
+        mock.return_value = storage_mock
+        yield storage_mock
+
+
+@pytest.fixture
 def auth_headers(client):
     """Get authentication headers for a logged-in admin user"""
     response = client.post("/api/auth/login", json={
@@ -120,3 +157,4 @@ def auth_headers(client):
         tokens = response.json()
         return {"Authorization": f"Bearer {tokens['access_token']}"}
     return {}
+

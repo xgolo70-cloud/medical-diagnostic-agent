@@ -109,9 +109,16 @@ export const ForgotPasswordPage: React.FC = () => {
                                     type="email"
                                     required
                                     value={email}
-                                    onChange={(e) => setEmail(e.target.value)}
+                                    onChange={(e) => {
+                                        setEmail(e.target.value);
+                                        if (error) setError('');
+                                    }}
+                                    onBlur={() => {
+                                        if (!email.trim()) setError('Email is required');
+                                        else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) setError('Invalid email format');
+                                    }}
                                     placeholder="you@example.com"
-                                    className="w-full h-12 pl-11 pr-4 rounded-xl bg-gray-50 border border-gray-200 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-black/5 focus:border-black focus:bg-white transition-all"
+                                    className={`w-full h-12 pl-11 pr-4 rounded-xl bg-gray-50 border ${error ? 'border-red-300 focus:border-red-400' : 'border-gray-200 focus:border-black'} text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-black/5 focus:bg-white transition-all`}
                                     disabled={isLoading}
                                 />
                             </div>

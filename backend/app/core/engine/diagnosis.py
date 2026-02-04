@@ -1,6 +1,9 @@
 import json
 import os
 import datetime
+import requests
+from PIL import Image
+from io import BytesIO
 from app.schemas.patient import PatientData
 
 # Demo mode - set to True to use mock responses instead of AI API
@@ -16,20 +19,44 @@ if not DEMO_MODE:
 class DiagnosisEngine:
     def __init__(self):
         if not DEMO_MODE:
-            import google.generativeai as genai
-            self.model = genai.GenerativeModel('models/gemini-1.5-flash')
+            self.model = genai.GenerativeModel('gemini-1.5-flash')
         else:
             self.model = None
 
     def generate_diagnosis(self, patient_data: PatientData, lab_results: str = "") -> dict:
+        """
+        Generate a diagnosis based on patient data, optional lab results, and optional image URL.
+        """
         if DEMO_MODE:
             return self._generate_mock_diagnosis(patient_data, lab_results)
         
-        prompt = self._construct_prompt(patient_data, lab_results)
-        response = self.model.generate_content(prompt)
+        # Prepare inputs for the model
+        model_inputs = []
         
+        # 1. Text Prompt
+        prompt_text = self._construct_prompt_text(patient_data, lab_results)
+        model_inputs.append(prompt_text)
+        
+        # 2. Image (if available)
+        if patient_data.image_url:
+            try:
+                image_data = self._download_image(patient_data.image_url)
+                if image_data:
+                    model_inputs.append(image_data)
+                    print(f"✅ Image loaded successfully from {patient_data.image_url}")
+                else:
+                    print(f"⚠️ Failed to download image from {patient_data.image_url}")
+                    model_inputs[0] += "\n\n(Note: An image was provided but could not be accessed. Proceed with text analysis only.)"
+            except Exception as e:
+                print(f"❌ Error processing image: {str(e)}")
+                model_inputs[0] += f"\n\n(Note: Error processing provided image: {str(e)})"
+
+        # Generate content
         try:
+            response = self.model.generate_content(model_inputs)
+            
             text_response = response.text.strip()
+            # Clean up markdown formatting if present
             if text_response.startswith("```json"):
                 text_response = text_response[7:]
             if text_response.endswith("```"):
@@ -38,6 +65,18 @@ class DiagnosisEngine:
             return json.loads(text_response.strip())
         except json.JSONDecodeError:
              return {"error": "Failed to parse AI response", "raw": response.text}
+        except Exception as e:
+            return {"error": f"AI generation failed: {str(e)}"}
+
+    def _download_image(self, url: str):
+        """Download image from URL and convert to PIL Image"""
+        try:
+            response = requests.get(url, timeout=10)
+            response.raise_for_status()
+            return Image.open(BytesIO(response.content))
+        except Exception as e:
+            print(f"Error downloading image: {e}")
+            return None
 
     def _generate_mock_diagnosis(self, patient: PatientData, lab_results: str = "") -> dict:
         """Generate a realistic mock diagnosis for demo purposes"""
@@ -122,10 +161,10 @@ class DiagnosisEngine:
                 "CDC Clinical Guidelines 2024"
             ],
             "clinical_notes": f"Demo diagnosis for patient {patient.patient_id}. This is a simulated response for testing purposes.",
-            "timestamp": datetime.datetime.now(datetime.UTC).isoformat()
+            "timestamp": datetime.datetime.now(datetime.timezone.utc).isoformat()
         }
 
-    def _construct_prompt(self, patient: PatientData, lab_results: str = "") -> str:
+    def _construct_prompt_text(self, patient: PatientData, lab_results: str = "") -> str:
         prompt = f"""
         Act as a medical expert. Analyze the following patient data:
         Age: {patient.age}
@@ -137,6 +176,9 @@ class DiagnosisEngine:
         
         if lab_results:
             prompt += f"\n\nLab Results / Reports:\n{lab_results}\n"
+            
+        if patient.image_url:
+            prompt += f"\n\nMedical Image Provided: {patient.image_url}\nType: {patient.image_type or 'Unknown'}\n"
             
         prompt += """
         Provide a differential diagnosis in JSON format with the following structure:

@@ -13,6 +13,7 @@ import hashlib
 import hmac
 import json
 import base64
+import jwt
 
 # ================== Configuration ==================
 
@@ -42,152 +43,166 @@ class TokenData(BaseModel):
 class User(BaseModel):
     username: str
     role: str  # 'gp', 'specialist', 'auditor', 'admin'
+    email: Optional[str] = None
 
 class TokenPair(BaseModel):
     access_token: str
     refresh_token: str
-    token_type: str = "bearer"
-    expires_in: int  # seconds until access token expires
+    token_type: str
+    expires_in: int
+
+# ================== JWT Handling ==================
+
+def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
+    to_encode = data.copy()
+    now = datetime.now(timezone.utc)
+    if expires_delta:
+        expire = now + expires_delta
+    else:
+        expire = now + timedelta(minutes=15)
+    to_encode.update({
+        "exp": expire, 
+        "type": "access",
+        "iat": now,
+        "jti": secrets.token_hex(16)
+    })
+    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+    return encoded_jwt
+
+def create_refresh_token(data: dict, expires_delta: Optional[timedelta] = None):
+    to_encode = data.copy()
+    now = datetime.now(timezone.utc)
+    if expires_delta:
+        expire = now + expires_delta
+    else:
+        expire = now + timedelta(days=7)
+    to_encode.update({
+        "exp": expire, 
+        "type": "refresh",
+        "iat": now,
+        "jti": secrets.token_hex(16)
+    })
+    encoded_jwt = jwt.encode(to_encode, REFRESH_SECRET_KEY, algorithm=ALGORITHM)
+    return encoded_jwt
+
+def create_token_pair(username: str, role: str) -> TokenPair:
+    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token = create_access_token(
+        data={"username": username, "role": role}, expires_delta=access_token_expires
+    )
+    
+    refresh_token_expires = timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS)
+    refresh_token = create_refresh_token(
+        data={"username": username, "role": role}, expires_delta=refresh_token_expires
+    )
+    
+    return TokenPair(
+        access_token=access_token,
+        refresh_token=refresh_token,
+        token_type="bearer",
+        expires_in=ACCESS_TOKEN_EXPIRE_MINUTES * 60
+    )
+
+def verify_token(token: str, is_refresh: bool = False) -> Optional[dict]:
+    try:
+        secret = REFRESH_SECRET_KEY if is_refresh else SECRET_KEY
+        payload = jwt.decode(token, secret, algorithms=[ALGORITHM])
+        
+        # Check if token is revoked
+        # In a real app, check redis or DB blacklist
+        if token in _revoked_tokens:
+            return None
+            
+        return payload
+    except jwt.PyJWTError:
+        return None
+
+def revoke_token(token: str) -> bool:
+    """Revoke a token. Returns True if successful, False if token was invalid."""
+    # Verify the token is valid before revoking
+    payload = verify_token(token, is_refresh=False)
+    if payload is None:
+        payload = verify_token(token, is_refresh=True)
+    if payload is None:
+        return False
+    _revoked_tokens.add(token)
+    return True
+
+def verify_refresh_token(token: str) -> Optional[dict]:
+    """
+    Verify a refresh token and return its payload.
+    Returns None if token is invalid, expired, or not a refresh token.
+    """
+    payload = verify_token(token, is_refresh=True)
+    if payload is None:
+        return None
+    if payload.get("type") != "refresh":
+        return None
+    return payload
+
+def rotate_tokens(refresh_token: str) -> Optional[TokenPair]:
+    payload = verify_token(refresh_token, is_refresh=True)
+    if not payload:
+        return None
+        
+    username = payload.get("username")
+    role = payload.get("role")
+    
+    if not username or not role:
+        return None
+        
+    # Revoke old refresh token
+    revoke_token(refresh_token)
+    
+    return create_token_pair(username, role)
+
+
+# Supabase Configuration
+SUPABASE_JWT_SECRET = os.getenv("SUPABASE_JWT_SECRET")
+SUPABASE_AUTH_AVAILABLE = True if SUPABASE_JWT_SECRET else False
+
+def get_supabase_user_from_token(token: str):
+    """
+    Verify and decode a Supabase JWT token.
+    Returns a simple object with email, role, and id if valid.
+    """
+    if not SUPABASE_JWT_SECRET:
+        return None
+        
+    try:
+        # Supabase uses HS256 by default
+        payload = jwt.decode(token, SUPABASE_JWT_SECRET, algorithms=["HS256"], audience="authenticated")
+        
+        class SupabaseUser:
+            def __init__(self, payload):
+                self.id = payload.get("sub")
+                self.email = payload.get("email")
+                self.role = payload.get("role", "patient")  # default to patient if unsure, usually 'authenticated'
+                
+                # Map 'authenticated' role to internal roles if stored in metadata
+                app_metadata = payload.get("app_metadata", {})
+                user_metadata = payload.get("user_metadata", {})
+                
+                # Check for specific claims or metadata for role mapping
+                # For now, we'll look at app_metadata or fallback to patient
+                if "role" in app_metadata and app_metadata["role"] != "authenticated":
+                     self.role = app_metadata["role"]
+                elif "role" in user_metadata:
+                     self.role = user_metadata["role"]
+                
+        return SupabaseUser(payload)
+    except Exception as e:
+        # print(f"Supabase token validation error: {str(e)}")
+        return None
 
 # ================== Security Setup ==================
 
 security = HTTPBearer(auto_error=False)
 
-# ================== JWT Functions ==================
-
-def _base64url_encode(data: bytes) -> str:
-    """Base64 URL-safe encoding without padding"""
-    return base64.urlsafe_b64encode(data).rstrip(b'=').decode('utf-8')
-
-def _base64url_decode(data: str) -> bytes:
-    """Base64 URL-safe decoding with padding"""
-    padding = 4 - len(data) % 4
-    if padding != 4:
-        data += '=' * padding
-    return base64.urlsafe_b64decode(data)
-
-def _create_token(data: dict, secret: str, expires_delta: timedelta) -> str:
-    """Create a JWT token with given secret and expiration"""
-    to_encode = data.copy()
-    expire = datetime.now(timezone.utc) + expires_delta
-    to_encode["exp"] = int(expire.timestamp())
-    to_encode["iat"] = int(datetime.now(timezone.utc).timestamp())
-    to_encode["jti"] = secrets.token_hex(16)  # Unique token ID for revocation
-    
-    # Create JWT manually (header.payload.signature)
-    header = {"alg": ALGORITHM, "typ": "JWT"}
-    header_encoded = _base64url_encode(json.dumps(header).encode())
-    payload_encoded = _base64url_encode(json.dumps(to_encode).encode())
-    
-    message = f"{header_encoded}.{payload_encoded}"
-    signature = hmac.new(secret.encode(), message.encode(), hashlib.sha256).digest()
-    signature_encoded = _base64url_encode(signature)
-    
-    return f"{message}.{signature_encoded}"
-
-def _verify_token(token: str, secret: str, check_revocation: bool = True) -> Optional[dict]:
-    """Verify and decode a JWT token with given secret"""
-    try:
-        parts = token.split('.')
-        if len(parts) != 3:
-            return None
-        
-        header_encoded, payload_encoded, signature_encoded = parts
-        
-        # Verify signature
-        message = f"{header_encoded}.{payload_encoded}"
-        expected_signature = hmac.new(secret.encode(), message.encode(), hashlib.sha256).digest()
-        actual_signature = _base64url_decode(signature_encoded)
-        
-        if not hmac.compare_digest(expected_signature, actual_signature):
-            return None
-        
-        # Decode payload
-        payload = json.loads(_base64url_decode(payload_encoded))
-        
-        # Check expiration
-        if payload.get("exp", 0) < datetime.now(timezone.utc).timestamp():
-            return None
-        
-        # Check revocation
-        if check_revocation and payload.get("jti") in _revoked_tokens:
-            return None
-        
-        return payload
-    except Exception:
-        return None
-
-# ================== Access Token Functions ==================
-
-def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
-    """Create an access token (short-lived)"""
-    delta = expires_delta or timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-    return _create_token(data, SECRET_KEY, delta)
-
-def verify_token(token: str) -> Optional[dict]:
-    """Verify and decode an access token"""
-    return _verify_token(token, SECRET_KEY)
-
-# ================== Refresh Token Functions ==================
-
-def create_refresh_token(data: dict) -> str:
-    """Create a refresh token (long-lived)"""
-    refresh_data = {
-        "username": data.get("username"),
-        "role": data.get("role"),
-        "type": "refresh"
-    }
-    return _create_token(refresh_data, REFRESH_SECRET_KEY, timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS))
-
-def verify_refresh_token(token: str) -> Optional[dict]:
-    """Verify and decode a refresh token"""
-    payload = _verify_token(token, REFRESH_SECRET_KEY)
-    if payload and payload.get("type") == "refresh":
-        return payload
-    return None
-
-def create_token_pair(username: str, role: str) -> TokenPair:
-    """Create both access and refresh tokens"""
-    data = {"username": username, "role": role}
-    return TokenPair(
-        access_token=create_access_token(data),
-        refresh_token=create_refresh_token(data),
-        expires_in=ACCESS_TOKEN_EXPIRE_MINUTES * 60
-    )
-
-def rotate_tokens(refresh_token: str) -> Optional[TokenPair]:
-    """
-    Rotate tokens: validate refresh token, revoke old one, issue new pair.
-    Returns None if refresh token is invalid.
-    """
-    payload = verify_refresh_token(refresh_token)
-    if not payload:
-        return None
-    
-    # Revoke old refresh token
-    old_jti = payload.get("jti")
-    if old_jti:
-        _revoked_tokens.add(old_jti)
-    
-    # Issue new token pair
-    return create_token_pair(payload["username"], payload["role"])
-
-def revoke_token(token: str) -> bool:
-    """Revoke a token by adding its JTI to the revoked set"""
-    payload = _verify_token(token, SECRET_KEY, check_revocation=False)
-    if not payload:
-        payload = _verify_token(token, REFRESH_SECRET_KEY, check_revocation=False)
-    
-    if payload and payload.get("jti"):
-        _revoked_tokens.add(payload["jti"])
-        return True
-    return False
-
-# ================== Dependencies ==================
-
 async def get_current_user(credentials: Optional[HTTPAuthorizationCredentials] = Depends(security)) -> User:
     """
     Dependency to get the current authenticated user.
+    Supports both Supabase JWT tokens and custom JWT tokens (hybrid mode).
     Raises HTTPException if not authenticated.
     """
     if credentials is None:
@@ -197,15 +212,37 @@ async def get_current_user(credentials: Optional[HTTPAuthorizationCredentials] =
             headers={"WWW-Authenticate": "Bearer"},
         )
     
-    payload = verify_token(credentials.credentials)
-    if payload is None:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid or expired token",
-            headers={"WWW-Authenticate": "Bearer"},
+    token = credentials.credentials
+    
+    # Try Supabase JWT first (for frontend users authenticated via Supabase)
+    if SUPABASE_AUTH_AVAILABLE:
+        supabase_user = get_supabase_user_from_token(token)
+        if supabase_user:
+            # Map Supabase user to our User model
+            # Use email prefix as username if no custom username
+            username = supabase_user.email.split('@')[0] if supabase_user.email else supabase_user.id[:8]
+            return User(
+                username=username, 
+                role=supabase_user.role, 
+                email=supabase_user.email
+            )
+    
+    # Fallback to custom JWT (for demo mode or legacy users)
+    payload = verify_token(token)
+    if payload is not None:
+        return User(
+            username=payload.get("username", "unknown"), 
+            role=payload.get("role", "gp"),
+            email=payload.get("email") # Assuming custom JWT might have email
         )
     
-    return User(username=payload.get("username", "unknown"), role=payload.get("role", "gp"))
+    # Neither token type is valid
+    raise HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Invalid or expired token",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+
 
 async def get_optional_user(credentials: Optional[HTTPAuthorizationCredentials] = Depends(security)) -> Optional[User]:
     """

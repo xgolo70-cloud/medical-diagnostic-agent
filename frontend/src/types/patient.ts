@@ -13,6 +13,8 @@ export interface PatientData {
     symptoms: string[];
     medical_history?: string[];
     vitals?: Vitals | null;
+    image_url?: string | null;
+    image_type?: string | null;
 }
 
 // Diagnosis response types
