@@ -26,11 +26,11 @@
     - [x] Create UI components for Differential Diagnosis cards, Confidence bars, and Rationale sections.
 - [x] Task: Conductor - User Manual Verification 'Diagnosis Features' (Protocol in workflow.md)
 
-## Phase 4: History View and Final Polish
+## Phase 4: History View and Final Polish [checkpoint: 2875275]
 - [x] Task: Backend - Implement simple GET /api/history endpoint to read `audit.log` (Required for frontend view).
 - [x] Task: Implement History/Audit Log View in Frontend.
     - [x] Fetch data from the new endpoint.
     - [x] Display audit logs in a data table.
 - [x] Task: Final UI Polish.
     - [x] Ensure consistent styling, error handling, and loading states across all views.
-- [~] Task: Conductor - User Manual Verification 'History View and Final Polish' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'History View and Final Polish' (Protocol in workflow.md) [checkpoint: 2875275]
