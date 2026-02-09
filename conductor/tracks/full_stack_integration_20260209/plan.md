@@ -4,7 +4,7 @@
 - [x] Task: Backend - Implement JWT Utilities. [commit: ad268a8]
     - [ ] Create `backend/app/core/security.py` with password hashing (bcrypt) and JWT token generation (PyJWT).
     - [ ] Define `Token` and `TokenData` schemas.
-- [ ] Task: Backend - Create Login Endpoint.
+- [x] Task: Backend - Create Login Endpoint. [commit: 3b3d0b5]
     - [ ] Implement `POST /api/auth/token` (OAuth2PasswordRequestForm).
     - [ ] Validate against hardcoded users (Admin, GP, Specialist).
 - [ ] Task: Backend - Implement Auth Dependency.
