@@ -274,12 +274,13 @@ def require_role(*roles: str):
 
 # ================== Utility Functions ==================
 
+from app.core.security import get_password_hash, verify_password as verify_pwd
+
 def hash_password(password: str) -> str:
-    """Hash a password using SHA-256 with salt"""
-    salt = os.getenv("PASSWORD_SALT", "default-salt-change-in-production")
-    return hashlib.sha256(f"{salt}{password}".encode()).hexdigest()
+    """Hash a password using Argon2 (via security.py)"""
+    return get_password_hash(password)
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     """Verify a password against its hash"""
-    return hmac.compare_digest(hash_password(plain_password), hashed_password)
+    return verify_pwd(plain_password, hashed_password)
 

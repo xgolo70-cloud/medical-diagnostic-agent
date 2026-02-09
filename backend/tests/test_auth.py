@@ -199,13 +199,18 @@ class TestPasswordHashing:
     """Tests for password hashing utilities"""
     
     def test_hash_password(self):
-        """Test password hashing produces consistent results"""
+        """Test password hashing produces valid verifiable hashes (Argon2 is randomized)"""
         password = "mysecurepassword123"
         hash1 = hash_password(password)
         hash2 = hash_password(password)
         
-        assert hash1 == hash2
+        # Argon2 produces different hashes for same password (salt)
+        assert hash1 != hash2
         assert hash1 != password
+        
+        # But both should verify
+        assert verify_password(password, hash1) is True
+        assert verify_password(password, hash2) is True
     
     def test_verify_password_correct(self):
         """Test correct password verification"""
