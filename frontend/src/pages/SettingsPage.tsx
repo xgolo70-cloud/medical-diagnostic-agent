@@ -39,7 +39,7 @@ import { useNavigate } from 'react-router-dom';
 import { useTour } from '../components/ui/TourProvider';
 import { resetTour, DASHBOARD_TOUR_STEPS } from '../components/ui/tourConfig';
 import { supabaseAuth, db, storage } from '../lib/supabase';
-import { api } from '../lib/api';
+import { authApi as api } from '../services/api';
 
 // Animation variants
 const containerVariants = {
@@ -255,8 +255,7 @@ export const SettingsPage: React.FC = () => {
     const handleSave = async () => {
         setIsSavingProfile(true);
         try {
-             const { user: authUser } = await supabaseAuth.getUser();
-             if (!authUser) {
+             if (!user) {
                  toast.error('User not authenticated');
                  return;
              }
@@ -268,7 +267,7 @@ export const SettingsPage: React.FC = () => {
 
              // Update Redux
              dispatch(setDisplayName(localDisplayName));
-             dispatch(setEmail(localEmail)); // Ideally this comes from Auth user source of truth
+             dispatch(setEmail(localEmail));
              
              toast.success('Profile settings saved successfully!');
         } catch (err) {

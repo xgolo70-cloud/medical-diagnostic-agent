@@ -1,5 +1,5 @@
-import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
-import { tokenManager } from '../services/api';
+import { createSlice, createAsyncThunk, type PayloadAction } from '@reduxjs/toolkit';
+import { tokenManager, authApi } from '../services/api';
 
 interface User {
     username: string;
@@ -21,58 +21,29 @@ const AUTH_STORAGE_KEY = 'auth_session';
 
 const loadAuthFromStorage = (): { user: User | null; isAuthenticated: boolean } => {
     try {
-        // First check if we have stored user session
         const stored = localStorage.getItem(AUTH_STORAGE_KEY);
         const hasTokens = tokenManager.hasTokens();
         
-        // Debug logging (can be removed in production)
-        if (import.meta.env.DEV) {
-            console.log('[Auth] Loading auth state:', {
-                hasStoredSession: !!stored,
-                hasTokens,
-                accessToken: !!localStorage.getItem('access_token'),
-                refreshToken: !!localStorage.getItem('refresh_token'),
-            });
-        }
-        
-        // If no tokens exist, clear everything and return unauthenticated
         if (!hasTokens) {
-            if (stored) {
-                localStorage.removeItem(AUTH_STORAGE_KEY);
-            }
+            if (stored) localStorage.removeItem(AUTH_STORAGE_KEY);
             return { user: null, isAuthenticated: false };
         }
         
-        // We have tokens, now check for user data
         if (stored) {
             const user = JSON.parse(stored) as User;
-            // Validate required fields exist
             if (user && user.username && user.role) {
-                if (import.meta.env.DEV) {
-                    console.log('[Auth] Session restored for user:', user.username);
-                }
                 return { user, isAuthenticated: true };
             }
         }
         
-        // We have tokens but no valid user session - this is an edge case
-        // Clear tokens as the session is incomplete
-        if (import.meta.env.DEV) {
-            console.warn('[Auth] Tokens exist but no valid user session, clearing...');
-        }
         tokenManager.clearTokens();
     } catch (error) {
-        // Clear corrupted data
-        if (import.meta.env.DEV) {
-            console.error('[Auth] Error loading auth state:', error);
-        }
         localStorage.removeItem(AUTH_STORAGE_KEY);
         tokenManager.clearTokens();
     }
     return { user: null, isAuthenticated: false };
 };
 
-// Load saved session on initialization
 const savedAuth = loadAuthFromStorage();
 
 const initialState: AuthState = {
@@ -82,10 +53,52 @@ const initialState: AuthState = {
     error: null,
 };
 
+// Async Thunks
+export const loginUser = createAsyncThunk(
+    'auth/login',
+    async ({ username, password }: { username: string; password: string }, { rejectWithValue }) => {
+        try {
+            // 1. Get Tokens
+            await authApi.login(username, password);
+            
+            // 2. Get User Profile (to get role/details)
+            // The login response provides tokens, but we need the user details (role, etc.)
+            // We can decode the token or call /auth/me
+            const userProfile = await authApi.getCurrentUser();
+            
+            return {
+                username: userProfile.username,
+                role: userProfile.role as User['role'],
+                email: username.includes('@') ? username : undefined, // Heuristic
+                displayName: userProfile.username
+            };
+        } catch (error) {
+            if (error instanceof Error) {
+                return rejectWithValue(error.message);
+            }
+            return rejectWithValue('Login failed');
+        }
+    }
+);
+
+export const logoutUser = createAsyncThunk(
+    'auth/logout',
+    async (_, { rejectWithValue }) => {
+        try {
+            await authApi.logout();
+        } catch (error) {
+            console.error('Logout failed', error);
+        }
+        // Always clear local state
+        return;
+    }
+);
+
 const authSlice = createSlice({
     name: 'auth',
     initialState,
     reducers: {
+        // Keep synchronous actions for manual updates if needed (e.g. demo mode)
         loginStart: (state) => {
             state.isLoading = true;
             state.error = null;
@@ -95,7 +108,6 @@ const authSlice = createSlice({
             state.isAuthenticated = true;
             state.user = action.payload;
             state.error = null;
-            // Persist session to localStorage
             localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(action.payload));
         },
         loginFailure: (state, action: PayloadAction<string>) => {
@@ -103,7 +115,6 @@ const authSlice = createSlice({
             state.isAuthenticated = false;
             state.user = null;
             state.error = action.payload;
-            // Clear any stale session data and tokens
             localStorage.removeItem(AUTH_STORAGE_KEY);
             tokenManager.clearTokens();
         },
@@ -112,13 +123,43 @@ const authSlice = createSlice({
             state.isAuthenticated = false;
             state.user = null;
             state.error = null;
-            // Clear session from localStorage and all tokens
             localStorage.removeItem(AUTH_STORAGE_KEY);
             tokenManager.clearTokens();
         },
     },
+    extraReducers: (builder) => {
+        // Login
+        builder.addCase(loginUser.pending, (state) => {
+            state.isLoading = true;
+            state.error = null;
+        });
+        builder.addCase(loginUser.fulfilled, (state, action) => {
+            state.isLoading = false;
+            state.isAuthenticated = true;
+            state.user = action.payload;
+            state.error = null;
+            localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(action.payload));
+        });
+        builder.addCase(loginUser.rejected, (state, action) => {
+            state.isLoading = false;
+            state.isAuthenticated = false;
+            state.user = null;
+            state.error = action.payload as string;
+            localStorage.removeItem(AUTH_STORAGE_KEY);
+            tokenManager.clearTokens();
+        });
+
+        // Logout
+        builder.addCase(logoutUser.fulfilled, (state) => {
+            state.isLoading = false;
+            state.isAuthenticated = false;
+            state.user = null;
+            state.error = null;
+            localStorage.removeItem(AUTH_STORAGE_KEY);
+            tokenManager.clearTokens();
+        });
+    }
 });
 
 export const { loginStart, loginSuccess, loginFailure, logout } = authSlice.actions;
 export default authSlice.reducer;
-

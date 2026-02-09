@@ -33,7 +33,7 @@ import {
     Image as ImageIcon,
 } from '@mui/icons-material';
 import { useMutation } from '@tanstack/react-query';
-import { api } from '../../services';
+import { api, ValidationError } from '../../services/api'; // Import ValidationError
 import type { PatientData } from '../../types';
 import { patientDataSchema, type PatientDataFormValues, commonSymptoms, commonMedicalHistory } from './schemas';
 import { storage, supabaseAuth, db, type Diagnosis } from '../../lib/supabase';
@@ -57,6 +57,7 @@ export const DiagnosisForm: React.FC<DiagnosisFormProps> = ({ unified = false })
         handleSubmit,
         formState: { errors },
         reset,
+        setError, // Add setError
     } = useForm<PatientDataFormValues>({
         resolver: zodResolver(patientDataSchema),
         defaultValues: {
@@ -79,6 +80,13 @@ export const DiagnosisForm: React.FC<DiagnosisFormProps> = ({ unified = false })
                 return api.diagnoseUnified(data, pdfFile);
             }
             return api.diagnose(data);
+        },
+        onError: (error) => {
+            if (error instanceof ValidationError) {
+                error.errors.forEach(({ field, message }) => {
+                    setError(field as any, { type: 'server', message });
+                });
+            }
         },
         onSuccess: async (data) => {
             // Save diagnosis to Supabase if user is logged in

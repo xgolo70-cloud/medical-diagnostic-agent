@@ -11,10 +11,12 @@ import {
     Brain,
     Home,
     ChevronRight,
-    Users
+    Users,
+    Activity // Added for Health Icon
 } from 'lucide-react';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { logout } from '../../store/authSlice';
+import api from '../../services/api'; // Import API
 
 export const SIDEBAR_WIDTH = 270;
 export const SIDEBAR_COLLAPSED_WIDTH = 80;
@@ -53,9 +55,26 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileOpen = false, onMobileCl
         return saved ? JSON.parse(saved) : false;
     });
 
+    // Health Check State
+    const [healthStatus, setHealthStatus] = useState<'healthy' | 'degraded' | 'offline'>('offline');
+
     useEffect(() => {
         localStorage.setItem('sidebar-collapsed', JSON.stringify(isCollapsed));
     }, [isCollapsed]);
+
+    // Poll Health Check
+    useEffect(() => {
+        const checkHealth = async () => {
+            const result = await api.checkHealth();
+            if (result.status === 'healthy') setHealthStatus('healthy');
+            else if (result.status === 'degraded') setHealthStatus('degraded');
+            else setHealthStatus('offline');
+        };
+
+        checkHealth(); // Initial check
+        const interval = setInterval(checkHealth, 30000); // Poll every 30s
+        return () => clearInterval(interval);
+    }, []);
 
     const handleLogout = () => {
         dispatch(logout());
@@ -65,6 +84,15 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileOpen = false, onMobileCl
     const toggleCollapse = () => setIsCollapsed(!isCollapsed);
 
     const currentWidth = isCollapsed ? SIDEBAR_COLLAPSED_WIDTH : SIDEBAR_WIDTH;
+
+    // Determine Status Color
+    const getStatusColor = () => {
+        switch(healthStatus) {
+            case 'healthy': return 'bg-emerald-500';
+            case 'degraded': return 'bg-yellow-500';
+            default: return 'bg-red-500';
+        }
+    };
 
     return (
         <>
@@ -148,8 +176,10 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileOpen = false, onMobileCl
                                     <span className="font-bold text-black text-[16px] tracking-tight leading-none bg-clip-text text-transparent bg-gradient-to-r from-black via-black to-zinc-600">
                                         AI & Things
                                     </span>
-                                    <span className="text-[11px] text-zinc-500 font-medium tracking-wider uppercase mt-1">
+                                    <span className="text-[11px] text-zinc-500 font-medium tracking-wider uppercase mt-1 flex items-center gap-1.5">
                                         Workspace
+                                        {/* Header Health Dot */}
+                                        <span className={`w-1.5 h-1.5 rounded-full ${getStatusColor()} animate-pulse`} title={`System Status: ${healthStatus}`} />
                                     </span>
                                 </motion.div>
                             )}
@@ -371,8 +401,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileOpen = false, onMobileCl
                                 <span>{(user?.displayName || user?.username)?.charAt(0).toUpperCase() || 'U'}</span>
                             )}
                             
-                            {/* Online Status Dot */}
-                            <div className="absolute bottom-0 right-0 w-3 h-3 bg-emerald-500 border-[2.5px] border-white rounded-full shadow-sm"></div>
+                            {/* Online Status Dot - Now Dynamic */}
+                            <div className={`absolute bottom-0 right-0 w-3 h-3 ${getStatusColor()} border-[2.5px] border-white rounded-full shadow-sm`}></div>
                         </div>
 
                         {/* Collapsed Profile Tooltip */}

@@ -155,10 +155,32 @@ apiClient.interceptors.response.use(
 
 // ================== Error Handler ==================
 
+export class ValidationError extends Error {
+    public errors: Array<{ field: string; message: string }>;
+
+    constructor(errors: Array<{ field: string; message: string }>) {
+        super('Validation Failed');
+        this.name = 'ValidationError';
+        this.errors = errors;
+    }
+}
+
 const handleApiError = (error: unknown): never => {
     if (axios.isAxiosError(error)) {
-        const axiosError = error as AxiosError<ApiError>;
-        const message = axiosError.response?.data?.detail || axiosError.message || 'An error occurred';
+        const axiosError = error as AxiosError<any>;
+        const data = axiosError.response?.data;
+        
+        // Handle Pydantic Validation Errors (Array of {loc, msg, type})
+        if (data?.detail && Array.isArray(data.detail)) {
+             const formattedErrors = data.detail.map((err: any) => ({
+                 // Filter out 'body' to match form field names (e.g. 'age', 'vitals.heart_rate')
+                 field: err.loc ? err.loc.filter((l: string) => l !== 'body').join('.') : 'unknown',
+                 message: err.msg
+             }));
+             throw new ValidationError(formattedErrors);
+        }
+        
+        const message = data?.detail || axiosError.message || 'An error occurred';
         throw new Error(message);
     }
     throw error;
@@ -215,9 +237,18 @@ export const authApi = {
         }
     },
     
-    async getCurrentUser(): Promise<{ username: string; role: string }> {
+    async getCurrentUser(): Promise<{ username: string; role: string; full_name?: string; avatar_url?: string; email?: string }> {
         try {
             const response = await apiClient.get('/auth/me');
+            return response.data;
+        } catch (error) {
+            return handleApiError(error);
+        }
+    },
+
+    async updateUserProfile(data: { full_name?: string; phone?: string; avatar_url?: string }): Promise<any> {
+        try {
+            const response = await apiClient.put('/auth/me', data);
             return response.data;
         } catch (error) {
             return handleApiError(error);
@@ -228,6 +259,19 @@ export const authApi = {
 // ================== Data API ==================
 
 export const api = {
+    /**
+     * Check system health
+     */
+    async checkHealth(): Promise<{ status: string; components: Record<string, string> }> {
+        try {
+            const response = await apiClient.get('/health');
+            return response.data;
+        } catch (error) {
+            // If network fails, return offline status rather than throwing
+            return { status: 'offline', components: {} };
+        }
+    },
+
     /**
      * Submit patient data for manual diagnosis
      */

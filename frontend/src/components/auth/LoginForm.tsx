@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Eye, EyeOff, ArrowLeft, Brain, ArrowRight, AlertCircle, Lock } from 'lucide-react';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
-import { loginStart, loginSuccess, loginFailure } from '../../store/authSlice';
+import { loginUser, loginSuccess, loginStart, loginFailure } from '../../store/authSlice'; // loginUser added
 import { tokenManager } from '../../services/api';
 import { Link } from 'react-router-dom';
 import { supabaseAuth, db } from '../../lib/supabase';
@@ -64,10 +64,9 @@ export const LoginForm: React.FC = () => {
         e.preventDefault();
         if (!validateForm()) return;
 
-        dispatch(loginStart());
-
         // Demo mode - validate locally without backend
         if (DEMO_MODE) {
+            dispatch(loginStart());
             const demoUser = DEMO_CREDENTIALS.find(
                 cred => cred.email === email && cred.password === password
             );
@@ -87,41 +86,15 @@ export const LoginForm: React.FC = () => {
             return;
         }
 
-        // Use Supabase Auth
+        // Real Backend Auth via Thunk
         try {
-            const { data, error: authError } = await supabaseAuth.signIn(email, password);
-
-            if (authError) {
-                // Provide more helpful error messages
-                let errorMessage = authError.message;
-                if (authError.message.includes('Invalid login credentials')) {
-                    errorMessage = 'Invalid email or password. Please check your credentials and try again.';
-                } else if (authError.message.includes('Email not confirmed')) {
-                    errorMessage = 'Please confirm your email address before logging in. Check your inbox.';
-                } else if (authError.message.includes('Too many requests')) {
-                    errorMessage = 'Too many login attempts. Please wait a moment and try again.';
-                }
-                throw new Error(errorMessage);
-            }
-
-            if (data.user) {
-                // Fetch user profile from Supabase
-                const { profile, error: profileError } = await db.getProfile(data.user.id);
-                
-                if (profileError) {
-                    console.warn('Profile not found, using default values');
-                }
-
-                dispatch(loginSuccess({
-                    username: profile?.username || email.split('@')[0],
-                    role: profile?.role || 'patient',
-                    email: data.user.email,
-                    avatar: profile?.avatar_url || undefined,
-                    displayName: profile?.full_name || undefined,
-                }));
-            }
+            // We use email as username for the backend if it's an email structure, 
+            // but the backend supports both.
+            await dispatch(loginUser({ username: email, password })).unwrap();
+            // Success is handled by the slice reducer (redirects usually happen in parent or via useEffect on isAuthenticated)
         } catch (err) {
-            dispatch(loginFailure(err instanceof Error ? err.message : 'Login failed. Please try again.'));
+            // Error is handled by slice, but we can log or do extra UI feedback here if needed
+            console.error('Login failed:', err);
         }
     };
 
@@ -157,43 +130,22 @@ export const LoginForm: React.FC = () => {
             return;
         }
 
-        // Try Supabase login with demo credentials, fallback to mock if fails
+        // For Quick Select in Real Mode, we can use the same Thunk if we want to support these users
+        // But since we don't know if these users exist in the Real DB, we might want to fail gracefully
+        // or just use the mock login for "Quick Select" purely for demo purposes even in non-demo mode?
+        // Let's assume Quick Select users MIGHT exist in DB if seeded.
+        
         try {
-            const { data, error: authError } = await supabaseAuth.signIn(cred.email, cred.password);
-
-            if (authError || !data.user) {
-                // Demo user doesn't exist in Supabase - use mock mode for seamless demo experience
-                console.log('[Demo] Supabase auth failed, using mock credentials for:', cred.username);
-                const mockToken = generateMockToken(cred.username, cred.role);
-                tokenManager.setTokens(mockToken, mockToken);
-                dispatch(loginSuccess({
-                    username: cred.username,
-                    role: cred.role,
-                    email: cred.email,
-                    displayName: cred.displayName,
-                }));
-                return;
-            }
-
-            // Supabase auth succeeded - fetch profile
-            const { profile } = await db.getProfile(data.user.id);
-            dispatch(loginSuccess({
-                username: profile?.username || cred.username,
-                role: profile?.role || cred.role,
-                email: data.user.email,
-                displayName: profile?.full_name || cred.displayName,
-            }));
+            await dispatch(loginUser({ username: cred.username, password: cred.password })).unwrap();
         } catch (err) {
-            // Network error or unexpected failure - fallback to mock mode for demo accounts
-            console.warn('[Demo] Unexpected error, falling back to mock:', err);
-            const mockToken = generateMockToken(cred.username, cred.role);
-            tokenManager.setTokens(mockToken, mockToken);
-            dispatch(loginSuccess({
-                username: cred.username,
-                role: cred.role,
-                email: cred.email,
-                displayName: cred.displayName,
-            }));
+            console.warn('Quick login failed against real backend:', err);
+            // Fallback to mock for smooth demo experience if backend fails?
+            // No, "Real Integration" track implies we want to see failures if backend is missing.
+            // But to avoid blocking the user if they just want to look around:
+            // console.warn('Falling back to local mock login');
+            // const mockToken = generateMockToken(cred.username, cred.role);
+            // tokenManager.setTokens(mockToken, mockToken);
+            // dispatch(loginSuccess({ ...cred }));
         }
     };
 
