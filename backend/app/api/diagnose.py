@@ -23,7 +23,7 @@ def get_engine():
 async def diagnose_patient(
     patient: PatientData, 
     engine: DiagnosisEngine = Depends(get_engine),
-    current_user: User = Depends(get_optional_user),  # Optional auth for backward compatibility
+    current_user: User = Depends(get_current_user),  # Optional auth for backward compatibility
     db: Session = Depends(get_db)
 ):
     try:
@@ -84,7 +84,7 @@ async def diagnose_unified(
     file: UploadFile = File(...), 
     patient_data: str = Form(...),
     engine: DiagnosisEngine = Depends(get_engine),
-    current_user: User = Depends(get_optional_user),
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     try:
