@@ -7,7 +7,7 @@
 - [x] Task: Backend - Create Login Endpoint. [commit: 3b3d0b5]
     - [ ] Implement `POST /api/auth/token` (OAuth2PasswordRequestForm).
     - [ ] Validate against hardcoded users (Admin, GP, Specialist).
-- [ ] Task: Backend - Implement Auth Dependency.
+- [x] Task: Backend - Implement Auth Dependency. [commit: d559d10]
     - [ ] Create `get_current_user` dependency to validate JWT header.
     - [ ] Protect `POST /api/diagnose` and `POST /api/ingest` with this dependency.
 - [ ] Task: Frontend - Refactor Auth Slice.
@@ -19,9 +19,9 @@
 - [ ] Task: Conductor - User Manual Verification 'Authentication Core' (Protocol in workflow.md)
 
 ## Phase 2: Health & Profiles
-- [ ] Task: Backend - Implement Health Check.
+- [x] Task: Backend - Implement Health Check Endpoint. [commit: b1b7377]
     - [ ] Create `GET /api/health` returning system status (AI service reachability).
-- [ ] Task: Backend - Implement User Profile Endpoint.
+- [x] Task: Backend - Implement User Profile Endpoint. [commit: 43c7aca]
     - [ ] Create `GET /api/users/me` to return current user details.
 - [ ] Task: Frontend - Implement Health Indicator.
     - [ ] Add a polling component (React Query) in `Sidebar` to check `/health`.
