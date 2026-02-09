@@ -4,7 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import Response
 from contextlib import asynccontextmanager
-from app.api import ingest, diagnose, history, auth, google_auth, admin
+from app.api import ingest, diagnose, history, auth, google_auth, admin, health
 from app.api.medgemma import router as medgemma_router
 from app.database.init_db import init_database
 from app.core.rate_limit import rate_limiter
@@ -99,12 +99,8 @@ from app.api import dashboard
 app.include_router(dashboard.router, prefix="/api/dashboard", tags=["Dashboard"])
 app.include_router(medgemma_router, prefix="/api", tags=["MedGemma AI"])
 app.include_router(admin.router, prefix="/api", tags=["Admin"])
+app.include_router(health.router, prefix="/api")
 
 @app.get("/")
 def read_root():
     return {"message": "Medical Diagnostic Agent API", "version": "2.0.0"}
-
-@app.get("/health")
-def health_check():
-    """Health check endpoint for monitoring"""
-    return {"status": "healthy"}
