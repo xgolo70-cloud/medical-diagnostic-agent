@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Eye, EyeOff, ArrowLeft, Brain, ArrowRight, AlertCircle, Lock, CheckCircle, User, Mail, Phone, Shield } from 'lucide-react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Eye, EyeOff, ArrowLeft, Brain, ArrowRight, AlertCircle, Lock, User, Mail, Phone, Shield } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { supabaseAuth, db } from '../../lib/supabase';
 
 interface FormErrors {
@@ -46,7 +46,6 @@ const getPasswordStrength = (password: string): { score: number; label: string; 
 };
 
 export const RegisterForm: React.FC = () => {
-    const navigate = useNavigate();
     const [isLoading, setIsLoading] = useState(false);
     const [success, setSuccess] = useState(false);
     const [formData, setFormData] = useState<FormData>({
@@ -138,22 +137,34 @@ export const RegisterForm: React.FC = () => {
 
             // Update profile with additional data if user was created
             if (data.user) {
-                // Wait a moment for the trigger to create the profile
-                await new Promise(resolve => setTimeout(resolve, 1000));
+                // Poll for profile creation (Database Trigger might be slow)
+                const waitForProfile = async (userId: string, retries = 5, delay = 1000): Promise<boolean> => {
+                    for (let i = 0; i < retries; i++) {
+                        const { profile } = await db.getProfile(userId);
+                        if (profile) return true;
+                        await new Promise(resolve => setTimeout(resolve, delay));
+                    }
+                    return false;
+                };
+
+                const profileCreated = await waitForProfile(data.user.id);
                 
-                // Update profile with role and phone
-                await db.updateProfile(data.user.id, {
-                    role: formData.role as 'patient' | 'doctor' | 'specialist' | 'admin' | 'auditor' | 'gp',
-                    phone: formData.phone || null,
-                    full_name: formData.fullName,
-                });
+                if (profileCreated) {
+                    // Update profile with role and phone
+                    await db.updateProfile(data.user.id, {
+                        role: formData.role as 'patient' | 'doctor' | 'specialist' | 'admin' | 'auditor' | 'gp',
+                        phone: formData.phone || null,
+                        full_name: formData.fullName,
+                    });
+                } else {
+                    console.warn('Profile creation timed out, but user created. User may need to update profile manually.');
+                    // Consider whether to throw an error or just proceed. 
+                    // Proceeding allows login, but profile might be incomplete. 
+                    // Given the flow, we should probably warn but allow success screen.
+                }
             }
 
             setSuccess(true);
-            // Redirect to login after 2 seconds
-            setTimeout(() => {
-                navigate('/login');
-            }, 2000);
         } catch (error) {
             setFormErrors({
                 general: error instanceof Error ? error.message : 'Registration failed. Please try again.',
@@ -193,13 +204,25 @@ export const RegisterForm: React.FC = () => {
                 <motion.div
                     initial={{ scale: 0.8, opacity: 0 }}
                     animate={{ scale: 1, opacity: 1 }}
-                    className="text-center p-8"
+                    className="text-center p-8 max-w-md"
                 >
                     <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-emerald-100 flex items-center justify-center">
-                        <CheckCircle className="w-10 h-10 text-emerald-600" />
+                        <Mail className="w-10 h-10 text-emerald-600" />
                     </div>
-                    <h2 className="text-2xl font-bold text-gray-900 mb-2">Account Created!</h2>
-                    <p className="text-gray-500">Redirecting to login...</p>
+                    <h2 className="text-2xl font-bold text-gray-900 mb-2">Check Your Email!</h2>
+                    <p className="text-gray-600 mb-4">
+                        We've sent a confirmation link to <span className="font-semibold text-gray-900">{formData.email}</span>
+                    </p>
+                    <p className="text-sm text-gray-500 mb-6">
+                        Please click the link in your email to activate your account before logging in.
+                    </p>
+                    <Link 
+                        to="/login"
+                        className="inline-flex items-center gap-2 px-6 py-3 bg-[#171717] text-white rounded-lg font-medium hover:bg-[#262626] transition-colors"
+                    >
+                        Go to Login
+                        <ArrowRight size={16} />
+                    </Link>
                 </motion.div>
             </div>
         );
@@ -220,8 +243,8 @@ export const RegisterForm: React.FC = () => {
 
             {/* Minimal Accent Orbs */}
             <div className="absolute inset-0 overflow-hidden pointer-events-none">
-                <div className="absolute top-[-10%] left-[-5%] w-[400px] h-[400px] bg-gradient-to-br from-emerald-100/40 to-transparent rounded-full blur-3xl" />
-                <div className="absolute bottom-[-10%] right-[-5%] w-[400px] h-[400px] bg-gradient-to-tl from-blue-100/40 to-transparent rounded-full blur-3xl" />
+                            <div className="absolute -bottom-6 -right-6 w-24 h-24 bg-linear-to-br from-blue-500/20 to-purple-500/20 rounded-full blur-xl animate-pulse" />
+                            <div className="absolute -top-6 -left-6 w-24 h-24 bg-linear-to-tl from-cyan-400/20 to-blue-400/20 rounded-full blur-xl animate-pulse delay-700" />
             </div>
             
             <div className="w-full max-w-4xl relative z-10">
@@ -357,7 +380,7 @@ export const RegisterForm: React.FC = () => {
                                             </motion.span>
                                         </AnimatePresence>
                                     </span>
-                                    <div className="absolute -bottom-0.5 left-0 right-0 h-[2px] bg-gradient-to-r from-emerald-400/60 via-white/80 to-emerald-400/60 rounded-full" />
+                                    <div className="absolute -bottom-0.5 left-0 right-0 h-[2px] bg-linear-to-r from-emerald-400/60 via-white/80 to-emerald-400/60 rounded-full" />
                                 </div>
                             </h2>
                          </div>
@@ -612,7 +635,7 @@ export const RegisterForm: React.FC = () => {
                                 <button
                                     type="submit"
                                     disabled={isLoading}
-                                    className="w-full h-10 bg-[#171717] text-white rounded-lg font-medium text-sm hover:bg-[#262626] active:scale-[0.99] transition-all duration-150 flex items-center justify-center gap-2 mt-2 shadow-sm"
+                                    className={`w-full bg-linear-to-br from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white py-3 rounded-lg font-semibold shadow-lg shadow-blue-500/30 transition-all duration-200 transform hover:scale-[1.02] flex items-center justify-center gap-2 mt-2`}
                                 >
                                     {isLoading ? (
                                         <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />

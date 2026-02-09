@@ -287,6 +287,40 @@ export const DEMO_AI_INSIGHTS = [
     },
 ];
 
+// ================== Demo Admin Users Summary ==================
+
+export const DEMO_USERS_SUMMARY = {
+    total: 24,
+    byRole: [
+        { role: 'patient', count: 12, color: 'bg-blue-50 text-blue-700' },
+        { role: 'doctor', count: 5, color: 'bg-green-50 text-green-700' },
+        { role: 'specialist', count: 3, color: 'bg-purple-50 text-purple-700' },
+        { role: 'gp', count: 2, color: 'bg-teal-50 text-teal-700' },
+        { role: 'auditor', count: 1, color: 'bg-orange-50 text-orange-700' },
+        { role: 'admin', count: 1, color: 'bg-red-50 text-red-700' },
+    ],
+    recentUsers: [
+        { id: '1', username: 'sarah.johnson', role: 'patient', createdAt: new Date(Date.now() - 3600000).toISOString() },
+        { id: '2', username: 'dr.ahmed', role: 'doctor', createdAt: new Date(Date.now() - 86400000).toISOString() },
+        { id: '3', username: 'noor.ali', role: 'patient', createdAt: new Date(Date.now() - 172800000).toISOString() },
+    ],
+};
+
+// ================== Demo Admin Activity Feed ==================
+
+export const DEMO_ADMIN_ACTIVITY = [
+    { id: '1', action: 'ECG Analysis', user: 'dr.smith', userRole: 'specialist', timestamp: new Date(Date.now() - 300000).toISOString(), details: 'Patient #P-2024-0847', type: 'diagnosis' as const },
+    { id: '2', action: 'User Login', user: 'admin', userRole: 'admin', timestamp: new Date(Date.now() - 600000).toISOString(), type: 'login' as const },
+    { id: '3', action: 'CT Scan Upload', user: 'dr.ahmed', userRole: 'doctor', timestamp: new Date(Date.now() - 1200000).toISOString(), details: 'chest_ct_scan.dcm', type: 'upload' as const },
+    { id: '4', action: 'New Registration', user: 'sarah.johnson', userRole: 'patient', timestamp: new Date(Date.now() - 1800000).toISOString(), type: 'registration' as const },
+    { id: '5', action: 'Blood Panel Analysis', user: 'dr.smith', userRole: 'specialist', timestamp: new Date(Date.now() - 3600000).toISOString(), details: 'Patient #P-2024-0923', type: 'diagnosis' as const },
+    { id: '6', action: 'User Login', user: 'dr.ahmed', userRole: 'doctor', timestamp: new Date(Date.now() - 5400000).toISOString(), type: 'login' as const },
+    { id: '7', action: 'MRI Report Upload', user: 'auditor', userRole: 'auditor', timestamp: new Date(Date.now() - 7200000).toISOString(), details: 'mri_brain_005.pdf', type: 'upload' as const },
+    { id: '8', action: 'System Settings Update', user: 'admin', userRole: 'admin', timestamp: new Date(Date.now() - 10800000).toISOString(), type: 'settings' as const },
+    { id: '9', action: 'Chest X-Ray Analysis', user: 'dr.smith', userRole: 'specialist', timestamp: new Date(Date.now() - 14400000).toISOString(), details: 'Patient #P-2024-0756', type: 'diagnosis' as const },
+    { id: '10', action: 'New Registration', user: 'noor.ali', userRole: 'patient', timestamp: new Date(Date.now() - 21600000).toISOString(), type: 'registration' as const },
+];
+
 // ================== Check if Demo Mode ==================
 
 export const isDemoMode = (): boolean => {

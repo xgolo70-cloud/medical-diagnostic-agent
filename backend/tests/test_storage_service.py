@@ -2,10 +2,17 @@
 Storage Service Tests
 Comprehensive tests for Supabase Storage integration including file upload,
 type validation, URL generation, error handling, and cleanup.
+
+All tests use synchronous wrappers to avoid pytest-asyncio configuration issues.
 """
 import pytest
-from unittest.mock import MagicMock, patch, AsyncMock
 import asyncio
+from unittest.mock import MagicMock, patch
+
+
+def run_async(coro):
+    """Helper to run async functions in sync tests"""
+    return asyncio.get_event_loop().run_until_complete(coro)
 
 
 # ================== FILE UPLOAD TESTS ==================
@@ -13,47 +20,51 @@ import asyncio
 class TestFileUpload:
     """Tests for file upload functionality"""
     
-    @pytest.mark.asyncio
-    async def test_upload_image_success(self):
+    def test_upload_image_success(self):
         """Test successful image upload"""
         with patch('app.core.storage.get_storage_client') as mock_storage:
-            storage_mock = MagicMock()
-            storage_mock.from_.return_value.upload.return_value = {"path": "user123/abc123_test.jpg"}
-            mock_storage.return_value = storage_mock
-            
-            from app.core.storage import upload_medical_image
-            
-            file_content = b"fake image bytes"
-            path, error = await upload_medical_image(
-                file_content=file_content,
-                filename="test.jpg",
-                user_id="user123",
-                content_type="image/jpeg"
-            )
-            
-            # Should succeed
-            assert error is None
-            assert path is not None
-            assert "user123" in path
+            with patch('app.core.storage.ensure_bucket_exists') as mock_bucket:
+                mock_bucket.return_value = asyncio.coroutine(lambda: True)()
+                
+                storage_mock = MagicMock()
+                storage_mock.from_.return_value.upload.return_value = {"path": "user123/abc123_test.jpg"}
+                mock_storage.return_value = storage_mock
+                
+                from app.core.storage import upload_medical_image
+                
+                file_content = b"fake image bytes"
+                path, error = run_async(upload_medical_image(
+                    file_content=file_content,
+                    filename="test.jpg",
+                    user_id="user123",
+                    content_type="image/jpeg"
+                ))
+                
+                # Should succeed
+                assert error is None
+                assert path is not None
+                assert "user123" in path
     
-    @pytest.mark.asyncio
-    async def test_upload_empty_file(self):
+    def test_upload_empty_file(self):
         """Test uploading empty file fails"""
         with patch('app.core.storage.get_storage_client') as mock_storage:
-            storage_mock = MagicMock()
-            storage_mock.from_.return_value.upload.side_effect = Exception("Empty file")
-            mock_storage.return_value = storage_mock
-            
-            from app.core.storage import upload_medical_image
-            
-            path, error = await upload_medical_image(
-                file_content=b"",
-                filename="empty.jpg",
-                user_id="user123"
-            )
-            
-            assert path is None
-            assert error is not None
+            with patch('app.core.storage.ensure_bucket_exists') as mock_bucket:
+                mock_bucket.return_value = asyncio.coroutine(lambda: True)()
+                
+                storage_mock = MagicMock()
+                storage_mock.from_.return_value.upload.side_effect = Exception("Empty file")
+                mock_storage.return_value = storage_mock
+                
+                from app.core.storage import upload_medical_image
+                
+                path, error = run_async(upload_medical_image(
+                    file_content=b"",
+                    filename="empty.jpg",
+                    user_id="user123"
+                ))
+                
+                assert path is None
+                assert error is not None
 
 
 # ================== FILE TYPE VALIDATION TESTS ==================
@@ -63,7 +74,6 @@ class TestFileTypeValidation:
     
     def test_allowed_image_types(self):
         """Test that common image types are allowed"""
-        # These are the allowed MIME types from storage.py
         allowed_types = [
             "image/jpeg",
             "image/png", 
@@ -91,8 +101,7 @@ class TestFileTypeValidation:
 class TestStorageURLGeneration:
     """Tests for signed and public URL generation"""
     
-    @pytest.mark.asyncio
-    async def test_public_url_generation(self):
+    def test_public_url_generation(self):
         """Test public URL generation"""
         with patch('app.core.storage.get_storage_client') as mock_storage:
             storage_mock = MagicMock()
@@ -101,13 +110,12 @@ class TestStorageURLGeneration:
             
             from app.core.storage import get_public_url
             
-            url = await get_public_url("test/file.jpg")
+            url = run_async(get_public_url("test/file.jpg"))
             
             assert url is not None
             assert "https://" in url or url.startswith("http")
     
-    @pytest.mark.asyncio
-    async def test_signed_url_generation(self):
+    def test_signed_url_generation(self):
         """Test signed URL generation with expiration"""
         with patch('app.core.storage.get_storage_client') as mock_storage:
             storage_mock = MagicMock()
@@ -118,7 +126,7 @@ class TestStorageURLGeneration:
             
             from app.core.storage import get_signed_url
             
-            url, error = await get_signed_url("test/file.jpg", expires_in=3600)
+            url, error = run_async(get_signed_url("test/file.jpg", expires_in=3600))
             
             assert error is None
             assert url is not None
@@ -129,42 +137,44 @@ class TestStorageURLGeneration:
 class TestStorageErrorHandling:
     """Tests for storage error handling"""
     
-    @pytest.mark.asyncio
-    async def test_storage_connection_failure(self):
+    def test_storage_connection_failure(self):
         """Test handling of storage connection failures"""
         with patch('app.core.storage.get_storage_client') as mock_storage:
-            mock_storage.side_effect = Exception("Connection refused")
-            
-            from app.core.storage import upload_medical_image
-            
-            path, error = await upload_medical_image(
-                file_content=b"test",
-                filename="test.jpg",
-                user_id="user123"
-            )
-            
-            assert path is None
-            assert error is not None
-            assert "Connection" in error or "Error" in str(error).lower() or error is not None
+            with patch('app.core.storage.ensure_bucket_exists') as mock_bucket:
+                mock_bucket.return_value = asyncio.coroutine(lambda: True)()
+                mock_storage.side_effect = Exception("Connection refused")
+                
+                from app.core.storage import upload_medical_image
+                
+                path, error = run_async(upload_medical_image(
+                    file_content=b"test",
+                    filename="test.jpg",
+                    user_id="user123"
+                ))
+                
+                assert path is None
+                assert error is not None
     
-    @pytest.mark.asyncio
-    async def test_storage_quota_exceeded(self):
+    def test_storage_quota_exceeded(self):
         """Test handling of storage quota exceeded errors"""
         with patch('app.core.storage.get_storage_client') as mock_storage:
-            storage_mock = MagicMock()
-            storage_mock.from_.return_value.upload.side_effect = Exception("Storage quota exceeded")
-            mock_storage.return_value = storage_mock
-            
-            from app.core.storage import upload_medical_image
-            
-            path, error = await upload_medical_image(
-                file_content=b"large file content",
-                filename="large.jpg",
-                user_id="user123"
-            )
-            
-            assert path is None
-            assert error is not None
+            with patch('app.core.storage.ensure_bucket_exists') as mock_bucket:
+                mock_bucket.return_value = asyncio.coroutine(lambda: True)()
+                
+                storage_mock = MagicMock()
+                storage_mock.from_.return_value.upload.side_effect = Exception("Storage quota exceeded")
+                mock_storage.return_value = storage_mock
+                
+                from app.core.storage import upload_medical_image
+                
+                path, error = run_async(upload_medical_image(
+                    file_content=b"large file content",
+                    filename="large.jpg",
+                    user_id="user123"
+                ))
+                
+                assert path is None
+                assert error is not None
 
 
 # ================== FILE CLEANUP TESTS ==================
@@ -172,8 +182,7 @@ class TestStorageErrorHandling:
 class TestFileCleanup:
     """Tests for file deletion and cleanup"""
     
-    @pytest.mark.asyncio
-    async def test_delete_file_success(self):
+    def test_delete_file_success(self):
         """Test successful file deletion"""
         with patch('app.core.storage.get_storage_client') as mock_storage:
             storage_mock = MagicMock()
@@ -182,13 +191,12 @@ class TestFileCleanup:
             
             from app.core.storage import delete_image
             
-            success, error = await delete_image("user123/test.jpg")
+            success, error = run_async(delete_image("user123/test.jpg"))
             
             assert success is True
             assert error is None
     
-    @pytest.mark.asyncio
-    async def test_delete_nonexistent_file(self):
+    def test_delete_nonexistent_file(self):
         """Test deleting a file that doesn't exist"""
         with patch('app.core.storage.get_storage_client') as mock_storage:
             storage_mock = MagicMock()
@@ -197,7 +205,7 @@ class TestFileCleanup:
             
             from app.core.storage import delete_image
             
-            success, error = await delete_image("nonexistent/file.jpg")
+            success, error = run_async(delete_image("nonexistent/file.jpg"))
             
             assert success is False
             assert error is not None
@@ -208,8 +216,7 @@ class TestFileCleanup:
 class TestStorageBuckets:
     """Tests for storage bucket operations"""
     
-    @pytest.mark.asyncio
-    async def test_bucket_exists(self):
+    def test_bucket_exists(self):
         """Test checking if bucket exists"""
         with patch('app.core.storage.get_storage_client') as mock_storage:
             storage_mock = MagicMock()
@@ -218,12 +225,11 @@ class TestStorageBuckets:
             
             from app.core.storage import ensure_bucket_exists
             
-            result = await ensure_bucket_exists()
+            result = run_async(ensure_bucket_exists())
             
             assert result is True
     
-    @pytest.mark.asyncio
-    async def test_list_bucket_files(self):
+    def test_list_bucket_files(self):
         """Test listing files in a bucket"""
         with patch('app.core.storage.get_storage_client') as mock_storage:
             storage_mock = MagicMock()
@@ -235,7 +241,7 @@ class TestStorageBuckets:
             
             from app.core.storage import list_user_images
             
-            files, error = await list_user_images("user123")
+            files, error = run_async(list_user_images("user123"))
             
             assert error is None
             assert len(files) == 2
@@ -253,8 +259,8 @@ class TestFilePathGeneration:
         path = generate_file_path("user123", "my image.jpg")
         
         assert "user123" in path
-        assert "my_image.jpg" in path  # Spaces should be replaced with underscores
-        assert "/" in path  # Should have directory separator
+        assert "my_image.jpg" in path
+        assert "/" in path
     
     def test_generate_file_path_unique(self):
         """Test that generated paths are unique"""
@@ -262,7 +268,6 @@ class TestFilePathGeneration:
         
         paths = [generate_file_path("user123", "test.jpg") for _ in range(10)]
         
-        # All paths should be unique due to UUID
         assert len(set(paths)) == 10
 
 

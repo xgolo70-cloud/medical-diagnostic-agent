@@ -29,8 +29,17 @@ export const SupabaseListener = () => {
                     avatar: user.user_metadata?.avatar_url,
                 }));
             } else if (event === 'SIGNED_OUT') {
-                tokenManager.clearTokens();
-                dispatch(logout());
+                // Check if we're using a mock token (contains 'demo-signature' in base64)
+                // If so, ignore the Supabase sign out event to prevent clearing our mock session
+                const currentToken = tokenManager.getAccessToken();
+                const isMockToken = currentToken && currentToken.includes('ZGVtby1zaWduYXR1cmU=');
+                
+                if (!isMockToken) {
+                    tokenManager.clearTokens();
+                    dispatch(logout());
+                } else {
+                    console.log('Ignoring Supabase SIGNED_OUT event for mock session');
+                }
             }
         });
 

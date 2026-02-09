@@ -3,13 +3,14 @@ MedGemma 1.5 & MedASR Integration API
 Provides endpoints for medical image analysis and medical speech-to-text
 """
 
-from fastapi import APIRouter, HTTPException, UploadFile, File, Form
+from fastapi import APIRouter, HTTPException, UploadFile, File, Form, Depends
 from fastapi.responses import JSONResponse
 from typing import Optional, List
 from pydantic import BaseModel
 import base64
 import io
 import os
+from app.core.auth import get_current_user, User as AuthUser
 
 # Import Google Generative AI (Gemini API) - PRIMARY ENGINE
 import google.generativeai as genai
@@ -602,7 +603,11 @@ async def check_model_status():
     )
 
 @router.post("/analyze-image", response_model=ImageAnalysisResponse)
-async def analyze_medical_image(request: ImageAnalysisRequest):
+async def analyze_medical_image(
+    request: ImageAnalysisRequest,
+    current_user: AuthUser = Depends(get_current_user)
+):
+    print(f"DEBUG: analyze_medical_image called. User: {current_user}")
     """
     Analyze a medical image using MedGemma 1.5
     
@@ -652,7 +657,8 @@ async def analyze_medical_image(request: ImageAnalysisRequest):
 async def analyze_uploaded_image(
     file: UploadFile = File(...),
     prompt: str = Form(default="Describe this medical image in detail."),
-    modality: str = Form(default="xray")
+    modality: str = Form(default="xray"),
+    current_user: AuthUser = Depends(get_current_user)
 ):
     """
     Analyze an uploaded medical image file
@@ -700,7 +706,10 @@ async def analyze_uploaded_image(
         raise HTTPException(status_code=500, detail=f"Image analysis failed: {str(e)}")
 
 @router.post("/transcribe-audio", response_model=SpeechToTextResponse)
-async def transcribe_medical_audio(request: SpeechToTextRequest):
+async def transcribe_medical_audio(
+    request: SpeechToTextRequest,
+    current_user: AuthUser = Depends(get_current_user)
+):
     """
     Transcribe medical audio using MedASR
     
@@ -716,7 +725,8 @@ async def transcribe_medical_audio(request: SpeechToTextRequest):
 @router.post("/transcribe-audio-upload")
 async def transcribe_uploaded_audio(
     file: UploadFile = File(...),
-    language: str = Form(default="en")
+    language: str = Form(default="en"),
+    current_user: AuthUser = Depends(get_current_user)
 ):
     """
     Transcribe an uploaded medical audio file
@@ -737,7 +747,9 @@ async def transcribe_uploaded_audio(
     )
 
 @router.post("/initialize-medgemma")
-async def initialize_medgemma_model():
+async def initialize_medgemma_model(
+    current_user: AuthUser = Depends(get_current_user)
+):
     """
     Manually trigger MedGemma model initialization
     This can take several minutes on first run as it downloads the model.

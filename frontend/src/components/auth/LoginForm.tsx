@@ -92,7 +92,16 @@ export const LoginForm: React.FC = () => {
             const { data, error: authError } = await supabaseAuth.signIn(email, password);
 
             if (authError) {
-                throw new Error(authError.message);
+                // Provide more helpful error messages
+                let errorMessage = authError.message;
+                if (authError.message.includes('Invalid login credentials')) {
+                    errorMessage = 'Invalid email or password. Please check your credentials and try again.';
+                } else if (authError.message.includes('Email not confirmed')) {
+                    errorMessage = 'Please confirm your email address before logging in. Check your inbox.';
+                } else if (authError.message.includes('Too many requests')) {
+                    errorMessage = 'Too many login attempts. Please wait a moment and try again.';
+                }
+                throw new Error(errorMessage);
             }
 
             if (data.user) {
@@ -112,7 +121,7 @@ export const LoginForm: React.FC = () => {
                 }));
             }
         } catch (err) {
-            dispatch(loginFailure(err instanceof Error ? err.message : 'Login failed'));
+            dispatch(loginFailure(err instanceof Error ? err.message : 'Login failed. Please try again.'));
         }
     };
 
@@ -148,12 +157,13 @@ export const LoginForm: React.FC = () => {
             return;
         }
 
-        // Try Supabase login with demo credentials
+        // Try Supabase login with demo credentials, fallback to mock if fails
         try {
             const { data, error: authError } = await supabaseAuth.signIn(cred.email, cred.password);
 
-            if (authError) {
-                // If demo user doesn't exist in Supabase, use mock mode
+            if (authError || !data.user) {
+                // Demo user doesn't exist in Supabase - use mock mode for seamless demo experience
+                console.log('[Demo] Supabase auth failed, using mock credentials for:', cred.username);
                 const mockToken = generateMockToken(cred.username, cred.role);
                 tokenManager.setTokens(mockToken, mockToken);
                 dispatch(loginSuccess({
@@ -165,17 +175,25 @@ export const LoginForm: React.FC = () => {
                 return;
             }
 
-            if (data.user) {
-                const { profile } = await db.getProfile(data.user.id);
-                dispatch(loginSuccess({
-                    username: profile?.username || cred.username,
-                    role: profile?.role || cred.role,
-                    email: data.user.email,
-                    displayName: profile?.full_name || cred.displayName,
-                }));
-            }
+            // Supabase auth succeeded - fetch profile
+            const { profile } = await db.getProfile(data.user.id);
+            dispatch(loginSuccess({
+                username: profile?.username || cred.username,
+                role: profile?.role || cred.role,
+                email: data.user.email,
+                displayName: profile?.full_name || cred.displayName,
+            }));
         } catch (err) {
-            dispatch(loginFailure(err instanceof Error ? err.message : 'Login failed'));
+            // Network error or unexpected failure - fallback to mock mode for demo accounts
+            console.warn('[Demo] Unexpected error, falling back to mock:', err);
+            const mockToken = generateMockToken(cred.username, cred.role);
+            tokenManager.setTokens(mockToken, mockToken);
+            dispatch(loginSuccess({
+                username: cred.username,
+                role: cred.role,
+                email: cred.email,
+                displayName: cred.displayName,
+            }));
         }
     };
 
@@ -372,11 +390,11 @@ export const LoginForm: React.FC = () => {
                                 )}
                             </div>
 
-                            <form onSubmit={handleSubmit} className="space-y-4">
+                            <form onSubmit={handleSubmit} className="space-y-4" autoComplete="on">
                                 {/* Email */}
                                 <div className="space-y-1.5">
                                     <div className="flex justify-between items-center">
-                                        <label className="text-xs font-medium text-[#666666]">Email</label>
+                                        <label htmlFor="login-email" className="text-xs font-medium text-[#666666]">Email</label>
                                         {formErrors.email && (
                                             <span className="text-[11px] font-medium text-red-500 flex items-center gap-1">
                                                 <AlertCircle size={10} /> {formErrors.email}
@@ -385,6 +403,9 @@ export const LoginForm: React.FC = () => {
                                     </div>
                                     <input
                                         type="email"
+                                        id="login-email"
+                                        name="email"
+                                        autoComplete="email"
                                         value={email}
                                         onChange={(e) => { setEmail(e.target.value); if (formErrors.email) setFormErrors({ ...formErrors, email: undefined }); }}
                                         onBlur={() => {
@@ -400,7 +421,7 @@ export const LoginForm: React.FC = () => {
                                 {/* Password */}
                                 <div className="space-y-1.5">
                                     <div className="flex justify-between items-center">
-                                        <label className="text-xs font-medium text-[#666666]">Password</label>
+                                        <label htmlFor="login-password" className="text-xs font-medium text-[#666666]">Password</label>
                                         <div className="flex items-center gap-3">
                                             {formErrors.password && (
                                                 <span className="text-[11px] font-medium text-red-500 flex items-center gap-1">
@@ -413,6 +434,9 @@ export const LoginForm: React.FC = () => {
                                     <div className="relative">
                                         <input
                                             type={showPassword ? 'text' : 'password'}
+                                            id="login-password"
+                                            name="password"
+                                            autoComplete="current-password"
                                             value={password}
                                             onChange={(e) => { 
                                                 setPassword(e.target.value); 

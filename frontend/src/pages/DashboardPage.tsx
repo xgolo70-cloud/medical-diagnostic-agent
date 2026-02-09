@@ -5,7 +5,9 @@ import { useAppSelector } from '../store/hooks';
 import { Button } from '../components/ui/Button';
 import { 
     RecentActivityTable,
-    AnalyticsSummary 
+    AnalyticsSummary,
+    AdminUsersWidget,
+    AdminActivityFeed
 } from '../components/dashboard';
 import { useNotifications, useAppointments, useDashboardStats, useSearch, type DiagnosisStats } from '../hooks';
 import {
@@ -394,6 +396,25 @@ export const DashboardPage: React.FC = () => {
                         </motion.div>
                     ))}
                 </div>
+
+                {/* Admin Panel - Only visible to admin users */}
+                {user?.role === 'admin' && (
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.5, delay: 0.2 }}
+                        className="mb-10"
+                    >
+                        <div className="flex items-center gap-2 mb-5">
+                            <div className="w-1 h-5 bg-red-500 rounded-full" />
+                            <h3 className="text-sm font-semibold text-gray-900 uppercase tracking-wider">Admin Panel</h3>
+                        </div>
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            <AdminUsersWidget />
+                            <AdminActivityFeed />
+                        </div>
+                    </motion.div>
+                )}
 
                 {/* Main Content Grid - 3 Columns */}
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">

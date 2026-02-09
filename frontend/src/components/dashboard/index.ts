@@ -8,3 +8,5 @@ export { NotificationsDropdown } from './NotificationsDropdown';
 export { MedASRPromo } from './MedASRPromo';
 export { AppointmentsCard } from './AppointmentsCard';
 export { KeyboardShortcutsCard } from './KeyboardShortcutsCard';
+export { AdminUsersWidget } from './AdminUsersWidget';
+export { AdminActivityFeed } from './AdminActivityFeed';

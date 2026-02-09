@@ -3,10 +3,11 @@ MedGemma API Router
 FastAPI endpoints for medical image analysis and speech-to-text
 """
 
-from fastapi import APIRouter, HTTPException, UploadFile, File, Form
+from fastapi import APIRouter, HTTPException, UploadFile, File, Form, Depends
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 from typing import Optional, List
+from app.core.auth import get_current_user, User as AuthUser
 
 from .config import SUPPORTED_MODALITIES
 from .services import medgemma_service
@@ -57,7 +58,7 @@ async def get_status():
 
 
 @router.post("/initialize-medgemma")
-async def initialize_medgemma():
+async def initialize_medgemma(current_user: AuthUser = Depends(get_current_user)):
     """Initialize the MedGemma model (lazy loading)"""
     try:
         success = medgemma_service.initialize()
@@ -73,7 +74,10 @@ async def initialize_medgemma():
 
 
 @router.post("/analyze-image", response_model=ImageAnalysisResponse)
-async def analyze_image(request: ImageAnalysisRequest):
+async def analyze_image(
+    request: ImageAnalysisRequest,
+    current_user: AuthUser = Depends(get_current_user)
+):
     """
     Analyze a medical image (base64 encoded).
     Uses local MedGemma if available, falls back to Gemini API.
@@ -115,7 +119,8 @@ async def analyze_image(request: ImageAnalysisRequest):
 async def analyze_uploaded_image(
     file: UploadFile = File(...),
     prompt: str = Form(default="Describe this medical image in detail."),
-    modality: str = Form(default="xray")
+    modality: str = Form(default="xray"),
+    current_user: AuthUser = Depends(get_current_user)
 ):
     """
     Analyze an uploaded medical image file.
@@ -166,6 +171,65 @@ async def analyze_uploaded_image(
         raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Image analysis failed: {str(e)}")
+
+
+
+# ================== MedASR Endpoints (Placeholder) ==================
+
+class SpeechToTextRequest(BaseModel):
+    """Request model for speech-to-text"""
+    audio_base64: str
+    language: Optional[str] = "en"
+
+
+class SpeechToTextResponse(BaseModel):
+    """Response model for speech-to-text"""
+    transcription: str
+    confidence: Optional[float] = None
+    medical_terms_detected: Optional[List[str]] = None
+
+
+@router.post("/transcribe-audio", response_model=SpeechToTextResponse)
+async def transcribe_medical_audio(
+    request: SpeechToTextRequest,
+    current_user: AuthUser = Depends(get_current_user)
+):
+    """
+    Transcribe medical audio using MedASR
+    
+    Note: MedASR integration requires additional setup.
+    This endpoint provides a placeholder that can be connected to the MedASR model.
+    """
+    # MedASR is not yet integrated - provide informative response
+    raise HTTPException(
+        status_code=501,
+        detail="MedASR integration is pending. Please visit https://developers.google.com/health-ai-developer-foundations/medasr/ for setup instructions."
+    )
+
+
+@router.post("/transcribe-audio-upload")
+async def transcribe_uploaded_audio(
+    file: UploadFile = File(...),
+    language: str = Form(default="en"),
+    current_user: AuthUser = Depends(get_current_user)
+):
+    """
+    Transcribe an uploaded medical audio file
+    Accepts: WAV, MP3, M4A, WEBM
+    """
+    # Validate file type
+    allowed_types = ["audio/wav", "audio/mpeg", "audio/mp4", "audio/webm", "audio/x-wav"]
+    if file.content_type not in allowed_types:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Unsupported audio type: {file.content_type}. Allowed types: {allowed_types}"
+        )
+    
+    # MedASR is not yet integrated
+    raise HTTPException(
+        status_code=501,
+        detail="MedASR integration is pending. Please visit https://developers.google.com/health-ai-developer-foundations/medasr/ for setup instructions."
+    )
 
 
 # ================== Health Check ==================

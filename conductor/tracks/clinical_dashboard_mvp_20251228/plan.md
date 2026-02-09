@@ -33,4 +33,4 @@
     - [x] Display audit logs in a data table.
 - [x] Task: Final UI Polish.
     - [x] Ensure consistent styling, error handling, and loading states across all views.
-- [ ] Task: Conductor - User Manual Verification 'History View and Final Polish' (Protocol in workflow.md)
+- [~] Task: Conductor - User Manual Verification 'History View and Final Polish' (Protocol in workflow.md)
