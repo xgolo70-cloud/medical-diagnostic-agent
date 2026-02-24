@@ -1,12 +1,29 @@
-import React, { useState } from 'react';
-import { motion } from 'framer-motion';
+import React, { useState, useMemo } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useSearchParams, Link, useNavigate } from 'react-router-dom';
-import { Lock, CheckCircle, XCircle, Loader2, Eye, EyeOff, ArrowRight } from 'lucide-react';
+import { Lock, CheckCircle, XCircle, Loader2, Eye, EyeOff, ArrowRight, Check } from 'lucide-react';
 import { Button } from '../components/ui/Button';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
 
 type ResetStatus = 'form' | 'loading' | 'success' | 'error';
+
+// ================== Password Strength Indicator ==================
+const getPasswordStrength = (password: string): { score: number; label: string; color: string } => {
+    let score = 0;
+    if (password.length >= 8) score++;
+    if (password.length >= 12) score++;
+    if (/[A-Z]/.test(password)) score++;
+    if (/[a-z]/.test(password)) score++;
+    if (/\d/.test(password)) score++;
+    if (/[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/.test(password)) score++;
+
+    if (score <= 2) return { score, label: 'Weak', color: 'bg-red-500' };
+    if (score <= 3) return { score, label: 'Fair', color: 'bg-orange-500' };
+    if (score <= 4) return { score, label: 'Good', color: 'bg-amber-500' };
+    if (score <= 5) return { score, label: 'Strong', color: 'bg-emerald-500' };
+    return { score, label: 'Very Strong', color: 'bg-green-600' };
+};
 
 export const ResetPasswordPage: React.FC = () => {
     const [searchParams] = useSearchParams();
@@ -19,6 +36,8 @@ export const ResetPasswordPage: React.FC = () => {
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [status, setStatus] = useState<ResetStatus>(() => !token ? 'error' : 'form');
     const [error, setError] = useState(() => !token ? 'No reset token provided' : '');
+
+    const passwordStrength = useMemo(() => getPasswordStrength(password), [password]);
 
     const validatePassword = (pass: string): string | null => {
         if (pass.length < 8) return 'Password must be at least 8 characters';
@@ -184,9 +203,49 @@ export const ResetPasswordPage: React.FC = () => {
                                     {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                                 </button>
                             </div>
-                            <p className="mt-1.5 text-xs text-gray-400">
-                                8+ characters, uppercase, lowercase, number
-                            </p>
+
+                            {/* Password Strength Indicator */}
+                            <AnimatePresence>
+                                {password && (
+                                    <motion.div
+                                        initial={{ opacity: 0, height: 0 }}
+                                        animate={{ opacity: 1, height: 'auto' }}
+                                        exit={{ opacity: 0, height: 0 }}
+                                        className="mt-2.5 space-y-2"
+                                    >
+                                        <div className="flex items-center gap-2">
+                                            <div className="flex-1 h-1.5 bg-gray-200 rounded-full overflow-hidden">
+                                                <motion.div
+                                                    className={`h-full rounded-full ${passwordStrength.color}`}
+                                                    initial={{ width: 0 }}
+                                                    animate={{ width: `${(passwordStrength.score / 6) * 100}%` }}
+                                                    transition={{ duration: 0.3 }}
+                                                />
+                                            </div>
+                                            <span className={`text-[10px] font-bold uppercase tracking-wider ${
+                                                passwordStrength.score <= 2 ? 'text-red-600' :
+                                                passwordStrength.score <= 3 ? 'text-orange-600' :
+                                                passwordStrength.score <= 4 ? 'text-amber-600' : 'text-emerald-600'
+                                            }`}>
+                                                {passwordStrength.label}
+                                            </span>
+                                        </div>
+                                        <div className="grid grid-cols-2 gap-1.5">
+                                            {[
+                                                { check: password.length >= 8, label: '8+ characters' },
+                                                { check: /[A-Z]/.test(password), label: 'Uppercase letter' },
+                                                { check: /[a-z]/.test(password), label: 'Lowercase letter' },
+                                                { check: /\d/.test(password), label: 'Number' },
+                                            ].map(req => (
+                                                <div key={req.label} className={`flex items-center gap-1.5 text-xs ${req.check ? 'text-emerald-600' : 'text-gray-400'}`}>
+                                                    <Check size={10} className={req.check ? 'opacity-100' : 'opacity-30'} />
+                                                    {req.label}
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
                         </div>
 
                         <div>
@@ -217,6 +276,9 @@ export const ResetPasswordPage: React.FC = () => {
                                     {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                                 </button>
                             </div>
+                            {confirmPassword && password !== confirmPassword && (
+                                <p className="text-xs text-red-500 mt-1.5">Passwords do not match</p>
+                            )}
                         </div>
 
                         <Button

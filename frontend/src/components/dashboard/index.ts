@@ -10,3 +10,4 @@ export { AppointmentsCard } from './AppointmentsCard';
 export { KeyboardShortcutsCard } from './KeyboardShortcutsCard';
 export { AdminUsersWidget } from './AdminUsersWidget';
 export { AdminActivityFeed } from './AdminActivityFeed';
+export { CriticalCasesWidget } from './CriticalCasesWidget';

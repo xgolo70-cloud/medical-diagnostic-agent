@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState } from 'react';
 import { useForm, Controller, type SubmitHandler } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
@@ -32,11 +33,49 @@ import {
     RestartAlt as ResetIcon,
     Image as ImageIcon,
 } from '@mui/icons-material';
+import { User, Activity, Heart, ImageIcon as LucideImageIcon } from 'lucide-react';
 import { useMutation } from '@tanstack/react-query';
-import { api, ValidationError } from '../../services/api'; // Import ValidationError
+import { api, ValidationError } from '../../services/api';
 import type { PatientData } from '../../types';
 import { patientDataSchema, type PatientDataFormValues, commonSymptoms, commonMedicalHistory } from './schemas';
-import { storage, supabaseAuth, db, type Diagnosis } from '../../lib/supabase';
+import { storage, supabaseAuth } from '../../lib/supabase';
+
+// ================== Step Header Component ==================
+const StepHeader: React.FC<{
+    step: number;
+    title: string;
+    description: string;
+    icon: React.ReactNode;
+    accent: string;
+}> = ({ step, title, description, icon, accent }) => (
+    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 3 }}>
+        <Box
+            sx={{
+                width: 36,
+                height: 36,
+                borderRadius: '12px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                bgcolor: accent,
+                color: 'white',
+                flexShrink: 0,
+                boxShadow: '0 2px 8px rgba(0,0,0,0.12)',
+            }}
+        >
+            {icon}
+        </Box>
+        <Box>
+            <Typography fontWeight={700} fontSize="0.95rem" letterSpacing="-0.01em" color="text.primary" sx={{ lineHeight: 1.2 }}>
+                <Box component="span" sx={{ color: '#a1a1aa', mr: 0.5, fontSize: '0.8rem', fontWeight: 600 }}>{step}.</Box>
+                {title}
+            </Typography>
+            <Typography variant="caption" color="text.secondary" sx={{ mt: 0.25, display: 'block' }}>
+                {description}
+            </Typography>
+        </Box>
+    </Box>
+);
 
 interface DiagnosisFormProps {
     unified?: boolean;
@@ -89,32 +128,9 @@ export const DiagnosisForm: React.FC<DiagnosisFormProps> = ({ unified = false })
             }
         },
         onSuccess: async (data) => {
-            // Save diagnosis to Supabase if user is logged in
-            try {
-                const { user } = await supabaseAuth.getUser();
-                if (user) {
-                     // Extract confidence from differential diagnosis (taking the highest)
-                     // Assuming structure of data matches what we expect from backend
-                     const topResult = data?.differential_diagnosis?.[0];
-                     const confidence = topResult?.confidence || 0;
-
-                     await db.createDiagnosis({
-                        user_id: user.id,
-                        image_url: imageUrl,
-                        diagnosis_text: JSON.stringify(data),
-                        confidence: confidence,
-                        model_used: 'Gemini 1.5 Flash',
-                        image_type: (imageFile && imageType) ? (imageType as Diagnosis['image_type']) : null,
-                     });
-                     console.log('Diagnosis saved to history');
-                }
-            } catch (err) {
-                console.error('Failed to save diagnosis history:', err);
-                // Don't block navigation on save error
-            }
-
-            // Navigate to result
-             navigate('/diagnosis/result', { state: data });
+            // Backend already saves the diagnosis to the database.
+            // Navigate to the result page.
+            navigate('/diagnosis/result', { state: data });
         },
     });
 
@@ -216,7 +232,6 @@ export const DiagnosisForm: React.FC<DiagnosisFormProps> = ({ unified = false })
         reset();
         setPdfFile(null);
         setImageFile(null);
-        setImageFile(null);
         setImageUrl(null);
         setImageType('xray');
         diagnoseMutation.reset();
@@ -278,28 +293,7 @@ export const DiagnosisForm: React.FC<DiagnosisFormProps> = ({ unified = false })
                     <Box component="form" onSubmit={handleSubmit(onSubmit)}>
                         {/* Patient Information Section */}
                         <Box sx={{ mb: 5 }}>
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 3 }}>
-                                <Box
-                                    sx={{
-                                        width: 28,
-                                        height: 28,
-                                        borderRadius: '50%',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        bgcolor: '#171717',
-                                        color: 'white',
-                                        fontWeight: 600,
-                                        fontSize: '0.85rem',
-                                        boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-                                    }}
-                                >
-                                    1
-                                </Box>
-                                <Typography variant="h6" fontWeight={600} fontSize="1rem" letterSpacing="-0.01em" color="text.primary">
-                                    Patient Information
-                                </Typography>
-                            </Box>
+                            <StepHeader step={1} title="Patient Information" description="Enter the patient's demographics and identifiers" icon={<User size={18} />} accent="#171717" />
                             <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'repeat(3, 1fr)' }, gap: 3 }}>
                                 <Box>
                                     <Controller
@@ -393,28 +387,7 @@ export const DiagnosisForm: React.FC<DiagnosisFormProps> = ({ unified = false })
 
                         {/* Symptoms Section */}
                         <Box sx={{ mb: 5 }}>
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 3 }}>
-                                <Box
-                                    sx={{
-                                        width: 28,
-                                        height: 28,
-                                        borderRadius: '50%',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        bgcolor: '#171717',
-                                        color: 'white',
-                                        fontWeight: 600,
-                                        fontSize: '0.85rem',
-                                        boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-                                    }}
-                                >
-                                    2
-                                </Box>
-                                <Typography variant="h6" fontWeight={600} fontSize="1rem" letterSpacing="-0.01em" color="text.primary">
-                                    Symptoms
-                                </Typography>
-                            </Box>
+                            <StepHeader step={2} title="Symptoms" description="Search and select from common symptoms or type custom entries" icon={<Activity size={18} />} accent="#2563eb" />
                             <Controller
                                 name="symptoms"
                                 control={control}
@@ -475,28 +448,7 @@ export const DiagnosisForm: React.FC<DiagnosisFormProps> = ({ unified = false })
 
                         {/* Medical History Section */}
                         <Box sx={{ mb: 5 }}>
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 3 }}>
-                                <Box
-                                    sx={{
-                                        width: 28,
-                                        height: 28,
-                                        borderRadius: '50%',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        bgcolor: '#171717',
-                                        color: 'white',
-                                        fontWeight: 600,
-                                        fontSize: '0.85rem',
-                                        boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-                                    }}
-                                >
-                                    3
-                                </Box>
-                                <Typography variant="h6" fontWeight={600} fontSize="1rem" letterSpacing="-0.01em" color="text.primary">
-                                    Medical History
-                                </Typography>
-                            </Box>
+                            <StepHeader step={3} title="Medical History" description="Add relevant medical conditions and past diagnoses" icon={<Heart size={18} />} accent="#dc2626" />
                             <Controller
                                 name="medical_history"
                                 control={control}
@@ -574,21 +526,22 @@ export const DiagnosisForm: React.FC<DiagnosisFormProps> = ({ unified = false })
                                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
                                     <Box
                                         sx={{
-                                            width: 24,
-                                            height: 24,
-                                            borderRadius: '50%',
+                                            width: 28,
+                                            height: 28,
+                                            borderRadius: '8px',
                                             display: 'flex',
                                             alignItems: 'center',
                                             justifyContent: 'center',
-                                            bgcolor: '#f3f4f6',
-                                            color: '#374151',
-                                            fontSize: '0.75rem',
-                                            fontWeight: 600,
+                                            bgcolor: '#fef3c7',
+                                            color: '#d97706',
                                         }}
                                     >
-                                        +
+                                        <Heart size={14} />
                                     </Box>
-                                    <Typography fontWeight={500} fontSize="0.95rem" color="text.primary">Vitals (Optional)</Typography>
+                                    <Box>
+                                        <Typography fontWeight={600} fontSize="0.9rem" color="text.primary" sx={{ lineHeight: 1.2 }}>Vitals (Optional)</Typography>
+                                        <Typography variant="caption" color="text.secondary">Temperature, blood pressure, heart rate</Typography>
+                                    </Box>
                                 </Box>
                             </AccordionSummary>
                             <AccordionDetails>
@@ -689,28 +642,7 @@ export const DiagnosisForm: React.FC<DiagnosisFormProps> = ({ unified = false })
 
                         {/* Medical Image Upload */}
                         <Box sx={{ mb: 5 }}>
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 3 }}>
-                                <Box
-                                    sx={{
-                                        width: 28,
-                                        height: 28,
-                                        borderRadius: '50%',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        bgcolor: '#171717',
-                                        color: 'white',
-                                        fontWeight: 600,
-                                        fontSize: '0.85rem',
-                                        boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-                                    }}
-                                >
-                                    {unified ? 4 : 4}
-                                </Box>
-                                <Typography variant="h6" fontWeight={600} fontSize="1rem" letterSpacing="-0.01em" color="text.primary">
-                                    Medical Image Analysis
-                                </Typography>
-                            </Box>
+                            <StepHeader step={4} title="Medical Image Analysis" description="Upload X-ray, MRI, CT, or Ultrasound scans for AI analysis" icon={<LucideImageIcon size={18} />} accent="#7c3aed" />
                             
                             <Box
                                 onDragOver={handleImageDragOver}
@@ -842,28 +774,7 @@ export const DiagnosisForm: React.FC<DiagnosisFormProps> = ({ unified = false })
                         {/* PDF Upload (Unified mode only) */}
                         {unified && (
                             <Box sx={{ mb: 4 }}>
-                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 3 }}>
-                                    <Box
-                                        sx={{
-                                            width: 28,
-                                            height: 28,
-                                            borderRadius: '50%',
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            justifyContent: 'center',
-                                            bgcolor: '#171717',
-                                            color: 'white',
-                                            fontWeight: 600,
-                                            fontSize: '0.85rem',
-                                            boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-                                        }}
-                                    >
-                                        5
-                                    </Box>
-                                    <Typography variant="h6" fontWeight={600} fontSize="1rem" letterSpacing="-0.01em" color="text.primary">
-                                        Lab Report (PDF)
-                                    </Typography>
-                                </Box>
+                                <StepHeader step={5} title="Lab Report (PDF)" description="Upload lab test results for comprehensive analysis" icon={<FileIcon sx={{ fontSize: 18 }} />} accent="#0d9488" />
                                 <Box
                                     onDragOver={handleDragOver}
                                     onDragLeave={handleDragLeave}

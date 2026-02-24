@@ -14,18 +14,29 @@ import {
     ChevronRight,
     AlertTriangle,
     X,
-    Loader2
+    Loader2,
+    CheckCircle2
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAppSelector } from '../store/hooks';
 import { Button } from '../components/ui/Button';
+import { staggerContainer, fadeSlideUp } from '../lib/animations';
 import { toast } from '../components/ui/Toast';
-import { supabase } from '../lib/supabase';
-import { isDemoMode } from '../data/demoData';
-import type { Profile } from '../lib/supabase';
+import { adminApi } from '../services/api';
 
-interface User extends Profile {
+interface User {
+    id: string;
+    username: string;
     email?: string;
+    full_name?: string;
+    role: string;
+    is_active: boolean;
+    is_verified?: boolean;
+    created_at: string;
+    last_login?: string;
+    phone?: string;
+    avatar_url?: string;
+    oauth_provider?: string;
 }
 
 interface UserStats {
@@ -70,127 +81,39 @@ export const AdminUsersPage: React.FC = () => {
         }
     }, [currentUser, navigate]);
 
-    // Demo users data
-    const DEMO_USERS: User[] = [
-        { id: '1', username: 'admin', full_name: 'System Administrator', role: 'admin', is_active: true, created_at: new Date(Date.now() - 86400000 * 30).toISOString(), updated_at: new Date().toISOString(), email: 'admin@medai.local', phone: null, avatar_url: null },
-        { id: '2', username: 'dr.smith', full_name: 'Dr. Emily Smith', role: 'specialist', is_active: true, created_at: new Date(Date.now() - 86400000 * 25).toISOString(), updated_at: new Date().toISOString(), email: 'dr.smith@hospital.com', phone: '+1234567890', avatar_url: null },
-        { id: '3', username: 'dr.ahmed', full_name: 'Dr. Ahmed Hassan', role: 'doctor', is_active: true, created_at: new Date(Date.now() - 86400000 * 20).toISOString(), updated_at: new Date().toISOString(), email: 'ahmed@clinic.com', phone: '+0987654321', avatar_url: null },
-        { id: '4', username: 'sarah.j', full_name: 'Sarah Johnson', role: 'patient', is_active: true, created_at: new Date(Date.now() - 86400000 * 15).toISOString(), updated_at: new Date().toISOString(), email: 'sarah@email.com', phone: null, avatar_url: null },
-        { id: '5', username: 'auditor', full_name: 'Quality Auditor', role: 'auditor', is_active: true, created_at: new Date(Date.now() - 86400000 * 10).toISOString(), updated_at: new Date().toISOString(), email: 'auditor@medai.local', phone: null, avatar_url: null },
-        { id: '6', username: 'noor.ali', full_name: 'Noor Ali', role: 'patient', is_active: true, created_at: new Date(Date.now() - 86400000 * 7).toISOString(), updated_at: new Date().toISOString(), email: 'noor@email.com', phone: null, avatar_url: null },
-        { id: '7', username: 'dr.fatima', full_name: 'Dr. Fatima Al-Khalil', role: 'gp', is_active: true, created_at: new Date(Date.now() - 86400000 * 5).toISOString(), updated_at: new Date().toISOString(), email: 'fatima@clinic.com', phone: '+1122334455', avatar_url: null },
-        { id: '8', username: 'john.w', full_name: 'John Williams', role: 'patient', is_active: false, created_at: new Date(Date.now() - 86400000 * 3).toISOString(), updated_at: new Date().toISOString(), email: 'john@email.com', phone: null, avatar_url: null },
-        { id: '9', username: 'omar.k', full_name: 'Omar Khalid', role: 'patient', is_active: true, created_at: new Date(Date.now() - 86400000 * 2).toISOString(), updated_at: new Date().toISOString(), email: 'omar@email.com', phone: null, avatar_url: null },
-        { id: '10', username: 'dr.lisa', full_name: 'Dr. Lisa Chen', role: 'specialist', is_active: true, created_at: new Date(Date.now() - 86400000).toISOString(), updated_at: new Date().toISOString(), email: 'lisa@hospital.com', phone: '+6677889900', avatar_url: null },
-        { id: '11', username: 'mohammed.h', full_name: 'Mohammed Hassan', role: 'patient', is_active: true, created_at: new Date(Date.now() - 43200000).toISOString(), updated_at: new Date().toISOString(), email: 'mohammed@email.com', phone: null, avatar_url: null },
-        { id: '12', username: 'emma.w', full_name: 'Emma Watson', role: 'patient', is_active: true, created_at: new Date(Date.now() - 3600000).toISOString(), updated_at: new Date().toISOString(), email: 'emma@email.com', phone: null, avatar_url: null },
-    ];
-
     const fetchUsers = useCallback(async () => {
         setIsLoading(true);
-        
-        // Demo mode - use local data
-        if (isDemoMode()) {
-            await new Promise(resolve => setTimeout(resolve, 300)); // Simulate loading
-            
-            let filtered = [...DEMO_USERS];
-            
-            if (searchTerm) {
-                const term = searchTerm.toLowerCase();
-                filtered = filtered.filter(u => 
-                    u.username?.toLowerCase().includes(term) || 
-                    u.full_name?.toLowerCase().includes(term)
-                );
-            }
-            if (roleFilter) {
-                filtered = filtered.filter(u => u.role === roleFilter);
-            }
-            if (activeFilter) {
-                filtered = filtered.filter(u => u.is_active === (activeFilter === 'true'));
-            }
-            
-            const from = (page - 1) * PAGE_SIZE;
-            const to = from + PAGE_SIZE;
-            
-            setUsers(filtered.slice(from, to));
-            setTotalPages(Math.ceil(filtered.length / PAGE_SIZE));
-            setIsLoading(false);
-            return;
-        }
-
-        // Real Supabase query
         try {
-            let query = supabase
-                .from('profiles')
-                .select('*', { count: 'exact' });
+            const params: {
+                page: number;
+                page_size: number;
+                search?: string;
+                role?: string;
+                is_active?: boolean;
+            } = { page, page_size: PAGE_SIZE };
 
-            if (searchTerm) {
-                query = query.or(`username.ilike.%${searchTerm}%,full_name.ilike.%${searchTerm}%`);
-            }
-            if (roleFilter) {
-                query = query.eq('role', roleFilter);
-            }
-            if (activeFilter) {
-                query = query.eq('is_active', activeFilter === 'true');
-            }
+            if (searchTerm) params.search = searchTerm;
+            if (roleFilter) params.role = roleFilter;
+            if (activeFilter) params.is_active = activeFilter === 'true';
 
-            const from = (page - 1) * PAGE_SIZE;
-            const to = from + PAGE_SIZE - 1;
-
-            const { data, count, error } = await query
-                .order('created_at', { ascending: false })
-                .range(from, to);
-
-            if (error) throw error;
-
-            setUsers(data as User[]);
-            setTotalPages(Math.ceil((count || 1) / PAGE_SIZE));
-        } catch (err) {
-            console.error('Error fetching users:', err);
-            // Fallback to demo data on error
-            setUsers(DEMO_USERS.slice(0, PAGE_SIZE));
-            setTotalPages(Math.ceil(DEMO_USERS.length / PAGE_SIZE));
-            // Silently use demo data
+            const result = await adminApi.getUsers(params);
+            setUsers(result.users);
+            setTotalPages(Math.ceil(result.total / PAGE_SIZE));
+        } catch {
+            toast.error('Failed to load users');
+            setUsers([]);
+            setTotalPages(1);
         } finally {
             setIsLoading(false);
         }
     }, [page, searchTerm, roleFilter, activeFilter]);
 
     const fetchStats = useCallback(async () => {
-        // Demo mode - use calculated stats
-        if (isDemoMode()) {
-            const byRole: Record<string, number> = {};
-            DEMO_USERS.forEach(u => {
-                byRole[u.role] = (byRole[u.role] || 0) + 1;
-            });
-            
-            setStats({
-                total_users: DEMO_USERS.length,
-                active_users: DEMO_USERS.filter(u => u.is_active).length,
-                verified_users: DEMO_USERS.length,
-                by_role: byRole
-            });
-            return;
-        }
-
         try {
-            const { count: total } = await supabase.from('profiles').select('*', { count: 'exact', head: true });
-            
-            setStats({
-                total_users: total || 0,
-                active_users: 0, 
-                verified_users: 0,
-                by_role: {}
-            });
-        } catch (err) {
-            console.error('Error fetching stats:', err);
-            // Fallback stats
-            setStats({
-                total_users: DEMO_USERS.length,
-                active_users: DEMO_USERS.filter(u => u.is_active).length,
-                verified_users: DEMO_USERS.length,
-                by_role: {}
-            });
+            const result = await adminApi.getUserStats();
+            setStats(result);
+        } catch {
+            setStats(null);
         }
     }, []);
 
@@ -202,16 +125,10 @@ export const AdminUsersPage: React.FC = () => {
     const handleActivate = async (user: User) => {
         setActionInProgress(user.id);
         try {
-            const { error } = await supabase
-                .from('profiles')
-                .update({ is_active: true })
-                .eq('id', user.id);
-
-            if (error) throw error;
+            await adminApi.activateUser(user.id);
             toast.success(`${user.username} activated`);
             fetchUsers();
-        } catch (err) {
-            console.error('Activate error:', err);
+        } catch {
             toast.error('Failed to activate user');
         } finally {
             setActionInProgress(null);
@@ -221,16 +138,10 @@ export const AdminUsersPage: React.FC = () => {
     const handleDeactivate = async (user: User) => {
         setActionInProgress(user.id);
         try {
-            const { error } = await supabase
-                .from('profiles')
-                .update({ is_active: false })
-                .eq('id', user.id);
-
-            if (error) throw error;
+            await adminApi.deactivateUser(user.id);
             toast.success(`${user.username} deactivated`);
             fetchUsers();
-        } catch (err) {
-            console.error('Deactivate error:', err);
+        } catch {
             toast.error('Failed to deactivate user');
         } finally {
             setActionInProgress(null);
@@ -248,19 +159,12 @@ export const AdminUsersPage: React.FC = () => {
         if (!selectedUser) return;
         setActionInProgress(selectedUser.id);
         try {
-            // @ts-ignore
-            const { error } = await supabase
-                .from('profiles')
-                .update({ role: newRole as any })
-                .eq('id', selectedUser.id);
-
-            if (error) throw error;
+            await adminApi.updateUser(selectedUser.id, { role: newRole });
             toast.success(`${selectedUser.username} role updated to ${newRole}`);
             setShowRoleModal(false);
             setSelectedUser(null);
             fetchUsers();
-        } catch (err) {
-            console.error('Role update error:', err);
+        } catch {
             toast.error('Failed to update role');
         } finally {
             setActionInProgress(null);
@@ -276,32 +180,30 @@ export const AdminUsersPage: React.FC = () => {
     }
 
     return (
-        <div className="min-h-screen bg-[#fafafa]">
+        <div className="min-h-screen bg-zinc-50/50">
             {/* Header */}
-            <header className="border-b border-gray-200 bg-white/80 backdrop-blur-md sticky top-0 z-40">
+            <header className="border-b border-zinc-200/60 bg-white/80 backdrop-blur-xl sticky top-0 z-40">
                 <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                        <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
-                            <Button 
-                                variant="secondary" 
-                                size="sm" 
-                                className="w-8 h-8 p-0 rounded-lg flex items-center justify-center"
-                                onClick={() => navigate('/dashboard')}
-                            >
-                                <ArrowLeft size={16} className="text-gray-600" />
-                            </Button>
-                        </motion.div>
-                        <div className="h-6 w-px bg-gray-200" />
-                        <div className="w-8 h-8 rounded-lg bg-black flex items-center justify-center">
+                        <Button 
+                            variant="secondary" 
+                            size="sm" 
+                            className="w-8 h-8 p-0 rounded-xl flex items-center justify-center border-zinc-200"
+                            onClick={() => navigate('/dashboard')}
+                        >
+                            <ArrowLeft size={16} className="text-zinc-600" />
+                        </Button>
+                        <div className="h-6 w-px bg-zinc-200 mx-1" />
+                        <div className="w-8 h-8 rounded-xl bg-black flex items-center justify-center shadow-md shadow-black/20">
                             <Users className="w-4 h-4 text-white" />
                         </div>
-                        <h1 className="text-xl font-semibold text-gray-900">User Management</h1>
+                        <h1 className="text-xl font-semibold text-zinc-900 tracking-tight">User Management</h1>
                     </div>
                     <Button 
                         variant="secondary" 
                         size="sm" 
                         onClick={() => { fetchUsers(); fetchStats(); }}
-                        className="gap-2"
+                        className="bg-white border-zinc-200 text-zinc-600 hover:bg-zinc-50 shadow-sm gap-2"
                     >
                         <RefreshCw size={14} />
                         Refresh
@@ -312,41 +214,93 @@ export const AdminUsersPage: React.FC = () => {
             <main className="max-w-7xl mx-auto px-6 py-8">
                 {/* Stats Cards */}
                 {stats && (
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+                    <motion.div 
+                        variants={staggerContainer}
+                        initial="hidden"
+                        animate="visible"
+                        className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8"
+                    >
                         <motion.div 
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            className="bg-white rounded-xl p-4 border border-gray-200 shadow-sm"
+                            variants={fadeSlideUp}
+                            className="bg-white border border-zinc-200/60 rounded-2xl p-5 hover:border-zinc-300 transition-all shadow-sm hover:shadow-md group relative overflow-hidden"
                         >
-                            <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">Total Users</p>
-                            <p className="text-2xl font-bold text-gray-900 mt-1">{stats.total_users}</p>
+                            <div className="absolute -top-6 -right-6 w-24 h-24 rounded-full bg-black opacity-[0.06] group-hover:opacity-[0.1] transition-opacity" />
+                            <div className="flex items-center gap-3 mb-3 relative z-10">
+                                <div className="p-2.5 rounded-xl bg-black text-white shadow-sm">
+                                    <Users size={18} />
+                                </div>
+                                <span className="text-[11px] font-bold text-zinc-500 uppercase tracking-wider">Total Users</span>
+                            </div>
+                            <div className="text-3xl font-bold text-zinc-900 tracking-tight relative z-10">{stats.total_users}</div>
                         </motion.div>
-                         <div className="hidden md:block col-span-3 bg-gray-50 border border-gray-100 rounded-xl p-4 flex items-center justify-center text-gray-400 text-sm">
-                            Detailed statistics require backend aggregation
-                        </div>
-                    </div>
+                        <motion.div 
+                            variants={fadeSlideUp}
+                            className="bg-white border border-zinc-200/60 rounded-2xl p-5 hover:border-zinc-300 transition-all shadow-sm hover:shadow-md group relative overflow-hidden"
+                        >
+                            <div className="absolute -top-6 -right-6 w-24 h-24 rounded-full bg-emerald-500 opacity-[0.06] group-hover:opacity-[0.1] transition-opacity" />
+                            <div className="flex items-center gap-3 mb-3 relative z-10">
+                                <div className="p-2.5 rounded-xl bg-emerald-500 text-white shadow-sm">
+                                    <UserCheck size={18} />
+                                </div>
+                                <span className="text-[11px] font-bold text-zinc-500 uppercase tracking-wider">Active Users</span>
+                            </div>
+                            <div className="text-3xl font-bold text-zinc-900 tracking-tight relative z-10">{stats.active_users}</div>
+                        </motion.div>
+                        <motion.div 
+                            variants={fadeSlideUp}
+                            className="bg-white border border-zinc-200/60 rounded-2xl p-5 hover:border-zinc-300 transition-all shadow-sm hover:shadow-md group relative overflow-hidden"
+                        >
+                            <div className="absolute -top-6 -right-6 w-24 h-24 rounded-full bg-blue-500 opacity-[0.06] group-hover:opacity-[0.1] transition-opacity" />
+                            <div className="flex items-center gap-3 mb-3 relative z-10">
+                                <div className="p-2.5 rounded-xl bg-blue-500 text-white shadow-sm">
+                                    <CheckCircle2 size={18} />
+                                </div>
+                                <span className="text-[11px] font-bold text-zinc-500 uppercase tracking-wider">Verified</span>
+                            </div>
+                            <div className="text-3xl font-bold text-zinc-900 tracking-tight relative z-10">{stats.verified_users}</div>
+                        </motion.div>
+                        <motion.div 
+                            variants={fadeSlideUp}
+                            className="bg-white border border-zinc-200/60 rounded-2xl p-5 hover:border-zinc-300 transition-all shadow-sm hover:shadow-md group relative overflow-hidden"
+                        >
+                            <div className="absolute -top-6 -right-6 w-24 h-24 rounded-full bg-purple-500 opacity-[0.06] group-hover:opacity-[0.1] transition-opacity" />
+                            <div className="flex items-center gap-3 mb-3 relative z-10">
+                                <div className="p-2.5 rounded-xl bg-purple-500 text-white shadow-sm">
+                                    <Shield size={18} />
+                                </div>
+                                <span className="text-[11px] font-bold text-zinc-500 uppercase tracking-wider">Roles</span>
+                            </div>
+                            <div className="flex flex-wrap gap-1.5 mt-1 relative z-10">
+                                {Object.entries(stats.by_role).map(([role, count]) => (
+                                    <span key={role} className={`text-[11px] px-2 py-0.5 rounded-full font-semibold ${getRoleColor(role)}`}>
+                                        {role} {count}
+                                    </span>
+                                ))}
+                            </div>
+                        </motion.div>
+                    </motion.div>
                 )}
 
                 {/* Filters */}
-                <div className="bg-white rounded-xl border border-gray-200 p-4 mb-6 shadow-sm">
+                <div className="bg-white rounded-2xl border border-zinc-200/60 p-4 mb-6 shadow-sm">
                     <div className="flex flex-col md:flex-row gap-4">
                         <div className="flex-1 relative">
-                            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" />
                             <input
                                 type="text"
                                 placeholder="Search by username or name..."
                                 value={searchTerm}
                                 onChange={(e) => { setSearchTerm(e.target.value); setPage(1); }}
-                                className="w-full h-10 pl-10 pr-4 rounded-lg bg-gray-50 border border-gray-200 text-gray-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-black/5 focus:border-black transition-all text-sm"
+                                className="w-full h-10 pl-10 pr-4 rounded-xl bg-zinc-50 border border-zinc-200 text-zinc-900 placeholder:text-zinc-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-black/5 focus:border-zinc-400 transition-all text-sm"
                             />
                         </div>
                         <div className="flex gap-3">
                             <div className="relative">
-                                <Filter size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                                <Filter size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" />
                                 <select
                                     value={roleFilter}
                                     onChange={(e) => { setRoleFilter(e.target.value); setPage(1); }}
-                                    className="h-10 pl-9 pr-8 rounded-lg bg-gray-50 border border-gray-200 text-gray-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-black/5 focus:border-black transition-all text-sm appearance-none cursor-pointer"
+                                    className="h-10 pl-9 pr-8 rounded-xl bg-zinc-50 border border-zinc-200 text-zinc-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-black/5 transition-all text-sm appearance-none cursor-pointer"
                                 >
                                     <option value="">All Roles</option>
                                     {ROLES.map(role => (
@@ -357,7 +311,7 @@ export const AdminUsersPage: React.FC = () => {
                             <select
                                 value={activeFilter}
                                 onChange={(e) => { setActiveFilter(e.target.value); setPage(1); }}
-                                className="h-10 px-4 rounded-lg bg-gray-50 border border-gray-200 text-gray-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-black/5 focus:border-black transition-all text-sm appearance-none cursor-pointer"
+                                className="h-10 px-4 rounded-xl bg-zinc-50 border border-zinc-200 text-zinc-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-black/5 transition-all text-sm appearance-none cursor-pointer"
                             >
                                 <option value="">All Status</option>
                                 <option value="true">Active</option>
@@ -368,44 +322,44 @@ export const AdminUsersPage: React.FC = () => {
                 </div>
 
                 {/* Users Table */}
-                <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+                <div className="bg-white rounded-2xl border border-zinc-200/60 shadow-sm overflow-hidden">
                     {isLoading ? (
                         <div className="flex items-center justify-center py-20">
-                            <Loader2 className="w-8 h-8 animate-spin text-gray-400" />
+                            <Loader2 className="w-8 h-8 animate-spin text-zinc-400" />
                         </div>
                     ) : users.length === 0 ? (
-                        <div className="flex flex-col items-center justify-center py-20 text-gray-500">
+                        <div className="flex flex-col items-center justify-center py-20 text-zinc-500">
                             <Users size={48} className="mb-4 opacity-20" />
                             <p>No users found</p>
                         </div>
                     ) : (
                         <div className="overflow-x-auto">
-                            <table className="w-full">
-                                <thead className="bg-gray-50 border-b border-gray-200">
+                            <table className="w-full text-left text-sm">
+                                <thead className="bg-zinc-50/80 border-b border-zinc-100">
                                     <tr>
-                                        <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">User</th>
-                                        <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Role</th>
-                                        <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
-                                        <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Joined</th>
-                                        <th className="text-right px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Actions</th>
+                                        <th className="px-6 py-4 font-semibold text-zinc-500 text-xs uppercase tracking-wider">User</th>
+                                        <th className="px-6 py-4 font-semibold text-zinc-500 text-xs uppercase tracking-wider">Role</th>
+                                        <th className="px-6 py-4 font-semibold text-zinc-500 text-xs uppercase tracking-wider">Status</th>
+                                        <th className="px-6 py-4 font-semibold text-zinc-500 text-xs uppercase tracking-wider">Joined</th>
+                                        <th className="px-6 py-4 font-semibold text-zinc-500 text-xs uppercase tracking-wider text-right">Actions</th>
                                     </tr>
                                 </thead>
-                                <tbody className="divide-y divide-gray-100">
+                                <tbody className="divide-y divide-zinc-100">
                                     {users.map((user) => (
                                         <motion.tr 
                                             key={user.id}
                                             initial={{ opacity: 0 }}
                                             animate={{ opacity: 1 }}
-                                            className="hover:bg-gray-50 transition-colors"
+                                            className="group hover:bg-zinc-50/80 transition-colors"
                                         >
                                             <td className="px-6 py-4">
                                                 <div className="flex items-center gap-3">
-                                                    <div className="w-10 h-10 rounded-full bg-gray-900 flex items-center justify-center text-white font-semibold">
+                                                    <div className="w-10 h-10 rounded-full bg-zinc-900 flex items-center justify-center text-white font-semibold">
                                                         {user.username?.charAt(0).toUpperCase() || '?'}
                                                     </div>
                                                     <div>
-                                                        <p className="font-medium text-gray-900">{user.full_name || user.username}</p>
-                                                        {user.email && <p className="text-xs text-gray-500">{user.email}</p>}
+                                                        <p className="font-medium text-zinc-900">{user.full_name || user.username}</p>
+                                                        {user.email && <p className="text-xs text-zinc-500">{user.email}</p>}
                                                     </div>
                                                 </div>
                                             </td>
@@ -419,19 +373,19 @@ export const AdminUsersPage: React.FC = () => {
                                             </td>
                                             <td className="px-6 py-4">
                                                 <div className="flex items-center gap-2">
-                                                    <span className={`w-2 h-2 rounded-full ${user.is_active ? 'bg-green-500' : 'bg-gray-300'}`} />
-                                                    <span className={`text-sm ${user.is_active ? 'text-green-700' : 'text-gray-500'}`}>
+                                                    <span className={`w-2 h-2 rounded-full ${user.is_active ? 'bg-green-500' : 'bg-zinc-300'}`} />
+                                                    <span className={`text-sm ${user.is_active ? 'text-green-700' : 'text-zinc-500'}`}>
                                                         {user.is_active ? 'Active' : 'Inactive'}
                                                     </span>
                                                 </div>
                                             </td>
-                                            <td className="px-6 py-4 text-sm text-gray-500">
+                                            <td className="px-6 py-4 text-sm text-zinc-500">
                                                 {new Date(user.created_at).toLocaleDateString()}
                                             </td>
                                             <td className="px-6 py-4">
                                                 <div className="flex items-center justify-end gap-2">
                                                     {actionInProgress === user.id ? (
-                                                        <Loader2 size={16} className="animate-spin text-gray-400" />
+                                                        <Loader2 size={16} className="animate-spin text-zinc-400" />
                                                     ) : (
                                                         <>
                                                             {user.is_active ? (
@@ -454,7 +408,7 @@ export const AdminUsersPage: React.FC = () => {
                                                             <button
                                                                 onClick={() => { setSelectedUser(user); setShowDeleteModal(true); }}
                                                                 className="p-2 rounded-lg hover:bg-red-50 text-red-600 transition-colors"
-                                                                title="Delete (Restrict to Soft)"
+                                                                title="Delete"
                                                             >
                                                                 <Trash2 size={16} />
                                                             </button>
@@ -471,27 +425,25 @@ export const AdminUsersPage: React.FC = () => {
 
                     {/* Pagination */}
                     {totalPages > 1 && (
-                        <div className="flex items-center justify-between px-6 py-4 border-t border-gray-100">
-                            <p className="text-sm text-gray-500">
-                                Page {page} of {totalPages}
+                        <div className="flex items-center justify-between px-6 py-4 border-t border-zinc-100 bg-zinc-50/40">
+                            <p className="text-xs text-zinc-500">
+                                Page <span className="font-semibold text-zinc-700">{page}</span> of <span className="font-semibold text-zinc-700">{totalPages}</span>
                             </p>
-                            <div className="flex gap-2">
-                                <Button
-                                    variant="secondary"
-                                    size="sm"
+                            <div className="flex gap-1">
+                                <button
                                     onClick={() => setPage(p => Math.max(1, p - 1))}
                                     disabled={page === 1}
+                                    className="p-2 rounded-lg hover:bg-white hover:shadow-sm border border-transparent hover:border-zinc-200 disabled:opacity-30 disabled:cursor-not-allowed text-zinc-600 transition-all"
                                 >
                                     <ChevronLeft size={16} />
-                                </Button>
-                                <Button
-                                    variant="secondary"
-                                    size="sm"
+                                </button>
+                                <button
                                     onClick={() => setPage(p => Math.min(totalPages, p + 1))}
                                     disabled={page === totalPages}
+                                    className="p-2 rounded-lg hover:bg-white hover:shadow-sm border border-transparent hover:border-zinc-200 disabled:opacity-30 disabled:cursor-not-allowed text-zinc-600 transition-all"
                                 >
                                     <ChevronRight size={16} />
-                                </Button>
+                                </button>
                             </div>
                         </div>
                     )}
@@ -506,15 +458,15 @@ export const AdminUsersPage: React.FC = () => {
                             initial={{ opacity: 0, scale: 0.9 }}
                             animate={{ opacity: 1, scale: 1 }}
                             exit={{ opacity: 0, scale: 0.9 }}
-                            className="bg-white rounded-xl p-6 max-w-md w-full mx-4 shadow-2xl"
+                            className="bg-white rounded-2xl p-6 max-w-md w-full mx-4 shadow-2xl"
                         >
                             <div className="flex items-center gap-3 mb-4">
                                 <div className="p-2 rounded-full bg-red-100">
                                     <AlertTriangle size={20} className="text-red-600" />
                                 </div>
-                                <h3 className="text-lg font-semibold text-gray-900">Delete User</h3>
+                                <h3 className="text-lg font-semibold text-zinc-900">Delete User</h3>
                             </div>
-                            <p className="text-sm text-gray-600 mb-6">
+                            <p className="text-sm text-zinc-600 mb-6">
                                 <strong>Warning:</strong> Hard deleting users can impact data integrity. 
                                 <br/><br/>
                                 Would you like to <strong>deactivate</strong> {selectedUser.username} instead? 
@@ -545,20 +497,20 @@ export const AdminUsersPage: React.FC = () => {
                             initial={{ opacity: 0, scale: 0.9 }}
                             animate={{ opacity: 1, scale: 1 }}
                             exit={{ opacity: 0, scale: 0.9 }}
-                            className="bg-white rounded-xl p-6 max-w-md w-full mx-4 shadow-2xl"
+                            className="bg-white rounded-2xl p-6 max-w-md w-full mx-4 shadow-2xl"
                         >
                             <div className="flex items-center justify-between mb-4">
                                 <div className="flex items-center gap-3">
                                     <div className="p-2 rounded-full bg-blue-100">
                                         <Shield size={20} className="text-blue-600" />
                                     </div>
-                                    <h3 className="text-lg font-semibold text-gray-900">Change Role</h3>
+                                    <h3 className="text-lg font-semibold text-zinc-900">Change Role</h3>
                                 </div>
-                                <button onClick={() => setShowRoleModal(false)} className="p-2 hover:bg-gray-100 rounded-lg">
+                                <button onClick={() => setShowRoleModal(false)} className="p-2 hover:bg-zinc-100 rounded-lg transition-colors">
                                     <X size={16} />
                                 </button>
                             </div>
-                            <p className="text-sm text-gray-600 mb-4">
+                            <p className="text-sm text-zinc-600 mb-4">
                                 Select a new role for <strong>{selectedUser.username}</strong>:
                             </p>
                             <div className="grid grid-cols-2 gap-2 mb-6">
@@ -567,10 +519,10 @@ export const AdminUsersPage: React.FC = () => {
                                         key={role.value}
                                         onClick={() => handleRoleChange(role.value)}
                                         disabled={actionInProgress === selectedUser.id}
-                                        className={`p-3 rounded-lg border text-left transition-all ${
+                                        className={`p-3 rounded-xl border text-left transition-all ${
                                             selectedUser.role === role.value
-                                                ? 'border-black bg-gray-50'
-                                                : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
+                                                ? 'border-black bg-zinc-50'
+                                                : 'border-zinc-200 hover:border-zinc-300 hover:bg-zinc-50'
                                         }`}
                                     >
                                         <span className={`inline-block px-2 py-0.5 rounded text-xs font-medium ${role.color}`}>

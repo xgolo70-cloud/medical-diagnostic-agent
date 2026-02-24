@@ -10,7 +10,6 @@ export const SupabaseListener = () => {
     useEffect(() => {
         // Listen for Supabase auth state changes (e.g. after Google redirect)
         const { data: { subscription } } = supabaseAuth.onAuthStateChange(async (event, session) => {
-            console.log('Supabase Auth Event:', event);
 
             if (event === 'SIGNED_IN' && session) {
                 const { user, access_token, refresh_token } = session;
@@ -37,8 +36,6 @@ export const SupabaseListener = () => {
                 if (!isMockToken) {
                     tokenManager.clearTokens();
                     dispatch(logout());
-                } else {
-                    console.log('Ignoring Supabase SIGNED_OUT event for mock session');
                 }
             }
         });

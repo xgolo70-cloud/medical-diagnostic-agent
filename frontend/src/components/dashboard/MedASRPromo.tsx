@@ -13,7 +13,7 @@ export const MedASRPromo: React.FC = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.6 }}
             whileHover={{ scale: 1.02, y: -4 }}
-            className="bg-gradient-to-br from-blue-600 to-indigo-700 rounded-xl shadow-xl overflow-hidden relative group cursor-pointer"
+            className="bg-linear-to-br from-blue-600 to-indigo-700 rounded-xl shadow-xl overflow-hidden relative group cursor-pointer"
             onClick={() => navigate('/medai')}
         >
             <div className="absolute top-0 right-0 p-6 opacity-20 pointer-events-none">

@@ -28,6 +28,9 @@ export interface Diagnosis {
 export interface DiagnosisResult {
     patient_id: string;
     differential_diagnosis: Diagnosis[];
+    severity?: string;
+    condition_category?: string;
+    requires_immediate_attention?: boolean;
     recommended_tests: string[];
     citations: string[];
     clinical_notes: string;

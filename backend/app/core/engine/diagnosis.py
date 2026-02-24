@@ -184,6 +184,9 @@ class DiagnosisEngine:
                 "Chest X-Ray" if any('cough' in s or 'chest' in s for s in symptoms_lower) else "ECG",
                 "COVID-19 PCR Test" if any('fever' in s for s in symptoms_lower) else "Urinalysis"
             ],
+            "severity": "Medium",
+            "condition_category": "Respiratory" if any('cough' in s or 'fever' in s for s in symptoms_lower) else ("Neurological" if any('headache' in s for s in symptoms_lower) else "General"),
+            "requires_immediate_attention": False,
             "citations": [
                 "Harrison's Principles of Internal Medicine, 21st Edition",
                 "UpToDate Clinical Decision Support",
@@ -215,6 +218,9 @@ class DiagnosisEngine:
             "differential_diagnosis": [
                 {"primary_diagnosis": "string", "confidence": float (0-1), "rationale": "string"}
             ],
+            "severity": "string (Critical, High, Medium, Low)",
+            "condition_category": "string (e.g., Respiratory, Cardiovascular, Neurological, General)",
+            "requires_immediate_attention": boolean,
             "recommended_tests": ["string"],
             "citations": ["string"],
             "clinical_notes": "string"

@@ -20,6 +20,9 @@ const AdminUsersPage = lazy(() => import('./pages').then(module => ({ default: m
 const VerifyEmailPage = lazy(() => import('./pages').then(module => ({ default: module.VerifyEmailPage })));
 const ForgotPasswordPage = lazy(() => import('./pages').then(module => ({ default: module.ForgotPasswordPage })));
 const ResetPasswordPage = lazy(() => import('./pages').then(module => ({ default: module.ResetPasswordPage })));
+const PatientsListPage = lazy(() => import('./pages').then(module => ({ default: module.PatientsListPage })));
+const PatientProfilePage = lazy(() => import('./pages/PatientProfilePage').then(module => ({ default: module.PatientProfilePage })));
+const GuidePage = lazy(() => import('./pages').then(module => ({ default: module.GuidePage })));
 
 // Loading Component
 const LoadingFallback = () => (
@@ -79,6 +82,9 @@ function App() {
             <Route path="/history" element={<HistoryPage />} />
             <Route path="/settings" element={<SettingsPage />} />
             <Route path="/admin/users" element={<AdminUsersPage />} />
+            <Route path="/patients" element={<PatientsListPage />} />
+            <Route path="/patients/:id" element={<PatientProfilePage />} />
+            <Route path="/guide" element={<GuidePage />} />
           </Route>
 
           {/* Catch-all - redirect to dashboard if logged in, else landing */}

@@ -44,18 +44,24 @@ export interface Diagnosis {
   created_at: string
 }
 
-// Create and export the Supabase client
-export const supabase = createClient(
-  supabaseUrl || '',
-  supabaseAnonKey || '',
-  {
-    auth: {
-      autoRefreshToken: true,
-      persistSession: true,
-      detectSessionInUrl: true
-    }
-  }
-)
+// Create and export the Supabase client (or null if not configured)
+export const supabaseConfigured = !!(supabaseUrl && supabaseAnonKey)
+
+export const supabase = supabaseConfigured
+  ? createClient(
+      supabaseUrl!,
+      supabaseAnonKey!,
+      {
+        auth: {
+          autoRefreshToken: true,
+          persistSession: true,
+          detectSessionInUrl: true
+        }
+      }
+    )
+  : null
+// Helper to create a typed error when Supabase is not configured
+const notConfiguredError = { message: 'Supabase is not configured', status: 0 } as const
 
 // Auth helper functions
 export const supabaseAuth = {
@@ -63,6 +69,7 @@ export const supabaseAuth = {
    * Sign up with email and password
    */
   signUp: async (email: string, password: string, metadata?: { username?: string; full_name?: string }) => {
+    if (!supabase) return { data: null, error: notConfiguredError }
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
@@ -77,6 +84,7 @@ export const supabaseAuth = {
    * Sign in with email and password
    */
   signIn: async (email: string, password: string) => {
+    if (!supabase) return { data: null, error: notConfiguredError }
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password
@@ -88,6 +96,7 @@ export const supabaseAuth = {
    * Sign in with Google OAuth
    */
   signInWithGoogle: async () => {
+    if (!supabase) return { data: null, error: notConfiguredError }
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
@@ -101,6 +110,7 @@ export const supabaseAuth = {
    * Sign out
    */
   signOut: async () => {
+    if (!supabase) return { error: null }
     const { error } = await supabase.auth.signOut()
     return { error }
   },
@@ -109,6 +119,7 @@ export const supabaseAuth = {
    * Get current session
    */
   getSession: async () => {
+    if (!supabase) return { session: null, error: null }
     const { data, error } = await supabase.auth.getSession()
     return { session: data.session, error }
   },
@@ -117,6 +128,7 @@ export const supabaseAuth = {
    * Get current user
    */
   getUser: async () => {
+    if (!supabase) return { user: null, error: null }
     const { data, error } = await supabase.auth.getUser()
     return { user: data.user, error }
   },
@@ -125,6 +137,7 @@ export const supabaseAuth = {
    * Request password reset
    */
   resetPassword: async (email: string) => {
+    if (!supabase) return { data: null, error: notConfiguredError }
     const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
       redirectTo: `${window.location.origin}/reset-password`
     })
@@ -135,6 +148,7 @@ export const supabaseAuth = {
    * Update password
    */
   updatePassword: async (newPassword: string) => {
+    if (!supabase) return { data: null, error: notConfiguredError }
     const { data, error } = await supabase.auth.updateUser({
       password: newPassword
     })
@@ -145,6 +159,10 @@ export const supabaseAuth = {
    * Listen to auth state changes
    */
   onAuthStateChange: (callback: (event: AuthChangeEvent, session: Session | null) => void) => {
+    if (!supabase) {
+      // Return a no-op subscription when Supabase is not configured
+      return { data: { subscription: { unsubscribe: () => {} } } }
+    }
     return supabase.auth.onAuthStateChange(callback)
   }
 }
@@ -155,6 +173,7 @@ export const db = {
    * Get user profile
    */
   getProfile: async (userId: string) => {
+    if (!supabase) return { profile: null, error: notConfiguredError }
     const { data, error } = await supabase
       .from('profiles')
       .select('*')
@@ -167,6 +186,7 @@ export const db = {
    * Update user profile
    */
   updateProfile: async (userId: string, updates: Partial<Profile>) => {
+    if (!supabase) return { profile: null, error: notConfiguredError }
     const { data, error } = await supabase
       .from('profiles')
       .update({ ...updates, updated_at: new Date().toISOString() })
@@ -180,6 +200,7 @@ export const db = {
    * Get user diagnoses
    */
   getDiagnoses: async (userId: string, limit = 50) => {
+    if (!supabase) return { diagnoses: null, error: notConfiguredError }
     const { data, error } = await supabase
       .from('diagnoses')
       .select('*')
@@ -193,6 +214,7 @@ export const db = {
    * Create new diagnosis
    */
   createDiagnosis: async (diagnosis: Omit<Diagnosis, 'id' | 'created_at'>) => {
+    if (!supabase) return { diagnosis: null, error: notConfiguredError }
     const { data, error } = await supabase
       .from('diagnoses')
       .insert(diagnosis)
@@ -205,6 +227,7 @@ export const db = {
    * Log audit event
    */
   logAudit: async (userId: string, action: string, details?: Record<string, unknown>) => {
+    if (!supabase) return { error: notConfiguredError }
     const { error } = await supabase
       .from('audit_logs')
       .insert({
@@ -222,6 +245,7 @@ export const storage = {
    * Upload medical image
    */
   uploadImage: async (file: File, userId: string) => {
+    if (!supabase) return { path: null, error: notConfiguredError }
     const fileExt = file.name.split('.').pop()
     const fileName = `${userId}/${Math.random()}.${fileExt}`
     const filePath = `${fileName}`
@@ -235,10 +259,9 @@ export const storage = {
 
   /**
    * Get public URL for image
-   * Note: This only works if the bucket is public.
-   * For private buckets, use getSignedUrl.
    */
   getPublicUrl: (path: string) => {
+    if (!supabase) return ''
     const { data } = supabase.storage
       .from('medical-images')
       .getPublicUrl(path)
@@ -249,6 +272,7 @@ export const storage = {
    * Get signed URL for private image
    */
   getSignedUrl: async (path: string, expiresIn = 3600) => {
+    if (!supabase) return { signedUrl: null, error: notConfiguredError }
     const { data, error } = await supabase.storage
       .from('medical-images')
       .createSignedUrl(path, expiresIn)

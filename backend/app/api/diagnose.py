@@ -1,5 +1,7 @@
 from fastapi import APIRouter, HTTPException, Depends, UploadFile, File, Form
 from sqlalchemy.orm import Session
+from sqlalchemy import desc
+from typing import Optional, List
 from app.schemas.patient import PatientData
 from app.core.engine.diagnosis import DiagnosisEngine
 from app.core.audit import log_action
@@ -18,6 +20,26 @@ MAX_FILE_SIZE = 10 * 1024 * 1024
 
 def get_engine():
     return DiagnosisEngine()
+
+@router.get("")
+async def list_diagnoses(
+    severity: Optional[str] = None,
+    condition_category: Optional[str] = None,
+    limit: int = 50,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Retrieve diagnoses, supporting classification filters for case management."""
+    query = db.query(Diagnosis)
+    
+    # Optional filtering
+    if severity:
+        query = query.filter(Diagnosis.severity == severity)
+    if condition_category:
+        query = query.filter(Diagnosis.condition_category == condition_category)
+        
+    diagnoses = query.order_by(desc(Diagnosis.created_at)).limit(limit).all()
+    return [d.to_dict() for d in diagnoses]
 
 @router.post("")
 async def diagnose_patient(
@@ -40,9 +62,17 @@ async def diagnose_patient(
                 primary_dx = top_dx.get("primary_diagnosis", top_dx.get("condition", "Unknown"))
                 confidence = top_dx.get("confidence", 0.0)
         
-        # Save to database
-        user_id_val = current_user.id if current_user else None
+        # Resolve user_id: use the patient's DB id (not the logged-in doctor's)
+        user_id_val = None
+        if patient.patient_id:
+            from app.database.models import User as DBUser
+            # Try matching patient_id against DB user id or username
+            db_patient = db.query(DBUser).filter(
+                (DBUser.id == patient.patient_id) | (DBUser.username == patient.patient_id)
+            ).first()
+            user_id_val = db_patient.id if db_patient else None
         
+        # Combine fields into the Diagnosis model
         db_diagnosis = Diagnosis(
             user_id=user_id_val,
             patient_id=patient.patient_id,
@@ -52,6 +82,9 @@ async def diagnose_patient(
             diagnosis_result=json.dumps(diagnosis_result),
             primary_diagnosis=primary_dx,
             confidence=str(confidence),
+            severity=diagnosis_result.get("severity", "Medium"),
+            condition_category=diagnosis_result.get("condition_category", "Unknown"),
+            requires_immediate_attention=diagnosis_result.get("requires_immediate_attention", False),
             image_url=patient.image_url,
             status="completed"
         )
@@ -124,9 +157,16 @@ async def diagnose_unified(
                 primary_dx = top_dx.get("primary_diagnosis", top_dx.get("condition", "Unknown"))
                 confidence = top_dx.get("confidence", 0.0)
 
-        # Save to database
-        user_id_val = current_user.id if current_user else None
+        # Resolve user_id: use the patient's DB id (not the logged-in doctor's)
+        user_id_val = None
+        if patient.patient_id:
+            from app.database.models import User as DBUser
+            db_patient = db.query(DBUser).filter(
+                (DBUser.id == patient.patient_id) | (DBUser.username == patient.patient_id)
+            ).first()
+            user_id_val = db_patient.id if db_patient else None
         
+        # Combine fields into the Diagnosis model
         db_diagnosis = Diagnosis(
             user_id=user_id_val,
             patient_id=patient.patient_id,
@@ -136,6 +176,9 @@ async def diagnose_unified(
             diagnosis_result=json.dumps(diagnosis_result),
             primary_diagnosis=primary_dx,
             confidence=str(confidence),
+            severity=diagnosis_result.get("severity", "Medium"),
+            condition_category=diagnosis_result.get("condition_category", "Unknown"),
+            requires_immediate_attention=diagnosis_result.get("requires_immediate_attention", False),
             image_url=patient.image_url,
             status="completed"
         )

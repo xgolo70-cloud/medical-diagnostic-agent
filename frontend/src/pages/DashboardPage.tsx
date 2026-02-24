@@ -3,13 +3,16 @@ import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAppSelector } from '../store/hooks';
 import { Button } from '../components/ui/Button';
+import { PageHeader } from '../components/layout/PageHeader';
 import { 
     RecentActivityTable,
     AnalyticsSummary,
     AdminUsersWidget,
-    AdminActivityFeed
+    AdminActivityFeed,
+    CriticalCasesWidget
 } from '../components/dashboard';
-import { useNotifications, useAppointments, useDashboardStats, useSearch, type DiagnosisStats } from '../hooks';
+import { useNotifications, useAppointments, useDashboardStats, useSystemHealth, useSearch, type DiagnosisStats } from '../hooks';
+import { staggerContainer, fadeSlideUp } from '../lib/animations';
 import {
     Stethoscope,
     TrendingUp,
@@ -17,12 +20,9 @@ import {
     FileText,
     Activity,
     Upload,
-    Cpu,
-    AlertCircle,
     Plus,
     Settings,
     ChevronRight,
-    Zap,
     Search,
     Calendar,
     Bell,
@@ -33,11 +33,11 @@ import {
     Filter,
     MoreHorizontal,
     ArrowUpRight,
-    Mic
+    Mic,
+    LayoutDashboard
 } from 'lucide-react';
 
 // Quick actions config
-
 const quickActions = [
     {
         title: 'New Analysis',
@@ -87,14 +87,14 @@ export const DashboardPage: React.FC = () => {
     const { notifications, markAsRead, markAllRead, unreadCount } = useNotifications();
     const { todayAppointments, updateStatus } = useAppointments();
     const { diagnosisBreakdown, recentPatients, stats } = useDashboardStats();
+    useSystemHealth();
     const { results: searchResults } = useSearch(searchQuery);
 
-    // Computed stats data - now dynamic!
+    // Computed stats data — all values from real backend
     const statsData = [
-        { label: 'Total Analyses', value: stats.totalAnalyses.toLocaleString(), icon: Activity, trend: '+12%', color: 'emerald' },
-        { label: 'Pending Review', value: String(stats.pendingReview), icon: FileText, trend: '2 urgent', color: 'amber' },
-        { label: 'Model Accuracy', value: `${stats.modelAccuracy}%`, icon: TrendingUp, trend: '+0.4%', color: 'blue' },
-        { label: 'System Load', value: `${stats.systemLoad}%`, icon: Cpu, trend: 'Optimal', color: 'purple' },
+        { label: 'Total Analyses', value: stats.totalAnalyses.toLocaleString(), icon: Activity, trend: `${stats.totalThisMonth} this month`, color: 'emerald' },
+        { label: 'Pending Review', value: String(stats.pendingReview), icon: FileText, trend: stats.pendingReview > 0 ? `${stats.pendingReview} pending` : 'All clear', color: 'amber' },
+        { label: 'Model Accuracy', value: stats.modelAccuracy > 0 ? `${stats.modelAccuracy}%` : '—', icon: TrendingUp, trend: stats.modelAccuracy > 90 ? 'Excellent' : stats.modelAccuracy > 70 ? 'Good' : 'Needs data', color: 'blue' },
     ];
 
     // Handle keyboard shortcut for search
@@ -201,26 +201,14 @@ export const DashboardPage: React.FC = () => {
                 )}
             </AnimatePresence>
 
-            {/* Header */}
-            <header className="border-b border-gray-200 bg-white/80 backdrop-blur-md sticky top-0 z-50">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 sm:py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                    <div className="flex items-center gap-2 sm:gap-3">
-                         <motion.div 
-                            whileHover={{ scale: 1.1, rotate: 90 }}
-                            whileTap={{ scale: 0.9 }}
-                            transition={{ type: "spring", stiffness: 400, damping: 15 }}
-                            className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-black flex items-center justify-center shadow-md shadow-black/20 cursor-pointer"
-                            onClick={() => navigate('/diagnosis')}
-                        >
-                            <Plus className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white" />
-                        </motion.div>
-                        <h1 className="text-lg sm:text-xl font-semibold text-gray-900 tracking-tight">
-                            Dashboard
-                        </h1>
-                        <span className="text-gray-300 hidden sm:inline">/</span>
-                        <span className="text-xs sm:text-sm text-gray-500 font-medium hidden sm:inline">Overview</span>
-                    </div>
-                    <div className="flex items-center gap-2 sm:gap-3">
+            {/* Unified Header */}
+            <PageHeader
+                title="Dashboard"
+                subtitle="Overview"
+                showBack={false}
+                icon={<LayoutDashboard size={18} />}
+                actions={
+                    <>
                         {/* Search Button */}
                         <motion.button
                             whileHover={{ scale: 1.05 }}
@@ -319,135 +307,183 @@ export const DashboardPage: React.FC = () => {
                                 <span className="sm:hidden">New</span>
                             </Button>
                         </motion.div>
-                    </div>
-                </div>
-            </header>
+                    </>
+                }
+            />
 
             <main className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
-                {/* Welcome Section */}
-                <motion.div 
+
+                {/* ======= SECTION 1: Welcome + Quick Actions ======= */}
+                <motion.section
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.5 }}
-                    className="flex flex-col md:flex-row md:items-center justify-between mb-10 gap-4"
+                    className="mb-10"
                 >
-                    <div>
-                        <h2 className="text-2xl font-bold text-gray-900 tracking-tight mb-1">
-                            Welcome back, {user?.username}
-                        </h2>
-                        <p className="text-sm text-gray-500">
-                            Here's what's happening with your diagnostic platform today.
-                        </p>
-                    </div>
-                    <div className="flex items-center gap-3">
-                       <motion.div 
-                           whileHover={{ scale: 1.05 }}
-                           className="hidden md:flex items-center gap-2 px-3 py-1.5 bg-white border border-gray-200 rounded-full shadow-sm cursor-default"
-                       >
-                            <span className="relative flex h-2 w-2">
-                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                                <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
-                            </span>
-                            <span className="text-xs font-medium text-gray-600">All Systems Operational</span>
-                        </motion.div>
-                        <span className="text-xs text-gray-400 font-mono">v2.4.0</span>
-                    </div>
-                </motion.div>
-
-                {/* Metrics Grid */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-10" data-tour="stats-cards">
-                    {statsData.map((stat, index) => (
-                        <motion.div 
-                            key={stat.label}
-                            initial={{ opacity: 0, y: 30 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.4, delay: index * 0.1 }}
-                            whileHover={{ y: -4, boxShadow: "0 20px 25px -5px rgb(0 0 0 / 0.05), 0 8px 10px -6px rgb(0 0 0 / 0.05)" }}
-                            className="group relative bg-white border border-gray-200 rounded-xl p-5 hover:border-gray-300 transition-all duration-200 shadow-sm cursor-pointer"
-                            onClick={() => navigate('/history')}
-                        >
-                            <div className="flex items-center justify-between mb-4">
-                                <motion.div 
-                                    whileHover={{ rotate: 15, scale: 1.1 }}
-                                    transition={{ type: "spring", stiffness: 400 }}
-                                    className="p-2 rounded-lg bg-gray-50 text-gray-500 group-hover:text-black group-hover:bg-gray-100 transition-colors"
-                                >
-                                    <stat.icon size={18} />
-                                </motion.div>
-                                <span className={`text-xs font-semibold px-2 py-1 rounded-full ${
-                                    stat.trend.includes('+') ? 'bg-green-50 text-green-700' : 
-                                    stat.trend === 'Optimal' ? 'bg-blue-50 text-blue-700' :
-                                    'bg-amber-50 text-amber-700'
-                                }`}>
-                                    {stat.trend}
+                    {/* Welcome Greeting */}
+                    <div className="flex flex-col md:flex-row md:items-end justify-between mb-6 gap-4">
+                        <div>
+                            <h2 className="text-2xl font-bold text-gray-900 tracking-tight mb-1">
+                                Welcome back, {user?.username}
+                            </h2>
+                            <p className="text-sm text-gray-500">
+                                Here's what's happening with your diagnostic platform today.
+                            </p>
+                        </div>
+                        <div className="flex items-center gap-3">
+                           <motion.div 
+                               whileHover={{ scale: 1.05 }}
+                               className="hidden md:flex items-center gap-2 px-3 py-1.5 bg-white border border-gray-200 rounded-full shadow-sm cursor-default"
+                           >
+                                <span className="relative flex h-2 w-2">
+                                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                                    <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
                                 </span>
-                            </div>
-                            <motion.div 
-                                initial={{ opacity: 0 }}
-                                animate={{ opacity: 1 }}
-                                transition={{ delay: 0.3 + index * 0.1 }}
-                                className="text-3xl font-bold text-gray-900 tracking-tight mb-1 font-display"
-                            >
-                                {stat.value}
+                                <span className="text-xs font-medium text-gray-600">All Systems Operational</span>
                             </motion.div>
-                            <div className="text-sm font-medium text-gray-500">
-                                {stat.label}
-                            </div>
-                        </motion.div>
-                    ))}
-                </div>
+                            <span className="text-xs text-gray-400 font-mono">v2.4.0</span>
+                        </div>
+                    </div>
 
-                {/* Admin Panel - Only visible to admin users */}
+                    {/* Quick Actions — promoted to top for actionability */}
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3" data-tour="quick-actions">
+                        {quickActions.map((action, index) => (
+                            <motion.button
+                                key={action.title}
+                                initial={{ opacity: 0, y: 16 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ duration: 0.3, delay: 0.1 + index * 0.05 }}
+                                whileHover={{ y: -3, boxShadow: "0 12px 24px -8px rgb(0 0 0 / 0.08)" }}
+                                whileTap={{ scale: 0.98 }}
+                                onClick={() => navigate(action.path)}
+                                className="relative flex flex-col items-center gap-3 p-5 bg-white border border-gray-200 rounded-xl hover:border-gray-300 transition-all text-center group shadow-sm"
+                            >
+                                <motion.div 
+                                    whileHover={{ rotate: 8, scale: 1.1 }}
+                                    className="p-3 rounded-xl bg-gray-50 text-gray-500 group-hover:bg-black group-hover:text-white transition-all duration-200"
+                                >
+                                    <action.icon size={20} />
+                                </motion.div>
+                                <div>
+                                    <div className="flex items-center justify-center gap-1.5">
+                                        <span className="text-sm font-semibold text-gray-900">
+                                            {action.title}
+                                        </span>
+                                        {action.badge && (
+                                            <span className="text-[9px] px-1.5 py-0.5 bg-purple-100 text-purple-700 rounded font-bold">
+                                                {action.badge}
+                                            </span>
+                                        )}
+                                    </div>
+                                    <p className="text-xs text-gray-400 mt-0.5">{action.description}</p>
+                                </div>
+                            </motion.button>
+                        ))}
+                    </div>
+                </motion.section>
+
+                {/* ======= SECTION 2: Key Metrics ======= */}
+                <motion.section 
+                    variants={staggerContainer}
+                    initial="hidden"
+                    animate="visible"
+                    className="mb-10"
+                >
+                    <div className="flex items-center gap-2 mb-4">
+                        <Activity size={14} className="text-gray-400" />
+                        <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Key Metrics</h3>
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-5" data-tour="stats-cards">
+                        {statsData.map((stat) => (
+                            <motion.div 
+                                key={stat.label}
+                                variants={fadeSlideUp}
+                                whileHover={{ y: -4, boxShadow: "0 20px 25px -5px rgb(0 0 0 / 0.05), 0 8px 10px -6px rgb(0 0 0 / 0.05)" }}
+                                className="group relative bg-white border border-gray-200 rounded-xl p-5 hover:border-gray-300 transition-all duration-200 shadow-sm cursor-pointer"
+                                onClick={() => navigate('/history')}
+                            >
+                                <div className="flex items-center justify-between mb-4">
+                                    <motion.div 
+                                        whileHover={{ rotate: 15, scale: 1.1 }}
+                                        transition={{ type: "spring", stiffness: 400 }}
+                                        className="p-2 rounded-lg bg-gray-50 text-gray-500 group-hover:text-black group-hover:bg-gray-100 transition-colors"
+                                    >
+                                        <stat.icon size={18} />
+                                    </motion.div>
+                                    <span className={`text-xs font-semibold px-2 py-1 rounded-full ${
+                                        stat.trend.includes('+') ? 'bg-green-50 text-green-700' : 
+                                        stat.trend === 'Optimal' ? 'bg-blue-50 text-blue-700' :
+                                        stat.trend === 'Excellent' ? 'bg-green-50 text-green-700' :
+                                        stat.trend === 'All clear' ? 'bg-green-50 text-green-700' :
+                                        'bg-amber-50 text-amber-700'
+                                    }`}>
+                                        {stat.trend}
+                                    </span>
+                                </div>
+                                <div className="text-3xl font-bold text-gray-900 tracking-tight mb-1 font-display">
+                                    {stat.value}
+                                </div>
+                                <div className="text-sm font-medium text-gray-500">
+                                    {stat.label}
+                                </div>
+                            </motion.div>
+                        ))}
+                    </div>
+                </motion.section>
+
+                {/* ======= SECTION 3: Admin Panel (role-gated) ======= */}
                 {user?.role === 'admin' && (
-                    <motion.div
+                    <motion.section
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.5, delay: 0.2 }}
                         className="mb-10"
                     >
-                        <div className="flex items-center gap-2 mb-5">
-                            <div className="w-1 h-5 bg-red-500 rounded-full" />
-                            <h3 className="text-sm font-semibold text-gray-900 uppercase tracking-wider">Admin Panel</h3>
+                        <div className="flex items-center gap-2 mb-4">
+                            <div className="w-1 h-4 bg-red-500 rounded-full" />
+                            <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Admin Panel</h3>
                         </div>
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                             <AdminUsersWidget />
                             <AdminActivityFeed />
                         </div>
-                    </motion.div>
+                    </motion.section>
                 )}
 
-                {/* Main Content Grid - 3 Columns */}
+                {/* ======= SECTION 4: Activity & Insights ======= */}
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                     
                     {/* Left Column - 2 spans */}
                     <div className="lg:col-span-2 space-y-8">
                         
                         {/* Recent Activity */}
-                        <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden" data-tour="recent-activity">
-                            <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
-                                <div className="flex items-center gap-2">
-                                    <Activity size={16} className="text-gray-400" />
-                                    <h3 className="text-sm font-semibold text-gray-900">Recent Activity</h3>
+                        <section>
+                            <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden" data-tour="recent-activity">
+                                <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
+                                    <div className="flex items-center gap-2">
+                                        <Activity size={16} className="text-gray-400" />
+                                        <h3 className="text-sm font-semibold text-gray-900">Recent Activity</h3>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <button className="p-1.5 rounded-lg hover:bg-gray-100 transition-colors">
+                                            <Filter size={14} className="text-gray-400" />
+                                        </button>
+                                        <button 
+                                            onClick={() => navigate('/history')}
+                                            className="text-xs font-medium text-gray-500 hover:text-black hover:underline transition-colors flex items-center gap-1"
+                                        >
+                                            View all
+                                            <ChevronRight size={12} />
+                                        </button>
+                                    </div>
                                 </div>
-                                <div className="flex items-center gap-2">
-                                    <button className="p-1.5 rounded-lg hover:bg-gray-100 transition-colors">
-                                        <Filter size={14} className="text-gray-400" />
-                                    </button>
-                                    <button 
-                                        onClick={() => navigate('/history')}
-                                        className="text-xs font-medium text-gray-500 hover:text-black hover:underline transition-colors flex items-center gap-1"
-                                    >
-                                        View all
-                                        <ChevronRight size={12} />
-                                    </button>
+                                <div className="min-h-[300px]">
+                                    <RecentActivityTable />
                                 </div>
                             </div>
-                            <div className="min-h-[300px]">
-                                <RecentActivityTable />
-                            </div>
-                        </div>
+                        </section>
 
-                        {/* Two Column Grid */}
+                        {/* Two Column Grid: Analytics + Diagnosis Breakdown */}
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             {/* Analytics */}
                             <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
@@ -495,8 +531,11 @@ export const DashboardPage: React.FC = () => {
                                         ))}
                                     </div>
                                     <div className="mt-5 pt-4 border-t border-gray-100 flex items-center justify-between">
-                                        <span className="text-xs text-gray-500">Total: 702 this month</span>
-                                        <button className="text-xs font-medium text-blue-600 hover:underline flex items-center gap-1">
+                                        <span className="text-xs text-gray-500">Total: {stats.totalThisMonth} this month</span>
+                                        <button 
+                                            onClick={() => navigate('/history')}
+                                            className="text-xs font-medium text-blue-600 hover:underline flex items-center gap-1"
+                                        >
                                             Detailed Report <ArrowUpRight size={10} />
                                         </button>
                                     </div>
@@ -562,71 +601,14 @@ export const DashboardPage: React.FC = () => {
                     {/* Right Column */}
                     <div className="space-y-8">
                         
-                        {/* Quick Actions */}
-                        <motion.div 
-                            initial={{ opacity: 0, x: 20 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            transition={{ duration: 0.5, delay: 0.2 }}
-                            className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden" data-tour="quick-actions"
-                        >
-                             <div className="px-5 py-4 border-b border-gray-100 bg-gray-50/50 flex items-center gap-2">
-                                <motion.div
-                                    animate={{ rotate: [0, 10, -10, 0] }}
-                                    transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
-                                >
-                                    <Zap size={16} className="text-amber-400" />
-                                </motion.div>
-                                <h3 className="text-sm font-semibold text-gray-900">Quick Actions</h3>
-                            </div>
-                            <div className="p-3 space-y-1">
-                                {quickActions.map((action, index) => (
-                                    <motion.button
-                                        key={action.title}
-                                        initial={{ opacity: 0, x: -20 }}
-                                        animate={{ opacity: 1, x: 0 }}
-                                        transition={{ duration: 0.3, delay: 0.3 + index * 0.1 }}
-                                        whileHover={{ x: 4, backgroundColor: "rgba(0,0,0,0.02)" }}
-                                        whileTap={{ scale: 0.98 }}
-                                        onClick={() => navigate(action.path)}
-                                        className="w-full flex items-center gap-4 p-3 rounded-lg border border-transparent hover:border-gray-200 transition-all text-left group"
-                                    >
-                                        <motion.div 
-                                            whileHover={{ rotate: 10, scale: 1.1 }}
-                                            className="p-2.5 rounded-lg bg-gray-100 text-gray-500 group-hover:bg-white group-hover:text-black group-hover:shadow-sm transition-all"
-                                        >
-                                            <action.icon size={18} />
-                                        </motion.div>
-                                        <div className="flex-1 min-w-0">
-                                            <div className="flex items-center gap-2">
-                                                <span className="text-sm font-medium text-gray-900 group-hover:text-black">
-                                                    {action.title}
-                                                </span>
-                                                {action.badge && (
-                                                    <span className="text-[10px] px-1.5 py-0.5 bg-purple-100 text-purple-700 rounded font-bold">
-                                                        {action.badge}
-                                                    </span>
-                                                )}
-                                            </div>
-                                            <div className="text-xs text-gray-500 line-clamp-1">
-                                                {action.description}
-                                            </div>
-                                        </div>
-                                        <motion.div 
-                                            className="w-6 h-6 rounded-full flex items-center justify-center text-gray-300 group-hover:text-black"
-                                            whileHover={{ x: 3 }}
-                                        >
-                                            <ChevronRight size={14} />
-                                        </motion.div>
-                                    </motion.button>
-                                ))}
-                            </div>
-                        </motion.div>
+                        {/* Critical Cases Alert */}
+                        <CriticalCasesWidget />
 
                         {/* Recent Patients */}
                         <motion.div 
                             initial={{ opacity: 0, x: 20 }}
                             animate={{ opacity: 1, x: 0 }}
-                            transition={{ duration: 0.5, delay: 0.3 }}
+                            transition={{ duration: 0.5, delay: 0.2 }}
                             className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden"
                         >
                              <div className="px-5 py-4 border-b border-gray-100 bg-gray-50/50 flex items-center justify-between">
@@ -634,7 +616,10 @@ export const DashboardPage: React.FC = () => {
                                     <Users size={16} className="text-gray-400" />
                                     <h3 className="text-sm font-semibold text-gray-900">Recent Patients</h3>
                                 </div>
-                                <button className="text-xs font-medium text-gray-500 hover:text-black transition-colors">
+                                <button 
+                                    onClick={() => navigate('/patients')}
+                                    className="text-xs font-medium text-gray-500 hover:text-black transition-colors"
+                                >
                                     View all
                                 </button>
                             </div>
@@ -680,104 +665,11 @@ export const DashboardPage: React.FC = () => {
                             </div>
                         </motion.div>
 
-                        {/* System Status */}
-                        <motion.div 
-                            initial={{ opacity: 0, x: 20 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            transition={{ duration: 0.5, delay: 0.4 }}
-                            className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden"
-                        >
-                             <div className="px-5 py-4 border-b border-gray-100 bg-gray-50/50 flex items-center gap-2">
-                                <motion.div
-                                    animate={{ rotate: 360 }}
-                                    transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
-                                >
-                                    <Cpu size={16} className="text-gray-400" />
-                                </motion.div>
-                                <h3 className="text-sm font-semibold text-gray-900">System Capacity</h3>
-                            </div>
-                            <div className="p-5 space-y-6">
-                                <div>
-                                    <div className="flex items-center justify-between mb-2">
-                                        <div className="flex items-center gap-2">
-                                            <div className="w-1.5 h-1.5 rounded-full bg-black" />
-                                            <span className="text-xs font-medium text-gray-700">GPU VRAM Usage</span>
-                                        </div>
-                                        <span className="text-xs font-mono text-gray-500">52%</span>
-                                    </div>
-                                    <div className="w-full bg-gray-100 rounded-full h-2 overflow-hidden">
-                                        <motion.div 
-                                            initial={{ width: 0 }}
-                                            animate={{ width: "52%" }}
-                                            transition={{ duration: 1, delay: 0.5, ease: "easeOut" }}
-                                            className="bg-linear-to-r from-gray-800 to-black h-full rounded-full shadow-sm" 
-                                        />
-                                    </div>
-                                </div>
-                                
-                                <div>
-                                    <div className="flex items-center justify-between mb-2">
-                                        <div className="flex items-center gap-2">
-                                            <div className="w-1.5 h-1.5 rounded-full bg-green-500" />
-                                            <span className="text-xs font-medium text-gray-700">API Latency</span>
-                                        </div>
-                                        <span className="text-xs font-mono text-gray-500">42ms</span>
-                                    </div>
-                                    <div className="w-full bg-gray-100 rounded-full h-2 overflow-hidden">
-                                        <motion.div 
-                                            initial={{ width: 0 }}
-                                            animate={{ width: "15%" }}
-                                            transition={{ duration: 1, delay: 0.7, ease: "easeOut" }}
-                                            className="bg-linear-to-r from-green-400 to-green-500 h-full rounded-full shadow-sm" 
-                                        />
-                                    </div>
-                                </div>
-
-                                <div>
-                                    <div className="flex items-center justify-between mb-2">
-                                        <div className="flex items-center gap-2">
-                                            <div className="w-1.5 h-1.5 rounded-full bg-blue-500" />
-                                            <span className="text-xs font-medium text-gray-700">Memory Usage</span>
-                                        </div>
-                                        <span className="text-xs font-mono text-gray-500">68%</span>
-                                    </div>
-                                    <div className="w-full bg-gray-100 rounded-full h-2 overflow-hidden">
-                                        <motion.div 
-                                            initial={{ width: 0 }}
-                                            animate={{ width: "68%" }}
-                                            transition={{ duration: 1, delay: 0.9, ease: "easeOut" }}
-                                            className="bg-linear-to-r from-blue-400 to-blue-500 h-full rounded-full shadow-sm" 
-                                        />
-                                    </div>
-                                </div>
-
-                                <motion.div 
-                                    initial={{ opacity: 0, y: 10 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    transition={{ delay: 0.8 }}
-                                    className="pt-4 border-t border-gray-100"
-                                >
-                                    <div className="flex gap-3 items-start p-3 bg-amber-50/50 border border-amber-100/50 rounded-lg">
-                                        <motion.div
-                                            animate={{ scale: [1, 1.2, 1] }}
-                                            transition={{ duration: 2, repeat: Infinity }}
-                                        >
-                                            <AlertCircle size={14} className="text-amber-500 shrink-0 mt-0.5" />
-                                        </motion.div>
-                                        <div className="text-xs">
-                                            <p className="font-semibold text-amber-900 mb-0.5">Scheduled Maintenance</p>
-                                            <p className="text-amber-700/80">Tonight, 02:00 AM UTC</p>
-                                        </div>
-                                    </div>
-                                </motion.div>
-                            </div>
-                        </motion.div>
-
                         {/* Keyboard Shortcuts */}
                         <motion.div 
                             initial={{ opacity: 0, x: 20 }}
                             animate={{ opacity: 1, x: 0 }}
-                            transition={{ duration: 0.5, delay: 0.5 }}
+                            transition={{ duration: 0.5, delay: 0.3 }}
                             className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden"
                         >
                             <div className="px-5 py-4 border-b border-gray-100 flex items-center gap-2 bg-gray-50/50">
@@ -807,7 +699,7 @@ export const DashboardPage: React.FC = () => {
                         <motion.div 
                             initial={{ opacity: 0, y: 30 }}
                             animate={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.6, delay: 0.6 }}
+                            transition={{ duration: 0.6, delay: 0.4 }}
                             whileHover={{ scale: 1.02, y: -4 }}
                             className="bg-linear-to-br from-blue-600 to-indigo-700 rounded-xl shadow-xl overflow-hidden relative group cursor-pointer"
                             onClick={() => navigate('/medai')}

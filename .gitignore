@@ -3,9 +3,33 @@ __pycache__/
 *.py[cod]
 *$py.class
 venv/
+.venv/
 .env
 .pytest_cache/
+.coverage
+*.egg-info/
 
 # Logs and DB
 *.log
 *.db
+*.db.bak
+*.sqlite
+
+# Node
+node_modules/
+dist/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE / Agent configs (not project-relevant)
+.antigravity/
+.claude/
+.codex/
+.cursor/
+.kiro/
+.opencode/
+.qoder/
+.trae/
+.windsurf/

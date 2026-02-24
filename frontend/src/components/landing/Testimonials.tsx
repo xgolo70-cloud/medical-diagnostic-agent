@@ -59,7 +59,7 @@ const reviews = [
 ];
 
 const ReviewCard = ({ review }: { review: typeof reviews[0] }) => (
-    <div className="group relative w-[300px] sm:w-[360px] md:w-[400px] flex-shrink-0 mx-2 sm:mx-4">
+    <div className="group relative w-[300px] sm:w-[360px] md:w-[400px] shrink-0 mx-2 sm:mx-4">
         <div className="relative p-8 h-full flex flex-col justify-between bg-white rounded-2xl border border-gray-200 hover:border-gray-300 shadow-sm hover:shadow-md transition-all duration-300">
             {/* Header */}
             <div>
@@ -107,8 +107,8 @@ export const Testimonials = () => {
         <section className="py-24 lg:py-32 relative overflow-hidden bg-white">
             {/* Subtle Background Pattern matching Hero */}
             <div className="absolute inset-0 bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:16px_16px] [mask-image:radial-gradient(ellipse_50%_50%_at_50%_50%,#000_70%,transparent_100%)] opacity-30 pointer-events-none" />
-            <div className="absolute top-0 inset-x-0 h-24 bg-gradient-to-b from-white to-transparent z-10" />
-            <div className="absolute bottom-0 inset-x-0 h-24 bg-gradient-to-t from-white to-transparent z-10" />
+            <div className="absolute top-0 inset-x-0 h-24 bg-linear-to-b from-white to-transparent z-10" />
+            <div className="absolute bottom-0 inset-x-0 h-24 bg-linear-to-t from-white to-transparent z-10" />
 
             <div className="max-w-7xl mx-auto px-6 relative z-10 flex flex-col items-center">
                 {/* Header */}
@@ -147,8 +147,8 @@ export const Testimonials = () => {
                 {/* Single Marquee Row */}
                 <div className="relative w-full mb-20">
                     {/* Gradient Masks */}
-                    <div className="absolute left-0 top-0 bottom-0 w-32 bg-gradient-to-r from-white to-transparent z-20 pointer-events-none" />
-                    <div className="absolute right-0 top-0 bottom-0 w-32 bg-gradient-to-l from-white to-transparent z-20 pointer-events-none" />
+                    <div className="absolute left-0 top-0 bottom-0 w-32 bg-linear-to-r from-white to-transparent z-20 pointer-events-none" />
+                    <div className="absolute right-0 top-0 bottom-0 w-32 bg-linear-to-l from-white to-transparent z-20 pointer-events-none" />
 
                     {/* Single Row */}
                     <div className="relative w-full overflow-hidden">

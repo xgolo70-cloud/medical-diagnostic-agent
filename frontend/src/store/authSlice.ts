@@ -37,7 +37,7 @@ const loadAuthFromStorage = (): { user: User | null; isAuthenticated: boolean } 
         }
         
         tokenManager.clearTokens();
-    } catch (error) {
+    } catch {
         localStorage.removeItem(AUTH_STORAGE_KEY);
         tokenManager.clearTokens();
     }
@@ -83,7 +83,7 @@ export const loginUser = createAsyncThunk(
 
 export const logoutUser = createAsyncThunk(
     'auth/logout',
-    async (_, { rejectWithValue }) => {
+    async () => {
         try {
             await authApi.logout();
         } catch (error) {

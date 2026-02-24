@@ -14,7 +14,6 @@ import {
     Clock
 } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
-import { isDemoMode, DEMO_ADMIN_ACTIVITY } from '../../data/demoData';
 import { api } from '../../services';
 
 interface ActivityEntry {
@@ -56,31 +55,21 @@ const FILTER_OPTIONS = [
 export const AdminActivityFeed: React.FC = () => {
     const navigate = useNavigate();
     const [filter, setFilter] = useState('');
-    const isDemo = isDemoMode();
 
     const { data: activities, isLoading } = useQuery<ActivityEntry[]>({
         queryKey: ['admin-activity-feed'],
         queryFn: async () => {
-            if (isDemo) {
-                return DEMO_ADMIN_ACTIVITY;
-            }
-            
-            // Fetch from API
-            try {
-                const history = await api.getHistory() as { id?: string; action: string; user_id: string; timestamp: string; details?: { patient_id?: string } }[];
-                return history.slice(0, 10).map((entry, idx) => ({
-                    id: entry.id || String(idx),
-                    action: entry.action,
-                    user: entry.user_id,
-                    userRole: 'user',
-                    timestamp: entry.timestamp,
-                    details: entry.details?.patient_id ? `Patient #${entry.details.patient_id}` : undefined,
-                    type: entry.action.includes('diagnosis') ? 'diagnosis' : 
-                          entry.action.includes('upload') ? 'upload' : 'other',
-                }));
-            } catch {
-                return DEMO_ADMIN_ACTIVITY;
-            }
+            const history = await api.getHistory() as { id?: string; action: string; user_id: string; timestamp: string; details?: { patient_id?: string } }[];
+            return history.slice(0, 10).map((entry, idx) => ({
+                id: entry.id || String(idx),
+                action: entry.action,
+                user: entry.user_id,
+                userRole: 'user',
+                timestamp: entry.timestamp,
+                details: entry.details?.patient_id ? `Patient #${entry.details.patient_id}` : undefined,
+                type: entry.action.includes('diagnosis') ? 'diagnosis' as const : 
+                      entry.action.includes('upload') ? 'upload' as const : 'other' as const,
+            }));
         },
         staleTime: 15000,
     });

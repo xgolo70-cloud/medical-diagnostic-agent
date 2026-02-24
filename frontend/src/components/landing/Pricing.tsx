@@ -2,6 +2,8 @@ import { useRef, useState } from 'react';
 import { motion, useInView } from 'framer-motion';
 import { Check, Zap, Crown, ArrowRight, Sparkles, X } from 'lucide-react';
 import { Button } from '../ui/Button';
+import { useNavigate } from 'react-router-dom';
+import { useAppSelector } from '../../store/hooks';
 
 const plans = [
     {
@@ -58,6 +60,8 @@ export const Pricing = () => {
     const [isYearly, setIsYearly] = useState(true);
     const sectionRef = useRef(null);
     const isInView = useInView(sectionRef, { once: true, margin: "-100px" });
+    const navigate = useNavigate();
+    const { isAuthenticated } = useAppSelector((state) => state.auth);
 
     return (
         <section id="pricing" ref={sectionRef} className="py-16 lg:py-24 relative bg-white">
@@ -179,13 +183,13 @@ export const Pricing = () => {
                                     {plan.features.map((feature, i) => (
                                         <div key={i} className="flex items-start gap-3 py-0.5">
                                             {feature.included ? (
-                                                <div className={`mt-0.5 w-4 h-4 rounded-full flex items-center justify-center flex-shrink-0 ${
+                                                <div className={`mt-0.5 w-4 h-4 rounded-full flex items-center justify-center shrink-0 ${
                                                     plan.highlight ? 'bg-black text-white' : 'bg-gray-200 text-gray-600'
                                                 }`}>
                                                     <Check size={10} strokeWidth={3} />
                                                 </div>
                                             ) : (
-                                                <div className="mt-0.5 w-4 h-4 rounded-full flex items-center justify-center bg-transparent border border-gray-200 text-gray-300 flex-shrink-0">
+                                                <div className="mt-0.5 w-4 h-4 rounded-full flex items-center justify-center bg-transparent border border-gray-200 text-gray-300 shrink-0">
                                                     <X size={10} strokeWidth={3} />
                                                 </div>
                                             )}
@@ -198,6 +202,7 @@ export const Pricing = () => {
 
                                 {/* CTA */}
                                 <Button
+                                    onClick={() => navigate(isAuthenticated ? '/dashboard' : '/login')}
                                     className={`w-full py-4 sm:py-6 rounded-xl font-bold text-sm tracking-wide transition-all ${
                                         plan.highlight 
                                             ? 'bg-black text-white hover:bg-gray-800 shadow-xl hover:-translate-y-1' 
@@ -205,7 +210,7 @@ export const Pricing = () => {
                                     }`}
                                 >
                                     <span className="flex items-center justify-center gap-2">
-                                        {plan.cta}
+                                        {isAuthenticated ? 'Go to Dashboard' : plan.cta}
                                         {plan.highlight && <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />}
                                     </span>
                                 </Button>

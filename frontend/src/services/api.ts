@@ -1,5 +1,6 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import axios, { AxiosError, type InternalAxiosRequestConfig } from 'axios';
-import type { PatientData, DiagnosisResult, IngestResponse, ApiError } from '../types';
+import type { PatientData, DiagnosisResult, IngestResponse } from '../types';
 
 // ================== Configuration ==================
 
@@ -254,6 +255,103 @@ export const authApi = {
             return handleApiError(error);
         }
     },
+
+    async changePassword(currentPassword: string, newPassword: string, confirmPassword: string): Promise<{ message: string }> {
+        try {
+            const response = await apiClient.post('/auth/me/password', {
+                current_password: currentPassword,
+                new_password: newPassword,
+                confirm_password: confirmPassword,
+            });
+            return response.data;
+        } catch (error) {
+            return handleApiError(error);
+        }
+    },
+
+    async logoutAll(): Promise<{ message: string }> {
+        try {
+            const response = await apiClient.post('/auth/logout-all');
+            return response.data;
+        } catch (error) {
+            return handleApiError(error);
+        } finally {
+            tokenManager.clearTokens();
+        }
+    },
+};
+
+// ================== Admin API ==================
+
+export const adminApi = {
+    async getUsers(params: {
+        page?: number;
+        page_size?: number;
+        role?: string;
+        is_active?: boolean;
+        search?: string;
+    } = {}): Promise<{ users: any[]; total: number; page: number; page_size: number }> {
+        try {
+            const response = await apiClient.get('/admin/users', { params });
+            return response.data;
+        } catch (error) {
+            return handleApiError(error);
+        }
+    },
+
+    async getUserStats(): Promise<{ total_users: number; active_users: number; verified_users: number; by_role: Record<string, number> }> {
+        try {
+            const response = await apiClient.get('/admin/users/stats');
+            return response.data;
+        } catch (error) {
+            return handleApiError(error);
+        }
+    },
+
+    async getUser(userId: string): Promise<any> {
+        try {
+            const response = await apiClient.get(`/admin/users/${userId}`);
+            return response.data;
+        } catch (error) {
+            return handleApiError(error);
+        }
+    },
+
+    async updateUser(userId: string, data: { role?: string; is_active?: boolean; is_verified?: boolean; full_name?: string }): Promise<any> {
+        try {
+            const response = await apiClient.put(`/admin/users/${userId}`, data);
+            return response.data;
+        } catch (error) {
+            return handleApiError(error);
+        }
+    },
+
+    async activateUser(userId: string): Promise<{ message: string }> {
+        try {
+            const response = await apiClient.post(`/admin/users/${userId}/activate`);
+            return response.data;
+        } catch (error) {
+            return handleApiError(error);
+        }
+    },
+
+    async deactivateUser(userId: string): Promise<{ message: string }> {
+        try {
+            const response = await apiClient.post(`/admin/users/${userId}/deactivate`);
+            return response.data;
+        } catch (error) {
+            return handleApiError(error);
+        }
+    },
+
+    async deleteUser(userId: string): Promise<{ message: string }> {
+        try {
+            const response = await apiClient.delete(`/admin/users/${userId}`);
+            return response.data;
+        } catch (error) {
+            return handleApiError(error);
+        }
+    },
 };
 
 // ================== Data API ==================
@@ -266,7 +364,7 @@ export const api = {
         try {
             const response = await apiClient.get('/health');
             return response.data;
-        } catch (error) {
+        } catch {
             // If network fails, return offline status rather than throwing
             return { status: 'offline', components: {} };
         }
@@ -363,6 +461,121 @@ export const api = {
             return handleApiError(error);
         }
     },
+
+    /**
+     * Update appointment status
+     */
+    async updateAppointmentStatus(id: string, status: string): Promise<any> {
+        try {
+            const response = await apiClient.patch(`/dashboard/appointments/${id}/status`, { status });
+            return response.data;
+        } catch (error) {
+            return handleApiError(error);
+        }
+    },
+
+    /**
+     * Get system health metrics (latency, memory, uptime)
+     */
+    async getSystemHealth(): Promise<{
+        apiLatency: number;
+        memoryUsage: number;
+        memoryMb: number;
+        uptime: string;
+        uptimeSeconds: number;
+        status: string;
+    }> {
+        try {
+            const response = await apiClient.get('/dashboard/system-health');
+            return response.data;
+        } catch {
+            return { apiLatency: 0, memoryUsage: 0, memoryMb: 0, uptime: '—', uptimeSeconds: 0, status: 'offline' };
+        }
+    },
+
+    /**
+     * Get weekly analysis stats for chart
+     */
+    async getWeeklyStats(): Promise<{
+        days: Array<{ label: string; value: number; date: string }>;
+        total: number;
+        changePct: number;
+    }> {
+        try {
+            const response = await apiClient.get('/dashboard/stats/weekly');
+            return response.data;
+        } catch (error) {
+            return handleApiError(error);
+        }
+    },
+
+    /**
+     * Get diagnoses with optional filtering
+     */
+    async getDiagnoses(params?: { severity?: string; condition_category?: string; limit?: number }) {
+        try {
+            const query = new URLSearchParams();
+            if (params?.severity) query.append('severity', params.severity);
+            if (params?.condition_category) query.append('condition_category', params.condition_category);
+            if (params?.limit) query.append('limit', params.limit.toString());
+
+            const queryString = query.toString() ? `?${query.toString()}` : '';
+            const response = await apiClient.get<any[]>(`/diagnose${queryString}`);
+            return response.data;
+        } catch (error) {
+            throw handleApiError(error);
+        }
+    },
+
+    // ================== Patients API ==================
+
+    /**
+     * Get all registered patients
+     */
+    async getPatients(): Promise<any[]> {
+        try {
+            const response = await apiClient.get('/patients');
+            return response.data;
+        } catch (error) {
+            return handleApiError(error);
+        }
+    },
+
+    /**
+     * Get a specific patient's full profile (medications + diagnoses)
+     */
+    async getPatientProfile(patientId: string): Promise<any> {
+        try {
+            const response = await apiClient.get(`/patients/${patientId}`);
+            return response.data;
+        } catch (error) {
+            return handleApiError(error);
+        }
+    },
+
+    /**
+     * Prescribe a new medication for a patient
+     */
+    async addMedication(patientId: string, data: { name: string; dosage: string; frequency: string; instructions?: string }): Promise<any> {
+        try {
+            const response = await apiClient.post(`/patients/${patientId}/medications`, data);
+            return response.data;
+        } catch (error) {
+            return handleApiError(error);
+        }
+    },
+
+    /**
+     * Create a new patient account (doctor/admin only)
+     */
+    async createPatient(data: { full_name: string; email: string; phone?: string }): Promise<any> {
+        try {
+            const response = await apiClient.post('/patients', data);
+            return response.data;
+        } catch (error) {
+            return handleApiError(error);
+        }
+    }
 };
 
 export default api;

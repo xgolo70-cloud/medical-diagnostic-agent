@@ -18,6 +18,7 @@ export const api = {
      * Get current authentication headers with Supabase JWT
      */
     getHeaders: async () => {
+        if (!supabase) throw new Error("Supabase client not initialized");
         const { data: { session } } = await supabase.auth.getSession();
         
         return {

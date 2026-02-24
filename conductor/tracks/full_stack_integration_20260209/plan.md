@@ -10,40 +10,40 @@
 - [x] Task: Backend - Implement Auth Dependency. [commit: d559d10]
     - [ ] Create `get_current_user` dependency to validate JWT header.
     - [ ] Protect `POST /api/diagnose` and `POST /api/ingest` with this dependency.
-- [ ] Task: Frontend - Refactor Auth Slice.
-    - [ ] Update `authSlice.ts` to use `createAsyncThunk` for the real login API.
-    - [ ] Implement local storage persistence for tokens.
-- [ ] Task: Frontend - Wire up Login Page.
-    - [ ] Connect `LoginForm.tsx` to the new async thunk.
-    - [ ] Handle loading and error states (401 Unauthorized).
+- [x] Task: Frontend - Refactor Auth Slice.
+    - [x] Update `authSlice.ts` to use `createAsyncThunk` for the real login API.
+    - [x] Implement local storage persistence for tokens.
+- [x] Task: Frontend - Wire up Login Page.
+    - [x] Connect `LoginForm.tsx` to the new async thunk.
+    - [x] Handle loading and error states (401 Unauthorized).
 - [ ] Task: Conductor - User Manual Verification 'Authentication Core' (Protocol in workflow.md)
 
 ## Phase 2: Health & Profiles
 - [x] Task: Backend - Implement Health Check Endpoint. [commit: b1b7377]
-    - [ ] Create `GET /api/health` returning system status (AI service reachability).
+    - [x] Create `GET /api/health` returning system status (AI service reachability).
 - [x] Task: Backend - Implement User Profile Endpoint. [commit: 43c7aca]
-    - [ ] Create `GET /api/users/me` to return current user details.
-- [ ] Task: Frontend - Implement Health Indicator.
-    - [ ] Add a polling component (React Query) in `Sidebar` to check `/health`.
-    - [ ] Display visual status (Green/Red dot).
-- [ ] Task: Frontend - Update Settings Page.
-    - [ ] Fetch and display user profile data (Name, Role) from `/api/users/me`.
+    - [x] Create `GET /api/users/me` to return current user details.
+- [x] Task: Frontend - Implement Health Indicator.
+    - [x] Add a polling component (React Query) in `Sidebar` to check `/health`.
+    - [x] Display visual status (Green/Red dot).
+- [x] Task: Frontend - Update Settings Page.
+    - [x] Fetch and display user profile data (Name, Role) from `/api/users/me`.
 - [ ] Task: Conductor - User Manual Verification 'Health & Profiles' (Protocol in workflow.md)
 
 ## Phase 3: Diagnosis Flow & Validation Polish
-- [ ] Task: Backend/Frontend - Type Safety Audit.
-    - [ ] Verify `PatientData` schema matches Frontend types.
-    - [ ] Ensure `DiagnosisResult` schema matches Frontend types.
-- [ ] Task: Frontend - Enhanced Error Handling.
-    - [ ] Update `DiagnosisForm.tsx` to display field-level errors from 422 responses.
+- [x] Task: Backend/Frontend - Type Safety Audit.
+    - [x] Verify `PatientData` schema matches Frontend types.
+    - [x] Ensure `DiagnosisResult` schema matches Frontend types.
+- [x] Task: Frontend - Enhanced Error Handling.
+    - [x] Update `DiagnosisForm.tsx` to display field-level errors from 422 responses.
 - [ ] Task: E2E - Verify Diagnosis Flows.
     - [ ] Test Manual Entry with valid/invalid data (Verify JWT is sent).
     - [ ] Test Unified Upload with valid/invalid file (Verify JWT is sent).
 - [ ] Task: Conductor - User Manual Verification 'Diagnosis Flow & Validation Polish' (Protocol in workflow.md)
 
 ## Phase 4: History Optimization
-- [ ] Task: Backend - Optimize Audit Log Reading.
-    - [ ] Refactor `get_audit_logs` to use efficient reverse reading (avoid loading full file).
+- [x] Task: Backend - Optimize Audit Log Reading.
+    - [x] Refactor `get_audit_logs` to use efficient reverse reading (avoid loading full file).
 - [ ] Task: Frontend - Verify History & Export.
     - [ ] Confirm History table filtering works with real backend data.
     - [ ] Verify CSV/JSON export matches the displayed data.

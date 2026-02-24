@@ -6,6 +6,8 @@ export { SettingsPage } from './SettingsPage';
 export { LandingPage } from './LandingPage';
 export { MedAIPage } from './MedAIPage';
 export { AdminUsersPage } from './AdminUsersPage';
+export { PatientsListPage } from './PatientsListPage';
 export { VerifyEmailPage } from './VerifyEmailPage';
 export { ForgotPasswordPage } from './ForgotPasswordPage';
 export { ResetPasswordPage } from './ResetPasswordPage';
+export { GuidePage } from './GuidePage';

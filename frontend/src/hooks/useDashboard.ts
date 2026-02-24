@@ -1,15 +1,7 @@
 import { useState, useCallback, useMemo } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '../services';
-import { 
-    DEMO_NOTIFICATIONS, 
-    DEMO_APPOINTMENTS, 
-    DEMO_RECENT_PATIENTS, 
-    DEMO_DIAGNOSIS_STATS, 
-    DEMO_STATS,
-    DEMO_HISTORY,
-    isDemoMode 
-} from '../data/demoData';
+
 // ================== Types ==================
 
 export interface Notification {
@@ -47,6 +39,21 @@ export interface DiagnosisStats {
     color: string;
 }
 
+export interface SystemHealth {
+    apiLatency: number;
+    memoryUsage: number;
+    memoryMb: number;
+    uptime: string;
+    uptimeSeconds: number;
+    status: string;
+}
+
+export interface WeeklyStats {
+    days: Array<{ label: string; value: number; date: string }>;
+    total: number;
+    changePct: number;
+}
+
 interface HistoryEntry {
     timestamp: string;
     action: string;
@@ -63,7 +70,6 @@ const NOTIFICATIONS_KEY = 'dashboard_notifications';
 
 // ================== Helper Functions ==================
 
-// Helper function - exported for potential use in other components
 export function getRelativeTime(timestamp: string): string {
     const now = Date.now();
     const time = new Date(timestamp).getTime();
@@ -84,17 +90,8 @@ function getStoredNotifications(): Notification[] {
     const stored = localStorage.getItem(NOTIFICATIONS_KEY);
     if (stored) return JSON.parse(stored);
     
-    // In demo mode, return rich demo data
-    if (isDemoMode()) {
-        localStorage.setItem(NOTIFICATIONS_KEY, JSON.stringify(DEMO_NOTIFICATIONS));
-        return DEMO_NOTIFICATIONS;
-    }
-    
-    // Default fallback
     const defaults: Notification[] = [
-        { id: '1', title: 'Critical Result', message: 'Patient requires immediate attention', time: '5m ago', type: 'urgent', read: false, createdAt: Date.now() - 300000 },
-        { id: '2', title: 'Report Ready', message: 'Lab results available for review', time: '1h ago', type: 'info', read: false, createdAt: Date.now() - 3600000 },
-        { id: '3', title: 'System Update', message: 'MedGemma model updated to v1.5.2', time: '3h ago', type: 'success', read: false, createdAt: Date.now() - 10800000 },
+        { id: '1', title: 'Welcome', message: 'Welcome to AI & Things Medical Diagnostics', time: 'Just now', type: 'info', read: false, createdAt: Date.now() },
     ];
     localStorage.setItem(NOTIFICATIONS_KEY, JSON.stringify(defaults));
     return defaults;
@@ -146,86 +143,113 @@ export function useNotifications() {
 
 // ================== Appointments Hook ==================
 
-// ================== Appointments Hook ==================
-
 export function useAppointments() {
-    const isDemo = isDemoMode();
+    const queryClient = useQueryClient();
 
     const { data: appointmentsData } = useQuery({
         queryKey: ['appointments'],
-        queryFn: () => isDemo ? Promise.resolve(DEMO_APPOINTMENTS) : api.getAppointments(),
+        queryFn: () => api.getAppointments(),
         staleTime: 60000,
     });
 
-    const [localAppointments, setLocalAppointments] = useState<Appointment[]>([]);
+    const statusMutation = useMutation({
+        mutationFn: ({ id, status }: { id: string; status: string }) =>
+            api.updateAppointmentStatus(id, status),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['appointments'] });
+        },
+    });
 
-    // Merge server data with local state if needed, or just use server data
     const appointments = useMemo(() => {
-        return appointmentsData || localAppointments;
-    }, [appointmentsData, localAppointments]);
-
-    const addAppointment = useCallback((apt: Omit<Appointment, 'id'>) => {
-        // For now, just update local state to reflect UI changes immediately
-        // In a full implementation, this should call an API
-        const newApt: Appointment = { ...apt, id: Date.now().toString() };
-        setLocalAppointments(prev => [...prev, newApt]);
-    }, []);
+        return appointmentsData || [];
+    }, [appointmentsData]);
 
     const updateStatus = useCallback((id: string, status: Appointment['status']) => {
-        // Mock update
-         setLocalAppointments(prev => prev.map(a => a.id === id ? { ...a, status } : a));
-    }, []);
-
-    const removeAppointment = useCallback((id: string) => {
-        setLocalAppointments(prev => prev.filter(a => a.id !== id));
-    }, []);
+        statusMutation.mutate({ id, status });
+    }, [statusMutation]);
 
     const todayAppointments = useMemo(() => 
         (appointments || []).filter((a: Appointment) => a.date === new Date().toISOString().split('T')[0]),
     [appointments]);
 
-    return { appointments: appointments || [], todayAppointments, addAppointment, updateStatus, removeAppointment };
+    return { appointments, todayAppointments, updateStatus };
+}
+
+// ================== System Health Hook ==================
+
+export function useSystemHealth() {
+    const { data, isLoading } = useQuery<SystemHealth>({
+        queryKey: ['system-health'],
+        queryFn: () => api.getSystemHealth(),
+        refetchInterval: 30000, // Poll every 30 seconds
+        staleTime: 15000,
+    });
+
+    return {
+        health: data ?? { apiLatency: 0, memoryUsage: 0, memoryMb: 0, uptime: '—', uptimeSeconds: 0, status: 'loading' },
+        isLoading,
+    };
+}
+
+// ================== Weekly Stats Hook ==================
+
+export function useWeeklyStats() {
+    const { data, isLoading } = useQuery<WeeklyStats>({
+        queryKey: ['weekly-stats'],
+        queryFn: () => api.getWeeklyStats(),
+        staleTime: 60000,
+    });
+
+    return {
+        weeklyStats: data ?? { days: [], total: 0, changePct: 0 },
+        isLoading,
+    };
 }
 
 // ================== Dashboard Stats Hook ==================
 
+const EMPTY_STATS = {
+    totalAnalyses: 0,
+    pendingReview: 0,
+    modelAccuracy: 0,
+    systemLoad: 0,
+    totalThisMonth: 0,
+};
+
+const EMPTY_DIAGNOSIS_BREAKDOWN: DiagnosisStats[] = [];
+
 export function useDashboardStats() {
-    // In demo mode, bypass API call
-    const isDemo = isDemoMode();
-    
-    // Fetch stats
     const { data: statsData, isLoading: statsLoading } = useQuery({
         queryKey: ['dashboard-stats'],
-        queryFn: () => isDemo ? Promise.resolve({ stats: DEMO_STATS, diagnosisBreakdown: DEMO_DIAGNOSIS_STATS }) : api.getDashboardStats(),
+        queryFn: () => api.getDashboardStats(),
         staleTime: 30000,
     });
 
-    // Fetch recent patients
     const { data: patientsData, isLoading: patientsLoading } = useQuery({
         queryKey: ['recent-patients'],
-        queryFn: () => isDemo ? Promise.resolve(DEMO_RECENT_PATIENTS) : api.getRecentPatients(),
+        queryFn: () => api.getRecentPatients(),
         staleTime: 30000,
     });
 
     const { data: historyData, isLoading: historyLoading } = useQuery<HistoryEntry[]>({
         queryKey: ['history'],
-        queryFn: () => isDemo ? Promise.resolve(DEMO_HISTORY) : api.getHistory() as Promise<HistoryEntry[]>,
+        queryFn: () => api.getHistory() as Promise<HistoryEntry[]>,
         staleTime: 30000,
     });
 
     const stats = useMemo(() => {
          if (statsData?.stats) return statsData.stats;
-         return DEMO_STATS;
+         return EMPTY_STATS;
     }, [statsData]);
 
     const diagnosisBreakdown = useMemo(() => {
         if (statsData?.diagnosisBreakdown) return statsData.diagnosisBreakdown;
-        return DEMO_DIAGNOSIS_STATS;
+        return EMPTY_DIAGNOSIS_BREAKDOWN;
     }, [statsData]);
 
     const recentPatients = useMemo(() => {
         if (patientsData) return patientsData;
-        return DEMO_RECENT_PATIENTS;
+        return [];
     }, [patientsData]);
 
     return { 

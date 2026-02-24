@@ -9,17 +9,19 @@ import {
     LogOut,
     X,
     Brain,
-    Home,
-    ChevronRight,
+    ChevronLeft,
     Users,
-    Activity // Added for Health Icon
+    BookOpen,
+    Sparkles,
+    Menu,
+    Shield
 } from 'lucide-react';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { logout } from '../../store/authSlice';
-import api from '../../services/api'; // Import API
+import api from '../../services/api';
 
-export const SIDEBAR_WIDTH = 270;
-export const SIDEBAR_COLLAPSED_WIDTH = 80;
+export const SIDEBAR_WIDTH = 260;
+export const SIDEBAR_COLLAPSED_WIDTH = 76;
 
 interface NavItem {
     path: string;
@@ -27,18 +29,38 @@ interface NavItem {
     icon: React.ReactNode;
 }
 
-const navItems: NavItem[] = [
-    { path: '/dashboard', label: 'Dashboard', icon: <LayoutDashboard size={20} strokeWidth={1.5} /> },
-    { path: '/diagnosis', label: 'Analysis', icon: <Stethoscope size={20} strokeWidth={1.5} /> },
-    { path: '/medai', label: 'MedGemma AI', icon: <Brain size={20} strokeWidth={1.5} /> },
-    { path: '/history', label: 'History', icon: <History size={20} strokeWidth={1.5} /> },
-    { path: '/settings', label: 'Settings', icon: <Settings size={20} strokeWidth={1.5} /> },
+// --- Grouped Navigation ---
+const navSections: { label: string; items: NavItem[] }[] = [
+    {
+        label: 'Main',
+        items: [
+            { path: '/dashboard', label: 'Dashboard', icon: <LayoutDashboard size={19} strokeWidth={1.7} /> },
+            { path: '/patients', label: 'Patients', icon: <Users size={19} strokeWidth={1.7} /> },
+        ],
+    },
+    {
+        label: 'Clinical',
+        items: [
+            { path: '/diagnosis', label: 'Analysis', icon: <Stethoscope size={19} strokeWidth={1.7} /> },
+            { path: '/medai', label: 'MedGemma AI', icon: <Sparkles size={19} strokeWidth={1.7} /> },
+            { path: '/history', label: 'History', icon: <History size={19} strokeWidth={1.7} /> },
+        ],
+    },
+    {
+        label: 'Settings & Tools',
+        items: [
+            { path: '/settings', label: 'Settings', icon: <Settings size={19} strokeWidth={1.7} /> },
+            { path: '/guide', label: 'Guide', icon: <BookOpen size={19} strokeWidth={1.7} /> },
+        ],
+    },
 ];
 
-// Admin-only nav items
-const adminNavItems: NavItem[] = [
-    { path: '/admin/users', label: 'User Management', icon: <Users size={20} strokeWidth={1.5} /> },
-];
+const adminSection: { label: string; items: NavItem[] } = {
+    label: 'Admin',
+    items: [
+        { path: '/admin/users', label: 'User Management', icon: <Shield size={19} strokeWidth={1.7} /> },
+    ],
+};
 
 interface SidebarProps {
     mobileOpen?: boolean;
@@ -71,8 +93,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileOpen = false, onMobileCl
             else setHealthStatus('offline');
         };
 
-        checkHealth(); // Initial check
-        const interval = setInterval(checkHealth, 30000); // Poll every 30s
+        checkHealth();
+        const interval = setInterval(checkHealth, 30000);
         return () => clearInterval(interval);
     }, []);
 
@@ -85,21 +107,143 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileOpen = false, onMobileCl
 
     const currentWidth = isCollapsed ? SIDEBAR_COLLAPSED_WIDTH : SIDEBAR_WIDTH;
 
-    // Determine Status Color
     const getStatusColor = () => {
-        switch(healthStatus) {
+        switch (healthStatus) {
             case 'healthy': return 'bg-emerald-500';
-            case 'degraded': return 'bg-yellow-500';
+            case 'degraded': return 'bg-amber-500';
             default: return 'bg-red-500';
         }
     };
+
+    const getStatusLabel = () => {
+        switch (healthStatus) {
+            case 'healthy': return 'Online';
+            case 'degraded': return 'Degraded';
+            default: return 'Offline';
+        }
+    };
+
+    const userInitial = (user?.displayName || user?.username)?.charAt(0).toUpperCase() || 'U';
+
+    // Render a single nav item
+    const renderNavItem = (item: NavItem, isAdmin = false) => {
+        const isActive = location.pathname === item.path;
+        const activeAccent = isAdmin ? 'bg-red-500' : 'bg-black';
+        const activeText = isAdmin ? 'text-red-600' : 'text-black';
+        const activeBg = isAdmin ? 'bg-red-500/[0.06]' : 'bg-black/[0.04]';
+        const hoverBg = isAdmin ? 'group-hover:bg-red-500/[0.04]' : 'group-hover:bg-black/[0.03]';
+
+        return (
+            <Link
+                key={item.path}
+                to={item.path}
+                onClick={onMobileClose}
+                className={`
+                    relative flex items-center gap-3 rounded-xl transition-all duration-200 group outline-none
+                    ${isCollapsed ? 'justify-center mx-auto w-11 h-11' : 'px-3 py-2.5'}
+                `}
+            >
+                {/* Active background */}
+                {isActive && (
+                    <motion.div
+                        layoutId="sidebarActiveIndicator"
+                        className={`absolute inset-0 ${activeBg} rounded-xl`}
+                        initial={false}
+                        transition={{ type: "spring", stiffness: 350, damping: 30 }}
+                    />
+                )}
+
+                {/* Hover background (non-active) */}
+                {!isActive && (
+                    <div className={`absolute inset-0 bg-transparent ${hoverBg} rounded-xl transition-colors duration-200`} />
+                )}
+
+                {/* Left accent bar */}
+                {isActive && !isCollapsed && (
+                    <motion.div
+                        layoutId="sidebarAccentBar"
+                        className={`absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-4 ${activeAccent} rounded-r-full`}
+                        initial={false}
+                        transition={{ type: "spring", stiffness: 350, damping: 30 }}
+                    />
+                )}
+
+                {/* Icon */}
+                <span className={`
+                    relative z-10 transition-all duration-200 shrink-0
+                    ${isActive ? `${activeText} scale-[1.05]` : `text-zinc-400 group-hover:text-zinc-700`}
+                `}>
+                    {isActive
+                        ? React.cloneElement(item.icon as React.ReactElement, { strokeWidth: 2.2 } as React.SVGAttributes<SVGElement>)
+                        : item.icon}
+                </span>
+
+                {/* Label */}
+                <AnimatePresence>
+                    {!isCollapsed && (
+                        <motion.span
+                            initial={{ opacity: 0, x: -8 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            exit={{ opacity: 0, x: -8 }}
+                            transition={{ duration: 0.15 }}
+                            className={`
+                                relative z-10 text-[13.5px] transition-colors duration-200 whitespace-nowrap
+                                ${isActive ? `${activeText} font-semibold` : 'text-zinc-500 font-medium group-hover:text-zinc-800'}
+                            `}
+                        >
+                            {item.label}
+                        </motion.span>
+                    )}
+                </AnimatePresence>
+
+                {/* Collapsed Tooltip */}
+                {isCollapsed && (
+                    <div className={`
+                        absolute left-full ml-3 px-3 py-1.5 text-[12px] font-medium rounded-lg
+                        opacity-0 invisible group-hover:opacity-100 group-hover:visible
+                        transition-all duration-200 translate-x-[-6px] group-hover:translate-x-0
+                        z-[60] whitespace-nowrap pointer-events-none shadow-lg
+                        ${isAdmin ? 'bg-red-600 text-white' : 'bg-zinc-900 text-white'}
+                    `}>
+                        {item.label}
+                        <div className={`absolute left-0 top-1/2 -translate-x-[3px] -translate-y-1/2 w-1.5 h-1.5 transform rotate-45 ${isAdmin ? 'bg-red-600' : 'bg-zinc-900'}`} />
+                    </div>
+                )}
+            </Link>
+        );
+    };
+
+    // Render a section with label + items
+    const renderSection = (section: { label: string; items: NavItem[] }, isAdmin = false) => (
+        <div key={section.label} className="mb-1">
+            <AnimatePresence>
+                {!isCollapsed && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 0.15 }}
+                        className={`px-3 pt-4 pb-1.5 first:pt-0`}
+                    >
+                        <span className={`text-[10px] font-bold uppercase tracking-[0.1em] ${isAdmin ? 'text-red-400' : 'text-zinc-400'}`}>
+                            {section.label}
+                        </span>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+            {isCollapsed && <div className="pt-3 first:pt-0" />}
+            <div className={`space-y-0.5 ${isCollapsed ? 'flex flex-col items-center' : ''}`}>
+                {section.items.map((item) => renderNavItem(item, isAdmin))}
+            </div>
+        </div>
+    );
 
     return (
         <>
             {/* Mobile Overlay */}
             <AnimatePresence>
                 {mobileOpen && (
-                    <motion.div 
+                    <motion.div
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
@@ -113,358 +257,217 @@ export const Sidebar: React.FC<SidebarProps> = ({ mobileOpen = false, onMobileCl
             <motion.aside
                 initial={false}
                 animate={{ width: currentWidth }}
-                transition={{ type: "spring", stiffness: 200, damping: 25, mass: 1 }}
+                transition={{ type: "spring", stiffness: 250, damping: 28 }}
                 className={`
-                    fixed top-0 left-0 z-50 h-full 
-                    bg-white/85 backdrop-blur-2xl border-r border-white/50
-                    shadow-[4px_0_24px_-12px_rgba(0,0,0,0.1)]
-                    md:translate-x-0 
+                    fixed top-0 left-0 z-50 h-full
+                    bg-white border-r border-zinc-100
+                    md:translate-x-0
                     ${mobileOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
-                    flex flex-col
+                    flex flex-col select-none
                 `}
                 style={{ width: currentWidth }}
             >
-                {/* Floating Collapse Toggle (Desktop) - Premium Pill Design */}
-                <motion.button 
-                    onClick={toggleCollapse}
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.95 }}
-                    className="
-                        absolute -right-4 top-1/2 -translate-y-1/2
-                        hidden md:flex w-8 h-14 
-                        bg-white/95 backdrop-blur-sm
-                        border border-zinc-200/80 shadow-lg shadow-black/5
-                        rounded-full items-center justify-center 
-                        text-zinc-400 hover:text-black hover:border-zinc-300 hover:shadow-xl
-                        transition-all duration-300 z-50
-                        group
-                    "
-                >
-                    <motion.div
-                        animate={{ rotate: isCollapsed ? 0 : 180 }}
-                        transition={{ type: "spring", stiffness: 300, damping: 25 }}
-                    >
-                        <ChevronRight size={16} strokeWidth={2} className="group-hover:scale-110 transition-transform" />
-                    </motion.div>
-                </motion.button>
-
-                {/* Inner Content Wrapper (Handles Overflow) */}
-                <div className="flex flex-col w-full h-full overflow-hidden">
-                {/* Header */}
-                <div className={`h-24 flex items-center shrink-0 ${isCollapsed ? 'justify-center' : 'justify-between px-6'}`}>
-                    <Link 
+                {/* ===== HEADER ===== */}
+                <div className={`h-16 flex items-center shrink-0 border-b border-zinc-100/80 ${isCollapsed ? 'justify-center px-2' : 'justify-between px-5'}`}>
+                    <Link
                         to="/"
-                        className="flex items-center gap-3.5 group relative overflow-hidden"
+                        className="flex items-center gap-2.5 group"
                     >
-                        {/* Logo Container */}
-                        <div className="relative shrink-0">
-                            <div className="absolute inset-0 bg-gradient-to-tr from-black/20 to-transparent blur-xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500 scale-150" />
-                            <div className="w-11 h-11 rounded-xl bg-black text-white flex items-center justify-center shadow-lg shadow-black/10 relative z-10 transition-transform duration-300 group-hover:scale-105 active:scale-95">
-                                <Brain className="w-5 h-5" />
-                            </div>
+                        <div className="w-9 h-9 rounded-lg bg-black text-white flex items-center justify-center shadow-sm relative transition-transform duration-200 group-hover:scale-[1.04] group-active:scale-95 shrink-0">
+                            <Brain className="w-[18px] h-[18px]" />
                         </div>
-                        
+
                         <AnimatePresence>
                             {!isCollapsed && (
-                                <motion.div
-                                    initial={{ opacity: 0, x: -10 }}
+                                <motion.span
+                                    initial={{ opacity: 0, x: -8 }}
                                     animate={{ opacity: 1, x: 0 }}
-                                    exit={{ opacity: 0, x: -10 }}
-                                    transition={{ duration: 0.2 }}
-                                    className="flex flex-col justify-center whitespace-nowrap"
+                                    exit={{ opacity: 0, x: -8 }}
+                                    transition={{ duration: 0.15 }}
+                                    className="font-bold text-[15px] tracking-tight text-zinc-900 whitespace-nowrap"
                                 >
-                                    <span className="font-bold text-black text-[16px] tracking-tight leading-none bg-clip-text text-transparent bg-gradient-to-r from-black via-black to-zinc-600">
-                                        AI & Things
-                                    </span>
-                                    <span className="text-[11px] text-zinc-500 font-medium tracking-wider uppercase mt-1 flex items-center gap-1.5">
-                                        Workspace
-                                        {/* Header Health Dot */}
-                                        <span className={`w-1.5 h-1.5 rounded-full ${getStatusColor()} animate-pulse`} title={`System Status: ${healthStatus}`} />
-                                    </span>
-                                </motion.div>
+                                    AI & Things
+                                </motion.span>
                             )}
                         </AnimatePresence>
                     </Link>
-                    
+
+                    {/* Collapse Toggle (Desktop) */}
+                    <AnimatePresence>
+                        {!isCollapsed && (
+                            <motion.button
+                                initial={{ opacity: 0, scale: 0.8 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                exit={{ opacity: 0, scale: 0.8 }}
+                                transition={{ duration: 0.15 }}
+                                onClick={toggleCollapse}
+                                className="hidden md:flex w-7 h-7 rounded-lg items-center justify-center text-zinc-300 hover:text-zinc-600 hover:bg-zinc-100 transition-all duration-200"
+                                title="Collapse sidebar"
+                            >
+                                <ChevronLeft size={16} strokeWidth={2} />
+                            </motion.button>
+                        )}
+                    </AnimatePresence>
+
+                    {/* Expand button when collapsed */}
+                    {isCollapsed && (
+                        <div className="absolute -right-3 top-4 hidden md:block z-[60]">
+                            <motion.button
+                                whileHover={{ scale: 1.1 }}
+                                whileTap={{ scale: 0.9 }}
+                                onClick={toggleCollapse}
+                                className="w-6 h-6 rounded-full bg-white border border-zinc-200 shadow-sm flex items-center justify-center text-zinc-400 hover:text-zinc-700 hover:border-zinc-300 hover:shadow-md transition-all duration-200"
+                                title="Expand sidebar"
+                            >
+                                <Menu size={12} strokeWidth={2.5} />
+                            </motion.button>
+                        </div>
+                    )}
+
                     {/* Mobile Close */}
-                    <button 
-                        onClick={onMobileClose}
-                        className="md:hidden p-2 text-black hover:bg-black/5 rounded-full transition-colors"
-                    >
-                        <X size={20} />
-                    </button>
+                    {!isCollapsed && (
+                        <button
+                            onClick={onMobileClose}
+                            className="md:hidden w-7 h-7 rounded-lg flex items-center justify-center text-zinc-400 hover:text-zinc-700 hover:bg-zinc-100 transition-colors"
+                        >
+                            <X size={16} />
+                        </button>
+                    )}
                 </div>
 
-                {/* Navigation */}
-                <nav className="flex-1 py-4 px-4 space-y-2 overflow-y-auto overflow-x-hidden relative scrollbar-thin scrollbar-thumb-zinc-200">
-                    {navItems.map((item) => {
-                        const isActive = location.pathname === item.path;
-                        return (
-                            <Link
-                                key={item.path}
-                                to={item.path}
-                                onClick={onMobileClose}
-                                className={`
-                                    relative flex items-center gap-4 px-4 py-3.5 rounded-2xl transition-all duration-300 group outline-none
-                                    ${isCollapsed ? 'justify-center' : ''}
-                                `}
-                            >
-                                {/* Active Indicator Background - Magic Motion */}
-                                {isActive && (
-                                    <motion.div
-                                        layoutId="activeTabBackground"
-                                        className="absolute inset-0 bg-black/[0.04] rounded-2xl border border-black/[0.02]"
-                                        initial={false}
-                                        transition={{ type: "spring", stiffness: 400, damping: 35 }}
-                                    />
-                                )}
+                {/* ===== NAVIGATION ===== */}
+                <nav className={`flex-1 overflow-y-auto overflow-x-hidden py-3 pb-6 ${isCollapsed ? 'px-2.5' : 'px-3'} scrollbar-thin scrollbar-thumb-zinc-100`}>
+                    {navSections.map((section) => renderSection(section))}
 
-                                {/* Hover Background (for non-active) */}
-                                {!isActive && (
-                                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/[0.02] rounded-2xl transition-colors duration-300" />
-                                )}
-
-                                <span className={`
-                                    relative z-10 transition-all duration-300 shrink-0
-                                    ${isActive ? 'text-black scale-105' : 'text-zinc-500 group-hover:text-black group-hover:scale-105'}
-                                `}>
-                                    {isActive 
-                                        ? React.cloneElement(item.icon as React.ReactElement, { strokeWidth: 2 } as React.SVGAttributes<SVGElement>) 
-                                        : item.icon}
-                                </span>
-
-                                <AnimatePresence>
-                                    {!isCollapsed && (
-                                        <motion.span 
-                                            initial={{ opacity: 0, x: -10 }}
-                                            animate={{ opacity: 1, x: 0 }}
-                                            exit={{ opacity: 0, x: -10 }}
-                                            transition={{ duration: 0.2 }}
-                                            className={`
-                                                relative z-10 font-medium text-[14px] transition-colors duration-300 whitespace-nowrap
-                                                ${isActive ? 'text-black font-semibold' : 'text-zinc-600 group-hover:text-black'}
-                                            `}
-                                        >
-                                            {item.label}
-                                        </motion.span>
-                                    )}
-                                </AnimatePresence>
-                                
-                                {/* Active Dot (Right side) */}
-                                {isActive && !isCollapsed && (
-                                    <motion.div
-                                        initial={{ scale: 0 }}
-                                        animate={{ scale: 1 }}
-                                        exit={{ scale: 0 }}
-                                        className="absolute right-3 w-1.5 h-1.5 rounded-full bg-black shadow-[0_0_10px_rgba(0,0,0,0.3)]"
-                                    />
-                                )}
-
-                                {/* Collapsed Tooltip */}
-                                {isCollapsed && (
-                                    <div className="absolute left-full ml-5 px-3 py-2 bg-black/90 backdrop-blur text-white text-[13px] font-medium rounded-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 shadow-xl translate-x-[-8px] group-hover:translate-x-0 z-50 whitespace-nowrap pointer-events-none">
-                                        {item.label}
-                                        <div className="absolute left-0 top-1/2 -translate-x-1 -translate-y-1/2 w-2 h-2 bg-black/90 transform rotate-45" />
-                                    </div>
-                                )}
-                            </Link>
-                        );
-                    })}
-
-                    {/* Admin-only Navigation */}
+                    {/* Admin section (role-gated) */}
                     {user?.role === 'admin' && (
                         <>
-                            <div className="my-4 px-4">
-                                <div className="h-px bg-gradient-to-r from-transparent via-zinc-200 to-transparent" />
-                                {!isCollapsed && (
-                                    <span className="block mt-3 text-[10px] font-bold uppercase tracking-widest text-zinc-400">
-                                        Admin
-                                    </span>
-                                )}
+                            <div className={`my-2 ${isCollapsed ? 'mx-2' : 'mx-3'}`}>
+                                <div className="h-px bg-zinc-100" />
                             </div>
-                            {adminNavItems.map((item) => {
-                                const isActive = location.pathname === item.path;
-                                return (
-                                    <Link
-                                        key={item.path}
-                                        to={item.path}
-                                        onClick={onMobileClose}
-                                        className={`
-                                            relative flex items-center gap-4 px-4 py-3.5 rounded-2xl transition-all duration-300 group outline-none
-                                            ${isCollapsed ? 'justify-center' : ''}
-                                        `}
-                                    >
-                                        {isActive && (
-                                            <motion.div
-                                                layoutId="activeTabBackground"
-                                                className="absolute inset-0 bg-red-500/10 rounded-2xl border border-red-500/20"
-                                                initial={false}
-                                                transition={{ type: "spring", stiffness: 400, damping: 35 }}
-                                            />
-                                        )}
-                                        {!isActive && (
-                                            <div className="absolute inset-0 bg-black/0 group-hover:bg-red-500/5 rounded-2xl transition-colors duration-300" />
-                                        )}
-                                        <span className={`
-                                            relative z-10 transition-all duration-300 shrink-0
-                                            ${isActive ? 'text-red-600 scale-105' : 'text-zinc-500 group-hover:text-red-600 group-hover:scale-105'}
-                                        `}>
-                                            {isActive 
-                                                ? React.cloneElement(item.icon as React.ReactElement, { strokeWidth: 2 } as React.SVGAttributes<SVGElement>) 
-                                                : item.icon}
-                                        </span>
-                                        <AnimatePresence>
-                                            {!isCollapsed && (
-                                                <motion.span 
-                                                    initial={{ opacity: 0, x: -10 }}
-                                                    animate={{ opacity: 1, x: 0 }}
-                                                    exit={{ opacity: 0, x: -10 }}
-                                                    transition={{ duration: 0.2 }}
-                                                    className={`
-                                                        relative z-10 font-medium text-[14px] transition-colors duration-300 whitespace-nowrap
-                                                        ${isActive ? 'text-red-600 font-semibold' : 'text-zinc-600 group-hover:text-red-600'}
-                                                    `}
-                                                >
-                                                    {item.label}
-                                                </motion.span>
-                                            )}
-                                        </AnimatePresence>
-                                        {isCollapsed && (
-                                            <div className="absolute left-full ml-5 px-3 py-2 bg-red-600/90 backdrop-blur text-white text-[13px] font-medium rounded-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 shadow-xl translate-x-[-8px] group-hover:translate-x-0 z-50 whitespace-nowrap pointer-events-none">
-                                                {item.label}
-                                                <div className="absolute left-0 top-1/2 -translate-x-1 -translate-y-1/2 w-2 h-2 bg-red-600/90 transform rotate-45" />
-                                            </div>
-                                        )}
-                                    </Link>
-                                );
-                            })}
+                            {renderSection(adminSection, true)}
                         </>
                     )}
                 </nav>
 
-                {/* Footer Section */}
-                <div className="p-5 relative shrink-0">
-                    {/* Gradient Divider */}
-                    <div className="absolute top-0 left-6 right-6 h-px bg-gradient-to-r from-transparent via-black/10 to-transparent" />
-
-
-
-                    {/* Website Link */}
-                    <Link 
-                        to="/"
-                        className={`
-                            flex items-center gap-3.5 p-3 rounded-2xl text-black hover:bg-black/[0.03] transition-all duration-300 mb-2 group
-                            ${isCollapsed ? 'justify-center' : ''}
-                        `}
-                    >
-                         <div className={`
-                             w-8 h-8 rounded-lg flex items-center justify-center transition-colors duration-300 shrink-0
-                             ${isCollapsed ? '' : 'bg-zinc-50 group-hover:bg-white border border-zinc-100 group-hover:border-zinc-200'}
-                         `}>
-                            <Home size={18} strokeWidth={1.5} className="text-zinc-500 group-hover:text-black transition-colors" />
-                         </div>
-                         <AnimatePresence>
-                             {!isCollapsed && (
-                                <motion.span 
-                                    initial={{ opacity: 0, x: -10 }}
-                                    animate={{ opacity: 1, x: 0 }}
-                                    exit={{ opacity: 0, x: -10 }}
-                                    transition={{ duration: 0.2 }}
-                                    className="text-[13px] font-medium text-zinc-600 group-hover:text-black transition-colors whitespace-nowrap"
-                                >
-                                    Website
-                                </motion.span>
-                             )}
-                         </AnimatePresence>
-                    </Link>
+                {/* ===== FOOTER ===== */}
+                <div className={`shrink-0 border-t border-zinc-100/80 ${isCollapsed ? 'p-2.5' : 'p-3'}`}>
+                    {/* System Status */}
+                    <AnimatePresence>
+                        {!isCollapsed && (
+                            <motion.div
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                exit={{ opacity: 0 }}
+                                transition={{ duration: 0.15 }}
+                                className="flex items-center gap-2 px-3 py-2 mb-2 rounded-lg bg-zinc-50/80"
+                            >
+                                <span className="relative flex h-2 w-2">
+                                    <span className={`animate-ping absolute inline-flex h-full w-full rounded-full ${getStatusColor()} opacity-60`} />
+                                    <span className={`relative inline-flex rounded-full h-2 w-2 ${getStatusColor()}`} />
+                                </span>
+                                <span className="text-[11px] font-medium text-zinc-500">
+                                    System: {getStatusLabel()}
+                                </span>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
 
                     {/* User Profile */}
                     <div className={`
-                        relative flex items-center gap-3.5 p-2 rounded-2xl transition-all duration-300 group
-                        ${isCollapsed 
-                            ? 'justify-center bg-transparent hover:bg-white hover:shadow-xl hover:ring-1 hover:ring-zinc-100' 
-                            : 'bg-gradient-to-b from-white to-zinc-50/50 border border-white shadow-sm hover:shadow-md'
+                        relative flex items-center gap-2.5 rounded-xl transition-all duration-200 group cursor-pointer
+                        ${isCollapsed
+                            ? 'justify-center p-1.5 hover:bg-zinc-100'
+                            : 'p-2 hover:bg-zinc-50'
                         }
                     `}>
+                        {/* Avatar */}
                         <div className={`
-                            relative rounded-full bg-zinc-900 text-white flex items-center justify-center font-medium shadow-lg ring-4 ring-white shrink-0 transition-all duration-300 group-hover:scale-105 group-hover:shadow-xl overflow-hidden
-                            ${isCollapsed ? 'w-12 h-12 text-lg' : 'w-10 h-10 text-xs'}
+                            relative rounded-full bg-zinc-900 text-white flex items-center justify-center font-semibold shrink-0 overflow-hidden transition-transform duration-200 group-hover:scale-[1.03]
+                            ${isCollapsed ? 'w-10 h-10 text-sm' : 'w-9 h-9 text-xs'}
                         `}>
                             {user?.avatar ? (
-                                <img 
-                                    src={user.avatar} 
-                                    alt={user.displayName || user.username} 
+                                <img
+                                    src={user.avatar}
+                                    alt={user.displayName || user.username}
                                     className="w-full h-full object-cover"
                                     referrerPolicy="no-referrer"
                                 />
                             ) : (
-                                <span>{(user?.displayName || user?.username)?.charAt(0).toUpperCase() || 'U'}</span>
+                                <span>{userInitial}</span>
                             )}
-                            
-                            {/* Online Status Dot - Now Dynamic */}
-                            <div className={`absolute bottom-0 right-0 w-3 h-3 ${getStatusColor()} border-[2.5px] border-white rounded-full shadow-sm`}></div>
+                            {/* Status Dot */}
+                            <div className={`absolute bottom-0 right-0 w-2.5 h-2.5 ${getStatusColor()} border-2 border-white rounded-full`} />
                         </div>
 
-                        {/* Collapsed Profile Tooltip */}
-                        {isCollapsed && (
-                             <div className="absolute left-full bottom-0 ml-3 mb-[-10px] w-56 p-4 bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-zinc-100 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 translate-x-[-8px] group-hover:translate-x-0 z-50">
-                                <div className="flex items-center gap-3 mb-3 pb-3 border-b border-zinc-100">
-                                    <div className="w-10 h-10 rounded-full bg-zinc-100 flex items-center justify-center text-sm font-bold text-zinc-900 overflow-hidden">
-                                         {user?.avatar ? (
-                                             <img src={user.avatar} alt="" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
-                                         ) : (
-                                             <span>{(user?.displayName || user?.username)?.charAt(0).toUpperCase() || 'U'}</span>
-                                         )}
-                                    </div>
-                                    <div className="overflow-hidden">
-                                        <p className="text-sm font-bold text-zinc-900 truncate">{user?.displayName || user?.username || 'User'}</p>
-                                        <p className="text-xs text-zinc-500 truncate">{user?.email || user?.role || 'Administrator'}</p>
-                                    </div>
-                                </div>
-                                <button 
-                                    onClick={handleLogout}
-                                    className="w-full flex items-center gap-2 px-2 py-2 text-xs font-medium text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                                >
-                                    <LogOut size={14} />
-                                    Sign out
-                                </button>
-                             </div>
-                        )}
-                        
+                        {/* User Info */}
                         <AnimatePresence>
                             {!isCollapsed && (
-                                <motion.div 
+                                <motion.div
                                     initial={{ opacity: 0, width: 0 }}
                                     animate={{ opacity: 1, width: 'auto' }}
                                     exit={{ opacity: 0, width: 0 }}
-                                    transition={{ duration: 0.2 }}
+                                    transition={{ duration: 0.15 }}
                                     className="flex-1 min-w-0 overflow-hidden"
                                 >
-                                    <p className="text-[13px] font-bold text-black truncate tracking-tight">
+                                    <p className="text-[13px] font-semibold text-zinc-900 truncate leading-tight">
                                         {user?.displayName || user?.username || 'User'}
                                     </p>
-                                    <p className="text-[11px] text-zinc-400 truncate font-medium">{user?.email || user?.role || 'Administrator'}</p>
+                                    <p className="text-[11px] text-zinc-400 truncate leading-tight mt-0.5">
+                                        {user?.email || user?.role || 'Administrator'}
+                                    </p>
                                 </motion.div>
                             )}
                         </AnimatePresence>
-                        
+
+                        {/* Sign Out Button */}
                         <AnimatePresence>
                             {!isCollapsed && (
                                 <motion.button
                                     initial={{ opacity: 0, scale: 0.8 }}
                                     animate={{ opacity: 1, scale: 1 }}
                                     exit={{ opacity: 0, scale: 0.5 }}
-                                    transition={{ duration: 0.2 }}
+                                    transition={{ duration: 0.15 }}
                                     onClick={handleLogout}
-                                    className="p-2 text-zinc-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all duration-200 shrink-0"
+                                    className="p-1.5 text-zinc-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all duration-200 shrink-0"
                                     title="Sign out"
                                 >
-                                    <LogOut size={16} strokeWidth={2} />
+                                    <LogOut size={15} strokeWidth={2} />
                                 </motion.button>
                             )}
                         </AnimatePresence>
+
+                        {/* Collapsed Tooltip / Popover */}
+                        {isCollapsed && (
+                            <div className="absolute left-full bottom-0 ml-2 w-52 p-3 bg-white rounded-xl shadow-xl border border-zinc-100 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 translate-x-[-6px] group-hover:translate-x-0 z-[60]">
+                                <div className="flex items-center gap-2.5 mb-2.5 pb-2.5 border-b border-zinc-100">
+                                    <div className="w-8 h-8 rounded-full bg-zinc-100 flex items-center justify-center text-xs font-bold text-zinc-800 overflow-hidden shrink-0">
+                                        {user?.avatar ? (
+                                            <img src={user.avatar} alt="" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                                        ) : (
+                                            <span>{userInitial}</span>
+                                        )}
+                                    </div>
+                                    <div className="overflow-hidden">
+                                        <p className="text-[12px] font-bold text-zinc-900 truncate">{user?.displayName || user?.username || 'User'}</p>
+                                        <p className="text-[11px] text-zinc-400 truncate">{user?.email || user?.role}</p>
+                                    </div>
+                                </div>
+                                {/* Status in popover */}
+                                <div className="flex items-center gap-2 px-1 py-1.5 mb-1.5">
+                                    <span className={`w-1.5 h-1.5 rounded-full ${getStatusColor()}`} />
+                                    <span className="text-[11px] text-zinc-500">System: {getStatusLabel()}</span>
+                                </div>
+                                <button
+                                    onClick={handleLogout}
+                                    className="w-full flex items-center gap-2 px-2 py-2 text-[12px] font-medium text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                                >
+                                    <LogOut size={13} />
+                                    Sign out
+                                </button>
+                            </div>
+                        )}
                     </div>
-                </div>
                 </div>
             </motion.aside>
         </>

@@ -8,6 +8,7 @@ interface SettingsState {
     // Profile
     displayName: string;
     email: string;
+    phone: string;
     avatar: string | null; // Base64 encoded image or URL
     
     // Appearance
@@ -19,6 +20,8 @@ interface SettingsState {
     emailNotifications: boolean;
     pushNotifications: boolean;
     weeklyReport: boolean;
+    criticalAlerts: boolean;
+    diagnosisComplete: boolean;
     
     // Privacy
     analyticsEnabled: boolean;
@@ -32,6 +35,7 @@ const defaultSettings: SettingsState = {
     // Profile
     displayName: '',
     email: '',
+    phone: '',
     avatar: null,
     
     // Appearance
@@ -43,6 +47,8 @@ const defaultSettings: SettingsState = {
     emailNotifications: true,
     pushNotifications: true,
     weeklyReport: false,
+    criticalAlerts: true,
+    diagnosisComplete: true,
     
     // Privacy
     analyticsEnabled: true,
@@ -90,6 +96,10 @@ const settingsSlice = createSlice({
             state.avatar = action.payload;
             saveSettingsToStorage(state);
         },
+        setPhone: (state, action: PayloadAction<string>) => {
+            state.phone = action.payload;
+            saveSettingsToStorage(state);
+        },
         
         // Appearance
         setTheme: (state, action: PayloadAction<ThemeMode>) => {
@@ -118,6 +128,14 @@ const settingsSlice = createSlice({
             state.weeklyReport = action.payload;
             saveSettingsToStorage(state);
         },
+        setCriticalAlerts: (state, action: PayloadAction<boolean>) => {
+            state.criticalAlerts = action.payload;
+            saveSettingsToStorage(state);
+        },
+        setDiagnosisComplete: (state, action: PayloadAction<boolean>) => {
+            state.diagnosisComplete = action.payload;
+            saveSettingsToStorage(state);
+        },
         
         // Privacy
         setAnalyticsEnabled: (state, action: PayloadAction<boolean>) => {
@@ -141,12 +159,15 @@ export const {
     setDisplayName,
     setEmail,
     setAvatar,
+    setPhone,
     setTheme,
     setAccentColor,
     setCompactView,
     setEmailNotifications,
     setPushNotifications,
     setWeeklyReport,
+    setCriticalAlerts,
+    setDiagnosisComplete,
     setAnalyticsEnabled,
     updateSettings,
     resetSettings,

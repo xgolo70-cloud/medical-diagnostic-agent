@@ -10,16 +10,16 @@ export const Card = React.forwardRef<HTMLDivElement, CardProps>(
     ({ className, variant = 'default', children, ...props }, ref) => {
 
         const variants = {
-            default: "bg-white border border-[#eaeaea]",
-            bordered: "bg-white border border-[#eaeaea] hover:border-[#d4d4d4]",
-            elevated: "bg-white border border-[#eaeaea] shadow-sm hover:shadow-md"
+            default: "bg-white border border-zinc-200/60",
+            bordered: "bg-white border border-zinc-200/60 hover:border-zinc-300",
+            elevated: "bg-white border border-zinc-200/60 shadow-sm hover:shadow-md"
         };
 
         return (
             <motion.div
                 ref={ref}
                 className={cn(
-                    "rounded-md text-[#171717] overflow-hidden transition-all",
+                    "rounded-2xl text-zinc-900 overflow-hidden transition-all",
                     variants[variant],
                     className
                 )}

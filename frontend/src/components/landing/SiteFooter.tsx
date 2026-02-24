@@ -1,8 +1,9 @@
 import { motion, useInView } from 'framer-motion';
 import { useRef } from 'react';
-import { Github, Twitter, Linkedin, Brain, ArrowRight, Mail, Sparkles, Shield, Zap } from 'lucide-react';
+import { Github, Twitter, Linkedin, Brain, ArrowRight, LayoutDashboard, Mail, Sparkles, Shield, Zap } from 'lucide-react';
 import { Button } from '../ui/Button';
 import { useNavigate } from 'react-router-dom';
+import { useAppSelector } from '../../store/hooks';
 
 interface FooterLink {
     label: string;
@@ -67,11 +68,12 @@ export const SiteFooter = () => {
     const ref = useRef(null);
     const isInView = useInView(ref, { once: true, margin: "-50px" });
     const navigate = useNavigate();
+    const { isAuthenticated } = useAppSelector((state) => state.auth);
 
     return (
         <footer ref={ref} className="relative overflow-hidden font-sans">
             {/* Gradient Background */}
-            <div className="absolute inset-0 bg-gradient-to-b from-white via-gray-50/80 to-gray-100/50" />
+            <div className="absolute inset-0 bg-linear-to-b from-white via-gray-50/80 to-gray-100/50" />
             
             {/* Subtle Pattern */}
             <div className="absolute inset-0 z-0 opacity-30" 
@@ -102,7 +104,7 @@ export const SiteFooter = () => {
                         <h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black tracking-tight text-gray-900 mb-6 lg:mb-8 leading-[1.1]">
                             Ready to transform
                             <br />
-                            <span className="bg-gradient-to-r from-gray-900 via-gray-700 to-gray-900 bg-clip-text text-transparent">
+                            <span className="bg-linear-to-r from-gray-900 via-gray-700 to-gray-900 bg-clip-text text-transparent">
                                 patient care?
                             </span>
                         </h2>
@@ -116,11 +118,11 @@ export const SiteFooter = () => {
                         
                         <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-12">
                             <Button 
-                                onClick={() => navigate('/login')}
+                                onClick={() => navigate(isAuthenticated ? '/dashboard' : '/login')}
                                 className="group h-14 px-10 bg-gray-900 text-white hover:bg-gray-800 text-base font-semibold rounded-2xl shadow-xl shadow-gray-900/20 hover:shadow-2xl hover:shadow-gray-900/30 hover:-translate-y-1 transition-all w-full sm:w-auto duration-300"
                             >
-                                Get Started Free
-                                <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
+                                {isAuthenticated ? 'Go to Dashboard' : 'Get Started Free'}
+                                {isAuthenticated ? <LayoutDashboard className="w-5 h-5 ml-2" /> : <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />}
                             </Button>
                             <Button 
                                 variant="outline"
@@ -152,7 +154,7 @@ export const SiteFooter = () => {
             {/* Divider */}
             <div className="relative z-10">
                 <div className="max-w-7xl mx-auto px-6">
-                    <div className="h-px bg-gradient-to-r from-transparent via-gray-300 to-transparent" />
+                    <div className="h-px bg-linear-to-r from-transparent via-gray-300 to-transparent" />
                 </div>
             </div>
 
@@ -169,7 +171,7 @@ export const SiteFooter = () => {
                                 transition={{ duration: 0.6, delay: 0.2 }}
                             >
                                 <div className="flex items-center gap-3 mb-6">
-                                    <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-gray-900 to-gray-700 flex items-center justify-center shadow-lg shadow-gray-900/20">
+                                    <div className="w-11 h-11 rounded-xl bg-linear-to-br from-gray-900 to-gray-700 flex items-center justify-center shadow-lg shadow-gray-900/20">
                                         <Brain className="w-5 h-5 text-white" />
                                     </div>
                                     <span className="font-bold text-xl text-gray-900 tracking-tight">AI & Things</span>
@@ -225,7 +227,7 @@ export const SiteFooter = () => {
                                                         <span className="absolute -bottom-0.5 left-0 w-0 h-px bg-gray-900 transition-all duration-300 group-hover:w-full" />
                                                     </span>
                                                     {link.badge && (
-                                                        <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-gradient-to-r from-emerald-50 to-green-50 text-emerald-600 border border-emerald-100 uppercase tracking-wider">
+                                                        <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-linear-to-r from-emerald-50 to-green-50 text-emerald-600 border border-emerald-100 uppercase tracking-wider">
                                                             {link.badge}
                                                         </span>
                                                     )}

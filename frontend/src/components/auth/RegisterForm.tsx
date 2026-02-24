@@ -135,9 +135,9 @@ export const RegisterForm: React.FC = () => {
                 throw new Error(error.message);
             }
 
-            // Update profile with additional data if user was created
-            if (data.user) {
-                // Poll for profile creation (Database Trigger might be slow)
+            // Optional chaining for data.user
+            if (data?.user) {
+                // Determine user role and handle registration (Database Trigger might be slow)
                 const waitForProfile = async (userId: string, retries = 5, delay = 1000): Promise<boolean> => {
                     for (let i = 0; i < retries; i++) {
                         const { profile } = await db.getProfile(userId);
@@ -147,9 +147,10 @@ export const RegisterForm: React.FC = () => {
                     return false;
                 };
 
-                const profileCreated = await waitForProfile(data.user.id);
+                // 3. Wait for the database trigger to create the profile
+                const profileCreated = await waitForProfile(data?.user?.id || '');
                 
-                if (profileCreated) {
+                if (profileCreated && data?.user?.id) {
                     // Update profile with role and phone
                     await db.updateProfile(data.user.id, {
                         role: formData.role as 'patient' | 'doctor' | 'specialist' | 'admin' | 'auditor' | 'gp',

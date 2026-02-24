@@ -175,6 +175,11 @@ class Diagnosis(Base):
     image_url = Column(String(500), nullable=True)
     status = Column(String(20), default="completed") # completed, failed, pending_review
     
+    # Smart Classification Fields
+    severity = Column(String(20), nullable=True) # e.g., Critical, High, Medium, Low
+    condition_category = Column(String(100), nullable=True) # e.g., Respiratory, Cardiovascular
+    requires_immediate_attention = Column(Boolean, default=False)
+    
     created_at = Column(
         DateTime(timezone=True),
         default=lambda: datetime.now(timezone.utc),
@@ -185,7 +190,7 @@ class Diagnosis(Base):
         import json
         try:
             result = json.loads(self.diagnosis_result)
-        except:
+        except (json.JSONDecodeError, TypeError, ValueError):
             result = {}
             
         return {
@@ -193,6 +198,9 @@ class Diagnosis(Base):
             "patient_id": self.patient_id,
             "primary_diagnosis": self.primary_diagnosis,
             "confidence": float(self.confidence) if self.confidence else 0.0,
+            "severity": self.severity,
+            "condition_category": self.condition_category,
+            "requires_immediate_attention": self.requires_immediate_attention,
             "date": self.created_at.isoformat(),
             "status": self.status,
             "result": result
@@ -228,3 +236,46 @@ class Appointment(Base):
             "type": self.appointment_type,
             "status": self.status
         }
+
+
+class Medication(Base):
+    """
+    Stores active and historical medications for a patient.
+    """
+    __tablename__ = "medications"
+    
+    id = Column(String(36), primary_key=True, default=generate_uuid)
+    patient_id = Column(String(36), nullable=False, index=True) # ForeignKey conceptually
+    
+    name = Column(String(200), nullable=False)
+    dosage = Column(String(100), nullable=False)
+    frequency = Column(String(100), nullable=False)
+    
+    status = Column(String(50), default="active") # active, discontinued, completed
+    instructions = Column(Text, nullable=True)
+    prescribing_doctor = Column(String(100), nullable=True)
+    
+    start_date = Column(DateTime(timezone=True), nullable=True)
+    end_date = Column(DateTime(timezone=True), nullable=True)
+    
+    created_at = Column(
+        DateTime(timezone=True),
+        default=lambda: datetime.now(timezone.utc),
+        nullable=False
+    )
+    
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "patient_id": self.patient_id,
+            "name": self.name,
+            "dosage": self.dosage,
+            "frequency": self.frequency,
+            "status": self.status,
+            "instructions": self.instructions,
+            "prescribing_doctor": self.prescribing_doctor,
+            "start_date": self.start_date.isoformat() if self.start_date else None,
+            "end_date": self.end_date.isoformat() if self.end_date else None,
+            "created_at": self.created_at.isoformat()
+        }
+

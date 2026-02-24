@@ -3,8 +3,7 @@ import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { Users, Shield, UserPlus, ChevronRight, Loader2 } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
-import { supabase } from '../../lib/supabase';
-import { isDemoMode, DEMO_USERS_SUMMARY } from '../../data/demoData';
+import { adminApi } from '../../services/api';
 
 interface UserSummary {
     total: number;
@@ -23,48 +22,35 @@ const ROLE_COLORS: Record<string, string> = {
 
 export const AdminUsersWidget: React.FC = () => {
     const navigate = useNavigate();
-    const isDemo = isDemoMode();
 
     const { data: userSummary, isLoading } = useQuery<UserSummary>({
         queryKey: ['admin-users-summary'],
         queryFn: async () => {
-            if (isDemo) {
-                return DEMO_USERS_SUMMARY;
-            }
-            
-            // Fetch from Supabase
-            const { data: profiles, count } = await supabase
-                .from('profiles')
-                .select('id, username, role, created_at', { count: 'exact' })
-                .order('created_at', { ascending: false })
-                .limit(50);
+            // Fetch stats and recent users from backend API
+            const [stats, usersResult] = await Promise.all([
+                adminApi.getUserStats(),
+                adminApi.getUsers({ page: 1, page_size: 3 }),
+            ]);
 
-            if (!profiles) {
-                return DEMO_USERS_SUMMARY;
-            }
+            // Build role breakdown
+            const byRole = Object.entries(stats.by_role)
+                .filter(([, count]) => count > 0)
+                .map(([role, count]) => ({
+                    role,
+                    count,
+                    color: ROLE_COLORS[role] || 'bg-gray-50 text-gray-700',
+                }));
 
-            // Calculate role breakdown
-            const roleMap: Record<string, number> = {};
-            profiles.forEach(p => {
-                roleMap[p.role] = (roleMap[p.role] || 0) + 1;
-            });
-
-            const byRole = Object.entries(roleMap).map(([role, roleCount]) => ({
-                role,
-                count: roleCount,
-                color: ROLE_COLORS[role] || 'bg-gray-50 text-gray-700',
-            }));
-
-            // Recent 3 users
-            const recentUsers = profiles.slice(0, 3).map(p => ({
-                id: p.id,
-                username: p.username || 'Unknown',
-                role: p.role,
-                createdAt: p.created_at,
+            // Recent users
+            const recentUsers = usersResult.users.slice(0, 3).map(u => ({
+                id: u.id,
+                username: u.username || 'Unknown',
+                role: u.role,
+                createdAt: u.created_at,
             }));
 
             return {
-                total: count || profiles.length,
+                total: stats.total_users,
                 byRole,
                 recentUsers,
             };
@@ -86,7 +72,19 @@ export const AdminUsersWidget: React.FC = () => {
         );
     }
 
-    const summary = userSummary || DEMO_USERS_SUMMARY;
+    if (!userSummary) {
+        return (
+            <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+                <div className="px-5 py-4 border-b border-gray-100 bg-gray-50/50 flex items-center gap-2">
+                    <Users size={16} className="text-gray-400" />
+                    <h3 className="text-sm font-semibold text-gray-900">Users Overview</h3>
+                </div>
+                <div className="flex items-center justify-center py-12 text-gray-400 text-sm">
+                    Unable to load user data
+                </div>
+            </div>
+        );
+    }
 
     return (
         <motion.div 
@@ -118,14 +116,14 @@ export const AdminUsersWidget: React.FC = () => {
                         <Users size={20} className="text-white" />
                     </div>
                     <div>
-                        <p className="text-3xl font-bold text-gray-900">{summary.total}</p>
+                        <p className="text-3xl font-bold text-gray-900">{userSummary.total}</p>
                         <p className="text-xs text-gray-500 font-medium">Total Users</p>
                     </div>
                 </div>
 
                 {/* Role Breakdown */}
                 <div className="flex flex-wrap gap-2 mb-5">
-                    {summary.byRole.map((item) => (
+                    {userSummary.byRole.map((item) => (
                         <span 
                             key={item.role}
                             className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${item.color}`}
@@ -140,7 +138,7 @@ export const AdminUsersWidget: React.FC = () => {
                 <div className="border-t border-gray-100 pt-4">
                     <p className="text-xs text-gray-400 uppercase tracking-wider mb-3 font-medium">Recent Registrations</p>
                     <div className="space-y-2">
-                        {summary.recentUsers.map((user, idx) => (
+                        {userSummary.recentUsers.map((user, idx) => (
                             <motion.div 
                                 key={user.id}
                                 initial={{ opacity: 0, x: -10 }}

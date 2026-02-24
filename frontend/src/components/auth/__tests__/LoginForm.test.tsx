@@ -93,7 +93,7 @@ describe('LoginForm Component', () => {
         it('renders email input field', () => {
             renderWithProviders(<LoginForm />);
             
-            const emailInput = screen.getByPlaceholderText('you@example.com');
+            const emailInput = screen.getByPlaceholderText('you@example.com or admin');
             expect(emailInput).toBeInTheDocument();
             expect(emailInput).toHaveAttribute('type', 'email');
         });
@@ -109,7 +109,7 @@ describe('LoginForm Component', () => {
         it('renders sign in button', () => {
             renderWithProviders(<LoginForm />);
             
-            expect(screen.getByRole('button', { name: /sign in/i })).toBeInTheDocument();
+            expect(screen.getByRole('button', { name: /^Sign In$/i })).toBeInTheDocument();
         });
 
         it('renders Google sign in button', () => {
@@ -145,12 +145,12 @@ describe('LoginForm Component', () => {
             const user = userEvent.setup();
             renderWithProviders(<LoginForm />);
             
-            const emailInput = screen.getByPlaceholderText('you@example.com');
+            const emailInput = screen.getByPlaceholderText('you@example.com or admin');
             await user.click(emailInput);
             await user.tab(); // Blur the input
             
             await waitFor(() => {
-                expect(screen.getByText('Email is required')).toBeInTheDocument();
+                expect(screen.getByText('Email or Username is required')).toBeInTheDocument();
             });
         });
 
@@ -158,7 +158,7 @@ describe('LoginForm Component', () => {
             const user = userEvent.setup();
             renderWithProviders(<LoginForm />);
             
-            const emailInput = screen.getByPlaceholderText('you@example.com');
+            const emailInput = screen.getByPlaceholderText('you@example.com or admin');
             await user.type(emailInput, 'invalid-email');
             await user.tab();
             
@@ -184,18 +184,18 @@ describe('LoginForm Component', () => {
             const user = userEvent.setup();
             renderWithProviders(<LoginForm />);
             
-            const emailInput = screen.getByPlaceholderText('you@example.com');
+            const emailInput = screen.getByPlaceholderText('you@example.com or admin');
             await user.click(emailInput);
             await user.tab();
             
             await waitFor(() => {
-                expect(screen.getByText('Email is required')).toBeInTheDocument();
+                expect(screen.getByText('Email or Username is required')).toBeInTheDocument();
             });
             
             await user.type(emailInput, 'test@example.com');
             
             await waitFor(() => {
-                expect(screen.queryByText('Email is required')).not.toBeInTheDocument();
+                expect(screen.queryByText('Email or Username is required')).not.toBeInTheDocument();
             });
         });
     });
@@ -225,7 +225,7 @@ describe('LoginForm Component', () => {
             const user = userEvent.setup();
             renderWithProviders(<LoginForm />);
             
-            const submitButton = screen.getByRole('button', { name: /sign in/i });
+            const submitButton = screen.getByRole('button', { name: /^Sign In$/i });
             await user.click(submitButton);
             
             // Form should show validation errors
@@ -244,10 +244,10 @@ describe('LoginForm Component', () => {
             
             renderWithProviders(<LoginForm />);
             
-            await user.type(screen.getByPlaceholderText('you@example.com'), 'test@example.com');
+            await user.type(screen.getByPlaceholderText('you@example.com or admin'), 'test@example.com');
             await user.type(screen.getByPlaceholderText('••••••••'), 'Password123!');
             
-            const submitButton = screen.getByRole('button', { name: /sign in/i });
+            const submitButton = screen.getByRole('button', { name: /^Sign In$/i });
             await user.click(submitButton);
             
             await waitFor(() => {
@@ -261,7 +261,7 @@ describe('LoginForm Component', () => {
             const store = createTestStore({ isLoading: true });
             renderWithProviders(<LoginForm />, store);
             
-            expect(screen.getByPlaceholderText('you@example.com')).toBeDisabled();
+            expect(screen.getByPlaceholderText('you@example.com or admin')).toBeDisabled();
             expect(screen.getByPlaceholderText('••••••••')).toBeDisabled();
         });
 
@@ -306,7 +306,7 @@ describe('LoginForm Component', () => {
         it('has proper form labels', () => {
             renderWithProviders(<LoginForm />);
             
-            expect(screen.getByText('Email')).toBeInTheDocument();
+            expect(screen.getByText('Email or Username')).toBeInTheDocument();
             expect(screen.getByText('Password')).toBeInTheDocument();
         });
 

@@ -1,7 +1,8 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowRight, Play, ChevronRight, Activity, Shield, Zap } from 'lucide-react';
+import { ArrowRight, Play, ChevronRight, Activity, Shield, Zap, LayoutDashboard } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useAppSelector } from '../../store/hooks';
 
 // Waterfall Images - Medical Diagnostic AI Theme
 const leftColumnImages = [
@@ -22,6 +23,7 @@ const rightColumnImages = [
 
 export const HeroSection = () => {
     const navigate = useNavigate();
+    const { isAuthenticated } = useAppSelector((state) => state.auth);
     const words = ["at the Edge", "for Everyone", "with Speed", "Securely"];
     const [index, setIndex] = React.useState(0);
 
@@ -57,14 +59,14 @@ export const HeroSection = () => {
             {/* Background Effects */}
             <div className="absolute inset-0 z-0">
                 <div className="absolute inset-0 bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:16px_16px] [mask-image:radial-gradient(ellipse_50%_50%_at_50%_50%,#000_70%,transparent_100%)] opacity-30" />
-                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[400px] opacity-30 bg-gradient-to-b from-blue-50/50 to-transparent blur-3xl pointer-events-none" />
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[400px] opacity-30 bg-linear-to-b from-blue-50/50 to-transparent blur-3xl pointer-events-none" />
             </div>
 
             {/* Left Waterfall Column */}
             <div className="absolute left-0 top-0 bottom-0 w-40 lg:w-56 xl:w-72 overflow-hidden z-0 hidden md:block">
                 {/* Fade Overlays - Softer */}
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-white z-20 pointer-events-none" />
-                <div className="absolute inset-0 bg-gradient-to-b from-white via-transparent to-white z-20 pointer-events-none" />
+                <div className="absolute inset-0 bg-linear-to-r from-transparent via-white/30 to-white z-20 pointer-events-none" />
+                <div className="absolute inset-0 bg-linear-to-b from-white via-transparent to-white z-20 pointer-events-none" />
                 
                 {/* Tilted Container - Higher opacity */}
                 <div className="absolute inset-0 transform -rotate-12 scale-150 origin-center opacity-70">
@@ -74,7 +76,7 @@ export const HeroSection = () => {
                                 key={`left-${i}`} 
                                 className="relative w-full aspect-[3/4] rounded-3xl overflow-hidden shadow-2xl shadow-blue-500/20 border border-white/30 group"
                             >
-                                <div className="absolute inset-0 bg-gradient-to-br from-blue-500/20 to-indigo-500/20 z-10 group-hover:opacity-0 transition-opacity duration-500" />
+                                <div className="absolute inset-0 bg-linear-to-br from-blue-500/20 to-indigo-500/20 z-10 group-hover:opacity-0 transition-opacity duration-500" />
                                 <img 
                                     src={img} 
                                     alt="" 
@@ -90,8 +92,8 @@ export const HeroSection = () => {
             {/* Right Waterfall Column */}
             <div className="absolute right-0 top-0 bottom-0 w-40 lg:w-56 xl:w-72 overflow-hidden z-0 hidden md:block">
                 {/* Fade Overlays - Softer */}
-                <div className="absolute inset-0 bg-gradient-to-l from-transparent via-white/30 to-white z-20 pointer-events-none" />
-                <div className="absolute inset-0 bg-gradient-to-b from-white via-transparent to-white z-20 pointer-events-none" />
+                <div className="absolute inset-0 bg-linear-to-l from-transparent via-white/30 to-white z-20 pointer-events-none" />
+                <div className="absolute inset-0 bg-linear-to-b from-white via-transparent to-white z-20 pointer-events-none" />
                 
                 {/* Tilted Container - Higher opacity */}
                 <div className="absolute inset-0 transform rotate-12 scale-150 origin-center opacity-70">
@@ -101,7 +103,7 @@ export const HeroSection = () => {
                                 key={`right-${i}`} 
                                 className="relative w-full aspect-[3/4] rounded-3xl overflow-hidden shadow-2xl shadow-purple-500/20 border border-white/30 group"
                             >
-                                <div className="absolute inset-0 bg-gradient-to-br from-purple-500/20 to-pink-500/20 z-10 group-hover:opacity-0 transition-opacity duration-500" />
+                                <div className="absolute inset-0 bg-linear-to-br from-purple-500/20 to-pink-500/20 z-10 group-hover:opacity-0 transition-opacity duration-500" />
                                 <img 
                                     src={img} 
                                     alt="" 
@@ -157,7 +159,7 @@ export const HeroSection = () => {
                                         animate={{ y: "0%", opacity: 1 }}
                                         exit={{ y: "-100%", opacity: 0 }}
                                         transition={{ duration: 0.5, ease: "circOut" }}
-                                        className="block bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent px-2 whitespace-nowrap"
+                                        className="block bg-linear-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent px-2 whitespace-nowrap"
                                     >
                                         {words[index]}
                                     </motion.span>
@@ -196,13 +198,13 @@ export const HeroSection = () => {
                         className="flex flex-col sm:flex-row items-center justify-center gap-4 w-full"
                     >
                         <button 
-                            onClick={() => navigate('/login')}
+                            onClick={() => navigate(isAuthenticated ? '/dashboard' : '/login')}
                             className="group relative w-full sm:w-auto px-8 py-4 bg-zinc-900 text-white rounded-xl font-semibold text-lg flex items-center justify-center gap-3 overflow-hidden transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] shadow-[0_10px_30px_-10px_rgba(0,0,0,0.5)] hover:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.6)]"
                         >
-                            <div className="absolute inset-0 bg-gradient-to-tr from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                            <span className="relative z-10">Sign In</span>
+                            <div className="absolute inset-0 bg-linear-to-tr from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                            <span className="relative z-10">{isAuthenticated ? 'Go to Dashboard' : 'Sign In'}</span>
                             <div className="relative z-10 p-1 rounded-full bg-white/10 group-hover:bg-white/20 transition-colors">
-                                <ArrowRight size={18} className="group-hover:translate-x-0.5 transition-transform duration-300" />
+                                {isAuthenticated ? <LayoutDashboard size={18} /> : <ArrowRight size={18} className="group-hover:translate-x-0.5 transition-transform duration-300" />}
                             </div>
                         </button>
                         <button className="w-full sm:w-auto px-8 py-4 bg-white text-gray-900 border border-gray-200 rounded-xl font-semibold text-lg flex items-center justify-center gap-2 hover:bg-gray-50 hover:border-gray-300 transition-all shadow-sm">
@@ -235,7 +237,7 @@ export const HeroSection = () => {
             </div>
             
             {/* Abstract Gradient Blob at bottom */}
-            <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-white to-transparent z-10" />
+            <div className="absolute bottom-0 left-0 right-0 h-32 bg-linear-to-t from-white to-transparent z-10" />
         </section>
     );
 };

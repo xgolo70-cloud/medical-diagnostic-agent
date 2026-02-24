@@ -151,7 +151,7 @@ const TourTooltip: React.FC<TooltipProps> = ({
             <div className="relative bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden">
                 
                 {/* Gradient Top Border */}
-                <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500" />
+                <div className="absolute top-0 left-0 right-0 h-1 bg-linear-to-r from-blue-500 via-purple-500 to-pink-500" />
                 
                 {/* Header */}
                 <div className="relative px-6 pt-5 pb-4">
@@ -160,7 +160,7 @@ const TourTooltip: React.FC<TooltipProps> = ({
                             <motion.div 
                                 initial={{ rotate: -10 }}
                                 animate={{ rotate: 0 }}
-                                className="w-10 h-10 rounded-xl bg-gradient-to-br from-gray-900 to-gray-700 flex items-center justify-center shadow-lg"
+                                className="w-10 h-10 rounded-xl bg-linear-to-br from-gray-900 to-gray-700 flex items-center justify-center shadow-lg"
                             >
                                 {step.icon || <Lightbulb className="text-white" size={20} />}
                             </motion.div>
@@ -196,7 +196,7 @@ const TourTooltip: React.FC<TooltipProps> = ({
                                     i < stepIndex 
                                         ? 'bg-green-500' 
                                         : i === stepIndex 
-                                            ? 'bg-gradient-to-r from-blue-500 to-purple-500' 
+                                            ? 'bg-linear-to-r from-blue-500 to-purple-500' 
                                             : 'bg-gray-200'
                                 }`}
                             />
@@ -244,7 +244,7 @@ const TourTooltip: React.FC<TooltipProps> = ({
                                 whileHover={{ scale: 1.02 }}
                                 whileTap={{ scale: 0.98 }}
                                 onClick={onFinish}
-                                className="flex items-center gap-2 px-5 py-2.5 text-sm font-bold text-white bg-gradient-to-r from-green-500 to-emerald-600 rounded-xl shadow-lg shadow-green-500/25 hover:shadow-xl hover:shadow-green-500/30 transition-all"
+                                className="flex items-center gap-2 px-5 py-2.5 text-sm font-bold text-white bg-linear-to-r from-green-500 to-emerald-600 rounded-xl shadow-lg shadow-green-500/25 hover:shadow-xl hover:shadow-green-500/30 transition-all"
                             >
                                 <Check size={16} />
                                 إنهاء الجولة
@@ -254,7 +254,7 @@ const TourTooltip: React.FC<TooltipProps> = ({
                                 whileHover={{ scale: 1.02 }}
                                 whileTap={{ scale: 0.98 }}
                                 onClick={onNext}
-                                className="flex items-center gap-2 px-5 py-2.5 text-sm font-bold text-white bg-gradient-to-r from-gray-900 to-gray-700 rounded-xl shadow-lg shadow-gray-900/25 hover:shadow-xl hover:shadow-gray-900/30 transition-all"
+                                className="flex items-center gap-2 px-5 py-2.5 text-sm font-bold text-white bg-linear-to-r from-gray-900 to-gray-700 rounded-xl shadow-lg shadow-gray-900/25 hover:shadow-xl hover:shadow-gray-900/30 transition-all"
                             >
                                 التالي
                                 <ChevronLeft size={16} />

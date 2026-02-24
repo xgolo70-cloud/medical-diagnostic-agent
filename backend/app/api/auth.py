@@ -15,6 +15,7 @@ from app.core.auth import (
     create_token_pair,
     rotate_tokens,
     revoke_token,
+    revoke_user_all_tokens,
     verify_password,
     hash_password,
     TokenPair,
@@ -26,6 +27,7 @@ from app.database.models import User, UserRole
 from app.schemas.user import (
     UserCreate,
     UserResponse,
+    UserUpdate,
     ForgotPasswordRequest,
     ResetPasswordRequest,
     TokenResponse
@@ -40,7 +42,7 @@ router = APIRouter(prefix="/auth", tags=["Authentication"])
 class LoginRequest(BaseModel):
     """Login can be done with username or email"""
     username: str = Field(..., min_length=3, max_length=255)  # Can be username or email
-    password: str = Field(..., min_length=6, max_length=100)
+    password: str = Field(..., min_length=4, max_length=100)
 
 class RefreshRequest(BaseModel):
     refresh_token: str
@@ -314,6 +316,20 @@ async def logout(
     return MessageResponse(message="Successfully logged out")
 
 
+# ================== Logout All Devices ==================
+
+@router.post("/logout-all", response_model=MessageResponse)
+async def logout_all_devices(
+    current_user: AuthUser = Depends(get_current_user)
+):
+    """
+    Logout from all devices by revoking all tokens for this user.
+    The user will need to log in again on every device.
+    """
+    revoke_user_all_tokens(current_user.username)
+    return MessageResponse(message="Successfully logged out from all devices")
+
+
 # ================== Email Verification Endpoints ==================
 
 @router.get("/verify-email", response_model=MessageResponse)
@@ -477,9 +493,7 @@ async def get_current_user_info(
 
 @router.put("/me", response_model=UserResponse)
 async def update_profile(
-    full_name: Optional[str] = None,
-    phone: Optional[str] = None,
-    avatar_url: Optional[str] = None,
+    update_data: UserUpdate,
     current_user: AuthUser = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
@@ -518,12 +532,12 @@ async def update_profile(
             db.refresh(user)
     
     # Update only provided fields
-    if full_name is not None:
-        user.full_name = full_name
-    if phone is not None:
-        user.phone = phone
-    if avatar_url is not None:
-        user.avatar_url = avatar_url
+    if update_data.full_name is not None:
+        user.full_name = update_data.full_name
+    if update_data.phone is not None:
+        user.phone = update_data.phone
+    if update_data.avatar_url is not None:
+        user.avatar_url = update_data.avatar_url
     
     db.commit()
     db.refresh(user)

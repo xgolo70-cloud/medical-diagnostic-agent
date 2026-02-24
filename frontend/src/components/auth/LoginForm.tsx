@@ -2,34 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Eye, EyeOff, ArrowLeft, Brain, ArrowRight, AlertCircle, Lock } from 'lucide-react';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
-import { loginUser, loginSuccess, loginStart, loginFailure } from '../../store/authSlice'; // loginUser added
-import { tokenManager } from '../../services/api';
+import { loginUser, loginStart, loginFailure } from '../../store/authSlice';
 import { Link } from 'react-router-dom';
-import { supabaseAuth, db } from '../../lib/supabase';
+import { supabaseAuth } from '../../lib/supabase';
 
-// Demo credentials for quick login (still works in demo mode)
-const DEMO_CREDENTIALS = [
-    { username: 'admin', password: 'Admin123!', role: 'admin' as const, displayName: 'System Administrator', email: 'admin@medai.local' },
-    { username: 'dr.smith', password: 'Doctor123!', role: 'specialist' as const, displayName: 'Dr. Sarah Smith', email: 'doctor@medai.local' },
-    { username: 'auditor', password: 'Auditor123!', role: 'auditor' as const, displayName: 'System Auditor', email: 'auditor@medai.local' },
-];
 
-// Demo mode - set to true for frontend-only demo without backend
-const DEMO_MODE = import.meta.env.VITE_DEMO_MODE === 'true';
-
-// Generate mock JWT token for demo mode
-const generateMockToken = (username: string, role: string): string => {
-    const header = btoa(JSON.stringify({ alg: 'HS256', typ: 'JWT' }));
-    const payload = btoa(JSON.stringify({
-        username,
-        role,
-        exp: Math.floor(Date.now() / 1000) + 3600,
-        iat: Math.floor(Date.now() / 1000),
-        jti: Math.random().toString(36).substring(7)
-    }));
-    const signature = btoa('demo-signature');
-    return `${header}.${payload}.${signature}`;
-};
 
 export const LoginForm: React.FC = () => {
     const dispatch = useAppDispatch();
@@ -53,8 +30,7 @@ export const LoginForm: React.FC = () => {
 
     const validateForm = (): boolean => {
         const errors: { email?: string; password?: string } = {};
-        if (!email.trim()) errors.email = 'Email is required';
-        else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) errors.email = 'Invalid email format';
+        if (!email.trim()) errors.email = 'Email or Username is required';
         if (!password) errors.password = 'Password is required';
         setFormErrors(errors);
         return Object.keys(errors).length === 0;
@@ -64,36 +40,9 @@ export const LoginForm: React.FC = () => {
         e.preventDefault();
         if (!validateForm()) return;
 
-        // Demo mode - validate locally without backend
-        if (DEMO_MODE) {
-            dispatch(loginStart());
-            const demoUser = DEMO_CREDENTIALS.find(
-                cred => cred.email === email && cred.password === password
-            );
-            
-            if (demoUser) {
-                const mockToken = generateMockToken(demoUser.username, demoUser.role);
-                tokenManager.setTokens(mockToken, mockToken);
-                dispatch(loginSuccess({
-                    username: demoUser.username,
-                    role: demoUser.role,
-                    email: demoUser.email,
-                    displayName: demoUser.displayName,
-                }));
-            } else {
-                dispatch(loginFailure('Invalid credentials. Try demo accounts below.'));
-            }
-            return;
-        }
-
-        // Real Backend Auth via Thunk
         try {
-            // We use email as username for the backend if it's an email structure, 
-            // but the backend supports both.
             await dispatch(loginUser({ username: email, password })).unwrap();
-            // Success is handled by the slice reducer (redirects usually happen in parent or via useEffect on isAuthenticated)
         } catch (err) {
-            // Error is handled by slice, but we can log or do extra UI feedback here if needed
             console.error('Login failed:', err);
         }
     };
@@ -114,40 +63,7 @@ export const LoginForm: React.FC = () => {
         }
     };
 
-    const handleDemoLogin = async (cred: typeof DEMO_CREDENTIALS[0]) => {
-        dispatch(loginStart());
-        
-        // Demo mode - instant login
-        if (DEMO_MODE) {
-            const mockToken = generateMockToken(cred.username, cred.role);
-            tokenManager.setTokens(mockToken, mockToken);
-            dispatch(loginSuccess({
-                username: cred.username,
-                role: cred.role,
-                email: cred.email,
-                displayName: cred.displayName,
-            }));
-            return;
-        }
 
-        // For Quick Select in Real Mode, we can use the same Thunk if we want to support these users
-        // But since we don't know if these users exist in the Real DB, we might want to fail gracefully
-        // or just use the mock login for "Quick Select" purely for demo purposes even in non-demo mode?
-        // Let's assume Quick Select users MIGHT exist in DB if seeded.
-        
-        try {
-            await dispatch(loginUser({ username: cred.username, password: cred.password })).unwrap();
-        } catch (err) {
-            console.warn('Quick login failed against real backend:', err);
-            // Fallback to mock for smooth demo experience if backend fails?
-            // No, "Real Integration" track implies we want to see failures if backend is missing.
-            // But to avoid blocking the user if they just want to look around:
-            // console.warn('Falling back to local mock login');
-            // const mockToken = generateMockToken(cred.username, cred.role);
-            // tokenManager.setTokens(mockToken, mockToken);
-            // dispatch(loginSuccess({ ...cred }));
-        }
-    };
 
     return (
         <div className="min-h-screen w-full flex items-center justify-center bg-[#fafafa] relative overflow-hidden font-['Inter',sans-serif] p-4">
@@ -164,8 +80,8 @@ export const LoginForm: React.FC = () => {
 
             {/* Minimal Accent Orbs */}
             <div className="absolute inset-0 overflow-hidden pointer-events-none">
-                <div className="absolute top-[-10%] left-[-5%] w-[400px] h-[400px] bg-gradient-to-br from-blue-100/40 to-transparent rounded-full blur-3xl" />
-                <div className="absolute bottom-[-10%] right-[-5%] w-[400px] h-[400px] bg-gradient-to-tl from-purple-100/40 to-transparent rounded-full blur-3xl" />
+                <div className="absolute top-[-10%] left-[-5%] w-[400px] h-[400px] bg-linear-to-br from-blue-100/40 to-transparent rounded-full blur-3xl" />
+                <div className="absolute bottom-[-10%] right-[-5%] w-[400px] h-[400px] bg-linear-to-tl from-purple-100/40 to-transparent rounded-full blur-3xl" />
             </div>
             
             <div className="w-full max-w-4xl relative z-10">
@@ -214,7 +130,7 @@ export const LoginForm: React.FC = () => {
                                     ].map((img, i) => (
                                         <div key={i} className="relative w-full aspect-[2/3] rounded-2xl overflow-hidden shadow-2xl border border-white/10 group">
                                             <div className="absolute inset-0 bg-indigo-500/20 mix-blend-overlay z-10" />
-                                            <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/60 z-10" />
+                                            <div className="absolute inset-0 bg-linear-to-b from-transparent via-transparent to-black/60 z-10" />
                                             <img src={img} alt="" className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-1000 ease-out" />
                                         </div>
                                     ))}
@@ -235,7 +151,7 @@ export const LoginForm: React.FC = () => {
                                     ].map((img, i) => (
                                         <div key={i} className="relative w-full aspect-[2/3] rounded-2xl overflow-hidden shadow-2xl border border-white/10 group">
                                             <div className="absolute inset-0 bg-blue-500/20 mix-blend-overlay z-10" />
-                                            <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/60 z-10" />
+                                            <div className="absolute inset-0 bg-linear-to-b from-transparent via-transparent to-black/60 z-10" />
                                             <img src={img} alt="" className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-1000 ease-out" />
                                         </div>
                                     ))}
@@ -256,7 +172,7 @@ export const LoginForm: React.FC = () => {
                                     ].map((img, i) => (
                                         <div key={i} className="relative w-full aspect-[2/3] rounded-2xl overflow-hidden shadow-2xl border border-white/10 group">
                                             <div className="absolute inset-0 bg-purple-500/20 mix-blend-overlay z-10" />
-                                            <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/60 z-10" />
+                                            <div className="absolute inset-0 bg-linear-to-b from-transparent via-transparent to-black/60 z-10" />
                                             <img src={img} alt="" className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-1000 ease-out" />
                                         </div>
                                     ))}
@@ -264,7 +180,7 @@ export const LoginForm: React.FC = () => {
                             </div>
 
                             {/* Unifying global overlay - Minimal gradient for text contrast only */}
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-black/30 pointer-events-none z-10" />
+                            <div className="absolute inset-0 bg-linear-to-t from-black/90 via-black/20 to-black/30 pointer-events-none z-10" />
 
                          </div>
                          
@@ -299,15 +215,15 @@ export const LoginForm: React.FC = () => {
                                             </motion.span>
                                         </AnimatePresence>
                                     </span>
-                                    <div className="absolute -bottom-1 left-0 right-0 h-[3px] bg-gradient-to-r from-blue-400/60 via-purple-400/80 to-blue-400/60 rounded-full" />
+                                    <div className="absolute -bottom-1 left-0 right-0 h-[3px] bg-linear-to-r from-blue-400/60 via-purple-400/80 to-blue-400/60 rounded-full" />
                                 </div>
                             </h2>
                          </div>
 
                          <div className="relative z-20 flex items-center gap-3 pt-6 mt-8 lg:mt-auto opacity-60">
-                            <div className="h-px flex-1 bg-gradient-to-r from-transparent via-white/30 to-transparent" />
+                            <div className="h-px flex-1 bg-linear-to-r from-transparent via-white/30 to-transparent" />
                             <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-white/80 drop-shadow-sm">V.2.0.26</span>
-                            <div className="h-px flex-1 bg-gradient-to-r from-transparent via-white/30 to-transparent" />
+                            <div className="h-px flex-1 bg-linear-to-r from-transparent via-white/30 to-transparent" />
                          </div>
                     </div>
 
@@ -343,10 +259,10 @@ export const LoginForm: React.FC = () => {
                             </div>
 
                             <form onSubmit={handleSubmit} className="space-y-4" autoComplete="on">
-                                {/* Email */}
+                                {/* Email/Username */}
                                 <div className="space-y-1.5">
                                     <div className="flex justify-between items-center">
-                                        <label htmlFor="login-email" className="text-xs font-medium text-[#666666]">Email</label>
+                                        <label htmlFor="login-email" className="text-xs font-medium text-[#666666]">Email or Username</label>
                                         {formErrors.email && (
                                             <span className="text-[11px] font-medium text-red-500 flex items-center gap-1">
                                                 <AlertCircle size={10} /> {formErrors.email}
@@ -354,18 +270,17 @@ export const LoginForm: React.FC = () => {
                                         )}
                                     </div>
                                     <input
-                                        type="email"
+                                        type="text"
                                         id="login-email"
                                         name="email"
-                                        autoComplete="email"
+                                        autoComplete="username"
                                         value={email}
                                         onChange={(e) => { setEmail(e.target.value); if (formErrors.email) setFormErrors({ ...formErrors, email: undefined }); }}
                                         onBlur={() => {
-                                            if (!email.trim()) setFormErrors(prev => ({ ...prev, email: 'Email is required' }));
-                                            else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) setFormErrors(prev => ({ ...prev, email: 'Invalid email format' }));
+                                            if (!email.trim()) setFormErrors(prev => ({ ...prev, email: 'Email or Username is required' }));
                                         }}
                                         className={`w-full h-10 px-3.5 rounded-md bg-white border ${formErrors.email ? 'border-red-300 focus:border-red-400' : 'border-[#eaeaea] focus:border-[#171717]'} text-[#171717] placeholder-[#a3a3a3] focus:outline-none focus:ring-2 focus:ring-[#eaeaea] transition-all duration-150 text-sm`}
-                                        placeholder="you@example.com"
+                                        placeholder="you@example.com or admin"
                                         disabled={isLoading}
                                     />
                                 </div>
@@ -430,7 +345,7 @@ export const LoginForm: React.FC = () => {
                                 {/* Divider */}
                                 <div className="relative flex py-2 items-center">
                                     <div className="flex-grow border-t border-[#eaeaea]"></div>
-                                    <span className="flex-shrink-0 mx-3 text-[#888888] text-xs font-medium">Or</span>
+                                    <span className="shrink-0 mx-3 text-[#888888] text-xs font-medium">Or</span>
                                     <div className="flex-grow border-t border-[#eaeaea]"></div>
                                 </div>
 
@@ -450,40 +365,37 @@ export const LoginForm: React.FC = () => {
                                     Sign in with Google
                                 </button>
                             </form>
-                        </div>
 
-                        {/* Quick Select Footer */}
-                        <div className="mt-6 bg-[#fafafa] rounded-md p-4 border border-[#eaeaea]">
-                            <div className="flex items-center justify-between mb-3">
-                                <p className="text-[10px] text-[#888888] uppercase tracking-wider font-medium">Quick Select</p>
-                                <div className="px-2 py-0.5 rounded-full bg-emerald-50 border border-emerald-100 flex items-center gap-1">
-                                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                                    <span className="text-[10px] font-medium text-emerald-700">Demo</span>
+                            {/* Demo Credentials */}
+                            <div className="mt-8 pt-6 border-t border-[#eaeaea]">
+                                <p className="text-xs font-medium text-[#888888] mb-3 text-center uppercase tracking-wider">Quick Select</p>
+                                <div className="grid grid-cols-3 gap-2">
+                                    <button
+                                        type="button"
+                                        onClick={() => { setEmail('admin'); setPassword('Admin123!'); }}
+                                        className="h-8 rounded text-xs font-medium bg-[#f5f5f5] text-[#666] hover:bg-[#e5e5e5] hover:text-[#171717] transition-colors"
+                                    >
+                                        admin
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => { setEmail('dr.smith'); setPassword('Doctor123!'); }}
+                                        className="h-8 rounded text-xs font-medium bg-[#f5f5f5] text-[#666] hover:bg-[#e5e5e5] hover:text-[#171717] transition-colors"
+                                    >
+                                        specialist
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => { setEmail('auditor'); setPassword('Auditor123!'); }}
+                                        className="h-8 rounded text-xs font-medium bg-[#f5f5f5] text-[#666] hover:bg-[#e5e5e5] hover:text-[#171717] transition-colors"
+                                    >
+                                        auditor
+                                    </button>
                                 </div>
                             </div>
-                            <div className="grid grid-cols-3 gap-2">
-                                {DEMO_CREDENTIALS.map((cred) => (
-                                    <button
-                                        key={cred.role}
-                                        type="button"
-                                        onClick={() => handleDemoLogin(cred)}
-                                        disabled={isLoading}
-                                        className="group flex items-center justify-center gap-1.5 h-9 px-2 rounded-md border border-[#eaeaea] bg-white hover:bg-[#171717] hover:border-[#171717] hover:text-white active:scale-[0.98] transition-all duration-150 disabled:opacity-50 disabled:cursor-not-allowed"
-                                    >
-                                        <div className={`w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-semibold transition-colors ${
-                                            cred.role === 'admin' ? 'bg-blue-100 text-blue-600 group-hover:bg-white group-hover:text-blue-600' : 
-                                            cred.role === 'specialist' ? 'bg-purple-100 text-purple-600 group-hover:bg-white group-hover:text-purple-600' : 
-                                            'bg-orange-100 text-orange-600 group-hover:bg-white group-hover:text-orange-600'
-                                        }`}>
-                                            {cred.role.charAt(0).toUpperCase()}
-                                        </div>
-                                        <span className="text-xs font-medium text-[#666666] group-hover:text-white capitalize transition-colors">
-                                            {cred.role}
-                                        </span>
-                                    </button>
-                                ))}
-                            </div>
                         </div>
+
+
 
                         {/* Create Account Link */}
                         <p className="text-center text-xs text-[#888888] mt-4">

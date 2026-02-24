@@ -3,10 +3,13 @@ Database Initialization
 Script for setting up the database and seeding initial data.
 """
 import os
+import logging
 from datetime import datetime, timezone
 from .connection import create_tables, get_db_context, engine, Base
 from .models import User, UserRole
 from app.core.auth import hash_password
+
+logger = logging.getLogger(__name__)
 
 
 def init_database():
@@ -30,10 +33,10 @@ def seed_initial_users():
         # Check if any users exist
         existing_users = db.query(User).first()
         if existing_users:
-            print("ℹ️ Database already has users, skipping seed")
+            logger.info("Database already has users, skipping seed")
             return
         
-        print("🌱 Seeding initial users...")
+        logger.info("Seeding initial users...")
         
         # Create default admin user
         admin_user = User(
@@ -92,17 +95,16 @@ def seed_initial_users():
                 db.add(user)
         
         db.commit()
-        print("✅ Initial users seeded successfully")
+        logger.info("Initial users seeded successfully")
         
-        # Print demo credentials in development
+        # Log demo credentials at DEBUG level (suppressed in production)
         if os.getenv("ENVIRONMENT", "development") != "production":
-            print("\n📝 Demo Credentials:")
-            print("  Admin:      admin / Admin123!")
-            print("  Specialist: dr.smith / Doctor123!")
-            print("  GP:         dr.johnson / Doctor123!")
-            print("  Patient:    john.doe / Patient123!")
-            print("  Auditor:    auditor / Auditor123!")
-            print()
+            logger.debug("Demo Credentials:")
+            logger.debug("  Admin:      admin / Admin123!")
+            logger.debug("  Specialist: dr.smith / Doctor123!")
+            logger.debug("  GP:         dr.johnson / Doctor123!")
+            logger.debug("  Patient:    john.doe / Patient123!")
+            logger.debug("  Auditor:    auditor / Auditor123!")
 
 
 def reset_database():
@@ -113,12 +115,12 @@ def reset_database():
     if os.getenv("ENVIRONMENT") == "production":
         raise RuntimeError("Cannot reset database in production!")
     
-    print("⚠️ Dropping all tables...")
+    logger.warning("Dropping all tables...")
     Base.metadata.drop_all(bind=engine)
     
-    print("🔄 Recreating tables...")
+    logger.info("Recreating tables...")
     init_database()
-    print("✅ Database reset complete")
+    logger.info("Database reset complete")
 
 
 if __name__ == "__main__":

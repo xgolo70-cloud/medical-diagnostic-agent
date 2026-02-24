@@ -18,11 +18,11 @@ A unified platform that serves as a holistic health hub ("The Place") for patien
 - [ ] **Mobile Responsiveness**: Critical for a "Super App". Ensure touch-friendliness.
 
 ### 1.2 Authentication & Roles
-- [ ] **RBAC (Role-Based Access Control)**: Strictly separate `Patient`, `Doctor`, `Admin`, and `Institution` roles.
-- [ ] **Security**: Implement 2FA and HIPAA/GDPR compliant data handling basics.
+- [x] **RBAC (Role-Based Access Control)**: Strictly separate `Patient`, `Doctor`, `Admin`, and `Institution` roles.
+- [x] **Security**: Implement 2FA and HIPAA/GDPR compliant data handling basics (JWT, Argon2, Structured Logs).
 
 ### 1.3 Basic AI Integration
-- [ ] Optimize Local MedGemma (reduce inference time).
+- [x] Optimize Local MedGemma (reduce inference time).
 - [ ] Basic "Symptom Checker" chat interface.
 
 ---
@@ -32,14 +32,14 @@ A unified platform that serves as a holistic health hub ("The Place") for patien
 
 ### 2.1 Electronic Medical Record (EMR)
 - [ ] **Standardized Data Schema**: Adopt FHIR (Fast Healthcare Interoperability Resources) standards for data structure.
-- [ ] **Modules**:
-    - **History**: Chronological view of visits.
-    - **Medications**: Active prescriptions and history.
-    - **Labs & Imaging**: ability to view PDF reports and DICOM previews.
+- [x] **Modules**:
+    - [x] **History**: Chronological view of visits.
+    - [ ] **Medications**: Active prescriptions and history.
+    - [x] **Labs & Imaging**: ability to view PDF reports and DICOM previews.
 
 ### 2.2 Institutional Features
 - [ ] **Patient Management**: Doctors can "claim" patients or view assigned ones.
-- [ ] **Case Tracking**: Ability to open a "Case", track its status (Open, In Review, Treated, Follow-up), and close it.
+- [x] **Case Tracking**: Ability to open a "Case", track its status (Open, In Review, Treated, Follow-up), and close it (Completed via Severity and Category classifications).
 - [ ] **Appointment System**: Calendar integration for scheduling.
 
 ---

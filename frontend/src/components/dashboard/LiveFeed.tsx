@@ -47,7 +47,7 @@ export const LiveFeed: React.FC<LiveFeedProps> = ({ items, onViewAll, className 
                             style={{ animationDelay: `${index * 100}ms` }}
                         >
                             {/* Status dot with ring */}
-                            <div className="mt-2 relative flex-shrink-0">
+                            <div className="mt-2 relative shrink-0">
                                 <div className={cn('h-2.5 w-2.5 rounded-full ring-4', config.dot, config.ring)} />
                             </div>
                             
@@ -55,7 +55,7 @@ export const LiveFeed: React.FC<LiveFeedProps> = ({ items, onViewAll, className 
                             <div className="flex-1 min-w-0">
                                 <div className="flex justify-between items-start gap-3 mb-1">
                                     <p className="text-[15px] font-semibold text-zinc-200 group-hover:text-white transition-colors truncate tracking-tight">{item.title}</p>
-                                    <span className="text-[10px] font-medium text-zinc-500 bg-white/[0.03] px-2.5 py-1 rounded-lg border border-white/[0.04] flex-shrink-0">
+                                    <span className="text-[10px] font-medium text-zinc-500 bg-white/[0.03] px-2.5 py-1 rounded-lg border border-white/[0.04] shrink-0">
                                         {item.time}
                                     </span>
                                 </div>

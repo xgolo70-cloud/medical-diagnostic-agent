@@ -326,7 +326,7 @@ const FeatureCard = ({ feature, index }: { feature: typeof features[0], index: n
                                 className="h-3 w-1.5 bg-green-500 mt-2"
                             />
                         </div>
-                         <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-transparent to-transparent pointer-events-none" />
+                         <div className="absolute inset-0 bg-linear-to-t from-[#0a0a0a] via-transparent to-transparent pointer-events-none" />
                     </div>
                 )}
             </div>

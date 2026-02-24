@@ -1,0 +1,54 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: medical_postgres_db
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: adminpassword
+      POSTGRES_DB: medical_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d medical_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build: 
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: medical_backend
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "8000:8000"
+    environment:
+      # Use the docker service name 'db' as the host
+      - DATABASE_URL=postgresql://admin:adminpassword@db:5432/medical_db
+      - ALLOWED_ORIGINS=http://localhost:5173,http://localhost:3000
+      - SQL_DEBUG=false
+      # You can add your actual API keys here or read them from a .env file
+      # - GOOGLE_API_KEY=your_key_here
+      # - HUGGINGFACE_TOKEN=your_token_here
+    volumes:
+      # Mount the logs directory to persist logs outside the container
+      - ./backend_logs:/app/logs
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: medical_frontend
+    depends_on:
+      - backend
+    ports:
+      - "80:80"
+
+volumes:
+  postgres_data:

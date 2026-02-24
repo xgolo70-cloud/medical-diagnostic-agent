@@ -78,7 +78,7 @@ export const InteractiveWorkflow = () => {
                     
                      {/* Moving Data Packet - The Delight Element */}
                      <motion.div
-                        className="absolute left-8 md:left-1/2 w-1.5 h-6 bg-gradient-to-b from-transparent via-blue-500 to-transparent z-20 md:-translate-x-[2px] rounded-full blur-[1px]"
+                        className="absolute left-8 md:left-1/2 w-1.5 h-6 bg-linear-to-b from-transparent via-blue-500 to-transparent z-20 md:-translate-x-[2px] rounded-full blur-[1px]"
                         animate={{ top: ["0%", "100%"] }}
                         transition={{ duration: 3, ease: "linear", repeat: Infinity, repeatDelay: 1 }}
                     />
@@ -157,7 +157,7 @@ const WorkflowStep = ({ step, index, isEven }: { step: StepType, index: number, 
                     transition={{ type: "spring", stiffness: 300, damping: 20 }}
                 >
                      {/* Magic Hover Card Background */}
-                     <div className="absolute inset-0 bg-gradient-to-br from-gray-50 to-white rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 shadow-xl shadow-black/5 -z-10 border border-gray-100 transform scale-105" />
+                     <div className="absolute inset-0 bg-linear-to-br from-gray-50 to-white rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 shadow-xl shadow-black/5 -z-10 border border-gray-100 transform scale-105" />
 
                     {/* Number Badge */}
                     <div className={`text-[140px] leading-none font-bold text-gray-50/80 absolute -top-16 -z-20 select-none transition-colors duration-500 group-hover:text-blue-50/50 ${isEven ? '-right-10' : '-left-10'}`}>

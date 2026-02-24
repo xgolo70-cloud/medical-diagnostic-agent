@@ -33,6 +33,9 @@ if SECRET_KEY == "dev-secret-key-change-in-production":
 # In-memory revoked tokens store (use Redis in production)
 _revoked_tokens: set = set()
 
+# In-memory revoked users store — all tokens for these users are rejected
+_revoked_users: set = set()
+
 # ================== Models ==================
 
 class TokenData(BaseModel):
@@ -86,6 +89,9 @@ def create_refresh_token(data: dict, expires_delta: Optional[timedelta] = None):
     return encoded_jwt
 
 def create_token_pair(username: str, role: str) -> TokenPair:
+    # If user was in revoked list, remove them since they're getting new tokens
+    _revoked_users.discard(username)
+    
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
         data={"username": username, "role": role}, expires_delta=access_token_expires
@@ -109,8 +115,12 @@ def verify_token(token: str, is_refresh: bool = False) -> Optional[dict]:
         payload = jwt.decode(token, secret, algorithms=[ALGORITHM])
         
         # Check if token is revoked
-        # In a real app, check redis or DB blacklist
         if token in _revoked_tokens:
+            return None
+        
+        # Check if all tokens for this user have been revoked
+        username = payload.get("username")
+        if username and username in _revoked_users:
             return None
             
         return payload
@@ -127,6 +137,10 @@ def revoke_token(token: str) -> bool:
         return False
     _revoked_tokens.add(token)
     return True
+
+def revoke_user_all_tokens(username: str) -> None:
+    """Revoke all tokens for a given user. They will need to log in again."""
+    _revoked_users.add(username)
 
 def verify_refresh_token(token: str) -> Optional[dict]:
     """
