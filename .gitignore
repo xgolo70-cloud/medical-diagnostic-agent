@@ -33,3 +33,6 @@ Thumbs.db
 .qoder/
 .trae/
 .windsurf/
+
+# Superpowers Agent Worktrees
+.worktrees/
