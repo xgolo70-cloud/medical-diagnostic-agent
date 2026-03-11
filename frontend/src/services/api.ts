@@ -403,6 +403,67 @@ export const api = {
     },
 
     /**
+     * Stream diagnosis response using SSE
+     */
+    async streamDiagnosis(patientData: PatientData, onChunk: (text: string) => void, onComplete: () => void, onError: (err: any) => void) {
+        try {
+            const token = tokenManager.getAccessToken();
+            const response = await fetch(`${API_BASE_URL}/diagnose/stream`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+                },
+                body: JSON.stringify(patientData)
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            if (!response.body) {
+                throw new Error("ReadableStream not yet supported in this browser.");
+            }
+
+            const reader = response.body.getReader();
+            const decoder = new TextDecoder('utf-8');
+
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+                
+                const chunk = decoder.decode(value, { stream: true });
+                const lines = chunk.split('\n\n');
+                
+                for (const line of lines) {
+                    if (line.startsWith('data: ')) {
+                        const data = line.substring(6);
+                        if (data === '[DONE]') {
+                            onComplete();
+                            return;
+                        }
+                        try {
+                            const parsed = JSON.parse(data);
+                            if (parsed.error) {
+                                onError(new Error(parsed.error));
+                                return;
+                            }
+                            if (parsed.chunk) {
+                                onChunk(parsed.chunk);
+                            }
+                        } catch (e) {
+                            // ignore partial JSON
+                        }
+                    }
+                }
+            }
+            onComplete();
+        } catch (error) {
+            onError(error);
+        }
+    },
+
+    /**
      * Ingest patient data manually
      */
     async ingestManual(patientData: PatientData): Promise<IngestResponse> {

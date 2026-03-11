@@ -89,6 +89,8 @@ export const DiagnosisForm: React.FC<DiagnosisFormProps> = ({ unified = false })
     const [isUploadingImage, setIsUploadingImage] = useState(false);
     const [isDragging, setIsDragging] = useState(false);
     const [isImageDragging, setIsImageDragging] = useState(false);
+    const [streamingText, setStreamingText] = useState<string>('');
+    const [isStreaming, setIsStreaming] = useState(false);
     const navigate = useNavigate();
 
     const {
@@ -128,8 +130,6 @@ export const DiagnosisForm: React.FC<DiagnosisFormProps> = ({ unified = false })
             }
         },
         onSuccess: async (data) => {
-            // Backend already saves the diagnosis to the database.
-            // Navigate to the result page.
             navigate('/diagnosis/result', { state: data });
         },
     });
@@ -144,7 +144,42 @@ export const DiagnosisForm: React.FC<DiagnosisFormProps> = ({ unified = false })
             image_url: imageUrl,
             image_type: imageFile ? imageType : null,
         };
-        diagnoseMutation.mutate(patientData);
+
+        if (unified && pdfFile) {
+             // For unified with PDF we fallback to normal mutation since stream doesn't support file upload yet in the backend
+             diagnoseMutation.mutate(patientData);
+             return;
+        }
+
+        setIsStreaming(true);
+        setStreamingText('');
+        
+        let accumulatedText = '';
+        
+        api.streamDiagnosis(
+            patientData,
+            (chunk) => {
+                accumulatedText += chunk;
+                setStreamingText(accumulatedText);
+            },
+            () => {
+                setIsStreaming(false);
+                try {
+                    // Try to parse the accumulated JSON text
+                    let finalJsonText = accumulatedText.trim();
+                    if (finalJsonText.startsWith('```json')) finalJsonText = finalJsonText.substring(7);
+                    if (finalJsonText.endsWith('```')) finalJsonText = finalJsonText.substring(0, finalJsonText.length - 3);
+                    const resultData = JSON.parse(finalJsonText.trim());
+                    navigate('/diagnosis/result', { state: resultData });
+                } catch (e) {
+                    console.error("Failed to parse streaming response", e);
+                }
+            },
+            (error) => {
+                setIsStreaming(false);
+                console.error(error);
+            }
+        );
     };
 
     const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -878,7 +913,7 @@ export const DiagnosisForm: React.FC<DiagnosisFormProps> = ({ unified = false })
                             <Button
                                 variant="outlined"
                                 onClick={handleReset}
-                                disabled={diagnoseMutation.isPending}
+                                disabled={diagnoseMutation.isPending || isStreaming}
                                 startIcon={<ResetIcon />}
                                 sx={{
                                     px: 3,
@@ -899,8 +934,8 @@ export const DiagnosisForm: React.FC<DiagnosisFormProps> = ({ unified = false })
                             <Button
                                 type="submit"
                                 variant="contained"
-                                disabled={diagnoseMutation.isPending || (unified && !pdfFile)}
-                                startIcon={diagnoseMutation.isPending ? <CircularProgress size={18} color="inherit" /> : <SendIcon />}
+                                disabled={diagnoseMutation.isPending || isStreaming || (unified && !pdfFile)}
+                                startIcon={(diagnoseMutation.isPending || isStreaming) ? <CircularProgress size={18} color="inherit" /> : <SendIcon />}
                                 sx={{
                                     px: 4,
                                     py: 1,
@@ -920,12 +955,37 @@ export const DiagnosisForm: React.FC<DiagnosisFormProps> = ({ unified = false })
                                     }
                                 }}
                             >
-                                {diagnoseMutation.isPending ? 'Analyzing...' : 'Get Diagnosis'}
+                                {(diagnoseMutation.isPending || isStreaming) ? 'Analyzing...' : 'Get Diagnosis'}
                             </Button>
                         </Box>
                     </Box>
                 </CardContent>
             </Card>
+
+            {/* Streaming UI */}
+            {isStreaming && (
+                <Card sx={{ mt: 4, borderRadius: 3, bgcolor: '#fafafa', border: '1px solid #eaeaea', p: 3 }}>
+                    <Typography variant="h6" sx={{ mb: 2, fontWeight: 600, display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <Sparkles size={20} className="text-amber-500 animate-pulse" />
+                        AI Analysis in Progress...
+                    </Typography>
+                    <Box 
+                        sx={{ 
+                            fontFamily: 'monospace', 
+                            fontSize: '0.85rem', 
+                            color: '#4b5563',
+                            bgcolor: '#f3f4f6', 
+                            p: 2, 
+                            borderRadius: 2,
+                            whiteSpace: 'pre-wrap',
+                            maxHeight: 300,
+                            overflowY: 'auto'
+                        }}
+                    >
+                        {streamingText || "Connecting to AI Engine..."}
+                    </Box>
+                </Card>
+            )}
 
             {/* Results - handling via redirection now */}
         </Box>
