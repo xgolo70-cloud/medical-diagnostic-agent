@@ -1,4 +1,5 @@
 from fastapi import APIRouter, HTTPException, Depends, UploadFile, File, Form
+from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
 from sqlalchemy import desc
 from typing import Optional, List
@@ -111,6 +112,29 @@ async def diagnose_patient(
         # Log internal error details, but don't expose to client
         logger.error(f"Diagnosis failed: {str(e)}", exc_info=True)
         raise HTTPException(status_code=500, detail="An internal error occurred during diagnosis")
+
+@router.post("/stream")
+async def stream_diagnose_patient(
+    patient: PatientData, 
+    engine: DiagnosisEngine = Depends(get_engine),
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """
+    Stream the AI diagnosis response using Server-Sent Events.
+    Does not save to DB immediately as it streams, client should call save endpoint if needed,
+    or we can modify to save after stream completes.
+    """
+    # Note: For simplicity, logging and saving are omitted in the streaming endpoint.
+    # In a full implementation, you would accumulate the chunks and save at the end.
+    try:
+        return StreamingResponse(
+            engine.stream_diagnosis(patient), 
+            media_type="text/event-stream"
+        )
+    except Exception as e:
+        logger.error(f"Streaming diagnosis failed: {str(e)}", exc_info=True)
+        raise HTTPException(status_code=500, detail="An internal error occurred during streaming")
 
 @router.post("/unified")
 async def diagnose_unified(

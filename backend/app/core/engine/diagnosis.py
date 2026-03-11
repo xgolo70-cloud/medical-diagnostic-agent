@@ -97,6 +97,49 @@ class DiagnosisEngine:
         except Exception as e:
             return {"error": f"AI generation failed: {str(e)}"}
 
+    async def stream_diagnosis(self, patient_data: PatientData, lab_results: str = ""):
+        """
+        Stream a diagnosis response using Server-Sent Events (SSE) format.
+        """
+        if DEMO_MODE:
+            # Simulate streaming for demo mode
+            import asyncio
+            mock_res = await self._generate_mock_diagnosis(patient_data, lab_results)
+            mock_text = json.dumps(mock_res)
+            chunk_size = 50
+            for i in range(0, len(mock_text), chunk_size):
+                chunk = mock_text[i:i+chunk_size]
+                yield f"data: {json.dumps({'chunk': chunk})}\n\n"
+                await asyncio.sleep(0.1)
+            yield "data: [DONE]\n\n"
+            return
+            
+        model_inputs = []
+        prompt_text = self._construct_prompt_text(patient_data, lab_results)
+        model_inputs.append(prompt_text)
+        
+        if patient_data.image_url:
+            try:
+                image_data = self._download_image(patient_data.image_url)
+                if image_data:
+                    model_inputs.append(image_data)
+                else:
+                    model_inputs[0] += "\n\n(Note: Image could not be accessed.)"
+            except Exception as e:
+                model_inputs[0] += f"\n\n(Note: Error processing image: {str(e)})"
+
+        try:
+            response = await self.model.generate_content_async(model_inputs, stream=True)
+            async for chunk in response:
+                if chunk.text:
+                    # Send each chunk as an SSE data payload
+                    yield f"data: {json.dumps({'chunk': chunk.text})}\n\n"
+            
+            yield "data: [DONE]\n\n"
+        except Exception as e:
+            yield f"data: {json.dumps({'error': str(e)})}\n\n"
+            yield "data: [DONE]\n\n"
+
     def _download_image(self, url: str):
         """Download image from URL and convert to PIL Image"""
         try:
