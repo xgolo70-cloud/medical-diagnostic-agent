@@ -1,6 +1,7 @@
 import { Suspense, lazy } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
-import { Layout } from './components/layout';
+import { MainLayout } from './components/layout/MainLayout';
+import { Outlet } from 'react-router-dom';
 import { LoginForm, RegisterForm } from './components/auth';
 import { SupabaseListener } from './components/auth/SupabaseListener';
 import { LandingPage } from './pages'; // Keep LandingPage eager for fast LCP
@@ -71,7 +72,9 @@ function App() {
           <Route
             element={
               <ProtectedRoute>
-                <Layout />
+                <MainLayout>
+                  <Outlet />
+                </MainLayout>
               </ProtectedRoute>
             }
           >
