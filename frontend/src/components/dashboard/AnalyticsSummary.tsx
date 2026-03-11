@@ -1,12 +1,12 @@
 import React from 'react';
 import { BarChart3, TrendingUp, TrendingDown } from 'lucide-react';
 import { useWeeklyStats } from '../../hooks';
+import { BarChart, Bar, ResponsiveContainer, Tooltip as RechartsTooltip, XAxis, YAxis } from 'recharts';
 
 export const AnalyticsSummary: React.FC = () => {
     const { weeklyStats, isLoading } = useWeeklyStats();
     const { days, total, changePct } = weeklyStats;
 
-    const maxValue = days.length > 0 ? Math.max(...days.map(d => d.value), 1) : 1;
     const isPositive = changePct >= 0;
 
     if (isLoading) {
@@ -16,7 +16,7 @@ export const AnalyticsSummary: React.FC = () => {
                     <div className="h-4 bg-gray-200 rounded w-32" />
                     <div className="h-6 bg-gray-200 rounded w-12" />
                 </div>
-                <div className="flex items-end justify-between gap-2 h-24 w-full mt-auto">
+                <div className="flex items-end justify-between gap-2 h-32 w-full mt-auto">
                     {[40, 60, 35, 70, 50, 45, 55].map((h, i) => (
                         <div key={i} className="flex-1 flex flex-col items-center">
                             <div className="w-full bg-gray-200 rounded-sm" style={{ height: `${h}%` }} />
@@ -51,27 +51,20 @@ export const AnalyticsSummary: React.FC = () => {
                 </div>
             </div>
 
-            {/* Chart */}
-            <div className="flex items-end justify-between gap-2 h-24 w-full mt-auto">
-                {days.map((d) => (
-                    <div key={d.date} className="relative flex-1 flex flex-col items-center group cursor-pointer">
-                        {/* Tooltip */}
-                        <div className="absolute -top-7 opacity-0 group-hover:opacity-100 transition-opacity bg-[#171717] text-white text-[10px] px-2 py-1 rounded pointer-events-none whitespace-nowrap z-10">
-                            {d.value} scans
-                        </div>
-                        
-                        {/* Bar */}
-                        <div 
-                            className="w-full bg-[#eaeaea] rounded-sm group-hover:bg-[#0070f3] transition-colors" 
-                            style={{ height: `${(d.value / maxValue) * 100}%`, minHeight: d.value > 0 ? '4px' : '2px' }}
+            {/* Recharts Bar Chart */}
+            <div className="h-32 w-full mt-auto">
+                <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={days} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
+                        <XAxis dataKey="label" axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#666' }} dy={10} />
+                        <RechartsTooltip 
+                            cursor={{ fill: '#f3f4f6' }}
+                            contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)', fontSize: '12px' }}
+                            formatter={(value: number) => [`${value} scans`, 'Volume']}
+                            labelStyle={{ color: '#666', marginBottom: '4px' }}
                         />
-                        
-                        {/* Label */}
-                        <div className="mt-2 text-[10px] text-[#666666] font-medium group-hover:text-[#171717] transition-colors">
-                            {d.label}
-                        </div>
-                    </div>
-                ))}
+                        <Bar dataKey="value" fill="#0070f3" radius={[4, 4, 0, 0]} barSize={30} />
+                    </BarChart>
+                </ResponsiveContainer>
             </div>
         </div>
     );
