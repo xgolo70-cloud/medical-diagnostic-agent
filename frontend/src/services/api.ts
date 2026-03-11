@@ -451,7 +451,7 @@ export const api = {
                             if (parsed.chunk) {
                                 onChunk(parsed.chunk);
                             }
-                        } catch (e) {
+                        } catch {
                             // ignore partial JSON
                         }
                     }

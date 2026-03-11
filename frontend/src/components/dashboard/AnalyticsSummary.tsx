@@ -1,7 +1,7 @@
 import React from 'react';
 import { BarChart3, TrendingUp, TrendingDown } from 'lucide-react';
 import { useWeeklyStats } from '../../hooks';
-import { BarChart, Bar, ResponsiveContainer, Tooltip as RechartsTooltip, XAxis, YAxis } from 'recharts';
+import { BarChart, Bar, ResponsiveContainer, Tooltip as RechartsTooltip, XAxis } from 'recharts';
 
 export const AnalyticsSummary: React.FC = () => {
     const { weeklyStats, isLoading } = useWeeklyStats();
