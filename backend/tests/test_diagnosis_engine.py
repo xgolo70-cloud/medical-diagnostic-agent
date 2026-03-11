@@ -1,9 +1,10 @@
 import pytest
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock, AsyncMock, patch
 from app.core.engine.diagnosis import DiagnosisEngine
 from app.schemas.patient import PatientData
 
-def test_diagnosis_generation_structure(mock_gemini):
+@pytest.mark.asyncio
+async def test_diagnosis_generation_structure(mock_gemini):
     # Setup mock response
     mock_model = mock_gemini.return_value
     mock_response = MagicMock()
@@ -18,7 +19,8 @@ def test_diagnosis_generation_structure(mock_gemini):
     }
     '''
     mock_response.text = expected_json
-    mock_model.generate_content.return_value = mock_response
+    # We will need to mock generate_content_async instead of generate_content eventually
+    mock_model.generate_content_async = AsyncMock(return_value=mock_response)
 
     engine = DiagnosisEngine()
     patient_data = PatientData(
@@ -30,7 +32,7 @@ def test_diagnosis_generation_structure(mock_gemini):
         vitals=None
     )
 
-    result = engine.generate_diagnosis(patient_data)
+    result = await engine.generate_diagnosis(patient_data)
 
     assert "differential_diagnosis" in result
     # Check for either 'condition' (AI response) or 'primary_diagnosis' (demo mode)
@@ -39,7 +41,8 @@ def test_diagnosis_generation_structure(mock_gemini):
     assert condition is not None
     assert "confidence" in first_diagnosis
 
-def test_diagnosis_demo_mode_structure():
+@pytest.mark.asyncio
+async def test_diagnosis_demo_mode_structure():
     """Test the demo mode response structure"""
     engine = DiagnosisEngine()
     patient_data = PatientData(
@@ -51,7 +54,7 @@ def test_diagnosis_demo_mode_structure():
         vitals=None
     )
 
-    result = engine.generate_diagnosis(patient_data)
+    result = await engine.generate_diagnosis(patient_data)
 
     assert "differential_diagnosis" in result
     assert "patient_id" in result
@@ -59,11 +62,12 @@ def test_diagnosis_demo_mode_structure():
     # Demo mode uses 'primary_diagnosis'
     assert "primary_diagnosis" in result["differential_diagnosis"][0]
 
-def test_diagnosis_json_error(mock_gemini):
+@pytest.mark.asyncio
+async def test_diagnosis_json_error(mock_gemini):
     mock_model = mock_gemini.return_value
     mock_response = MagicMock()
     mock_response.text = "Invalid JSON"
-    mock_model.generate_content.return_value = mock_response
+    mock_model.generate_content_async = AsyncMock(return_value=mock_response)
 
     engine = DiagnosisEngine()
     patient_data = PatientData(
@@ -75,13 +79,14 @@ def test_diagnosis_json_error(mock_gemini):
         vitals=None
     )
 
-    result = engine.generate_diagnosis(patient_data)
+    result = await engine.generate_diagnosis(patient_data)
     # In demo mode, we get a valid response not an error
     # The error case only happens with real AI when parsing fails
     # So we test that we get a valid structure back
     assert "differential_diagnosis" in result or "error" in result
 
-def test_rationale_traceability(mock_gemini):
+@pytest.mark.asyncio
+async def test_rationale_traceability(mock_gemini):
     # Setup mock response with a rationale that references input
     mock_model = mock_gemini.return_value
     mock_response = MagicMock()
@@ -101,7 +106,7 @@ def test_rationale_traceability(mock_gemini):
     }
     '''
     mock_response.text = expected_json
-    mock_model.generate_content.return_value = mock_response
+    mock_model.generate_content_async = AsyncMock(return_value=mock_response)
 
     engine = DiagnosisEngine()
     patient_data = PatientData(
@@ -113,7 +118,7 @@ def test_rationale_traceability(mock_gemini):
         vitals=None
     )
 
-    result = engine.generate_diagnosis(patient_data)
+    result = await engine.generate_diagnosis(patient_data)
     rationale = result["differential_diagnosis"][0]["rationale"]
     
     # Check if rationale contains keywords from input

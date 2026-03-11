@@ -23,12 +23,12 @@ class DiagnosisEngine:
         else:
             self.model = None
 
-    def generate_diagnosis(self, patient_data: PatientData, lab_results: str = "") -> dict:
+    async def generate_diagnosis(self, patient_data: PatientData, lab_results: str = "") -> dict:
         """
         Generate a diagnosis based on patient data, optional lab results, and optional image URL.
         """
         if DEMO_MODE:
-            return self._generate_mock_diagnosis(patient_data, lab_results)
+            return await self._generate_mock_diagnosis(patient_data, lab_results)
         
         # Prepare inputs for the model
         model_inputs = []
@@ -53,7 +53,7 @@ class DiagnosisEngine:
 
         # Generate content
         try:
-            response = self.model.generate_content(model_inputs)
+            response = await self.model.generate_content_async(model_inputs)
             
             text_response = response.text.strip()
             # Clean up markdown formatting if present
@@ -107,8 +107,10 @@ class DiagnosisEngine:
             print(f"Error downloading image: {e}")
             return None
 
-    def _generate_mock_diagnosis(self, patient: PatientData, lab_results: str = "") -> dict:
+    async def _generate_mock_diagnosis(self, patient: PatientData, lab_results: str = "") -> dict:
         """Generate a realistic mock diagnosis for demo purposes"""
+        import asyncio
+        await asyncio.sleep(1) # Simulate delay
         
         # Analyze symptoms for mock response
         symptoms_lower = [s.lower() for s in patient.symptoms]

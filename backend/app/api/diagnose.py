@@ -50,7 +50,7 @@ async def diagnose_patient(
 ):
     try:
         # Generate diagnosis
-        diagnosis_result = engine.generate_diagnosis(patient)
+        diagnosis_result = await engine.generate_diagnosis(patient)
         
         # Extract primary diagnosis and confidence for indexing
         primary_dx = "Unknown"
@@ -146,7 +146,7 @@ async def diagnose_unified(
         lab_results_text = extract_text_from_pdf(file.file)
         
         # Generate diagnosis with combined data
-        diagnosis_result = engine.generate_diagnosis(patient, lab_results=lab_results_text)
+        diagnosis_result = await engine.generate_diagnosis(patient, lab_results=lab_results_text)
         
         # Extract metadata
         primary_dx = "Unknown"
